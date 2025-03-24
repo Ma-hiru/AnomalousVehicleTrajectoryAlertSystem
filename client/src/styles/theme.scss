@@ -1,0 +1,19 @@
+:root.lightMode {
+  /* layout */
+  --layout-container-bg: #f5f5f5;
+  --layout-bar-bg: #ffffff;
+  --layout-bar-height: 2.9rem;
+  --layout-bar-color: #000000;
+  --layout-bar-title-color: #1677ff;
+  --layout-bar-menu-active-color: #1677ff;
+  --layout-content-padding: 1.5rem;
+  --layout-card-inset-padding: 1rem;
+  /* Analysis */
+  --analysis-divider-ratio: 3fr 2fr
+
+}
+
+:root.darkMode {
+
+
+}

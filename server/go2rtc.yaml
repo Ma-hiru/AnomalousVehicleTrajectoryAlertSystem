@@ -1,0 +1,10 @@
+streams:
+  ffmpeg:
+    - rtsp://127.0.0.1:8554/live
+rtsp:
+  listen: ":3000"
+api:
+  listen: ":3001"
+  origin: "*"
+webrtc:
+  listen: ":3002"

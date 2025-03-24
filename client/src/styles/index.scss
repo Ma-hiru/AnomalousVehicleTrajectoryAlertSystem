@@ -1,0 +1,32 @@
+@import "reset";
+@import "theme";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root{
+  --spacing: 0.25rem;
+}
+html {
+  font-size: 16px;
+}
+
+::view-transition-new(root),
+::view-transition-old(root) {
+  animation: none;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 9999;
+}
+
+::view-transition-old(root) {
+  z-index: 9999;
+}
+
+#app {
+  background: var(--theme-bg-color);
+  color: var(--theme-text-color);
+}

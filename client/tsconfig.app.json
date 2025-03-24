@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    /*协同配置*/
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    /*React*/
+    //    "target": "ES2020",
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    /* Vue */
+    //    "jsx": "preserve",
+    //    "jsxImportSource": "vue",
+    "resolveJsonModule": true,
+    "noImplicitThis": true,
+    "verbatimModuleSyntax": false,
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    /* Vue/React */
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "useDefineForClassFields": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "skipLibCheck": true,
+    //Bundler mode
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    // Linting
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "plugins/**/*",
+    "dist",
+    "vite.config.*",
+    "src/**/__tests__/*"
+  ]
+}
