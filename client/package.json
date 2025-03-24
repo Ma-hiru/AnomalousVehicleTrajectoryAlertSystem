@@ -1,6 +1,10 @@
 {
   "name": "anomalous-vehicle-trajectory-alert-system",
   "private": true,
+  "author": {
+    "name": "Ma-hiru",
+    "email": "tenshimahiru@qq.com"
+  },
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -64,7 +68,7 @@
     "vitest": "^3.0.8",
     "vue-tsc": "^2.2.8"
   },
-  "packageManager": "pnpm@10.6.3",
+  "packageManager": "pnpm@10.6.5",
   "engines": {
     "pnpm": ">=10.0.0"
   }
