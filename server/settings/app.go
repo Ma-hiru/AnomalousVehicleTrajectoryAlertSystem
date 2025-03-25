@@ -80,3 +80,12 @@ const TokenPrefix = "Bearer "
 
 // TimeFormat 时间格式
 const TimeFormat = "%4d-%02d-%02d %02d:%02d:%02d"
+
+// Go2rtcBaseUrl go2rtc port
+const Go2rtcBaseUrl = "http://localhost:3001"
+
+// TokenStruct Token Struct
+type TokenStruct = struct {
+	Id       int
+	Username string
+}

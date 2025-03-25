@@ -18,7 +18,8 @@ import { ref } from "vue";
 const props = defineProps<{
   containerStyle: CSSProperties
 }>();
-const urlList = ref(["ws://127.0.0.1:3001/api/ws?src=ffmpeg"]);
+//
+const urlList = ref(["ws://127.0.0.1:8080/api/go2rtc/ws?src=ffmpeg"]);
 // const metaList = ref([{ id: 1, name: "test" }]);
 const styles = {
   container: {

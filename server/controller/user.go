@@ -32,11 +32,11 @@ func HandleUserLogin(ctx *gin.Context) {
 			utils.InternalErrorResponse(ctx)
 			return
 		}
-		token, err := middleware.GenerateToken(utils.StructToJWTMap(model.User{
-			Id:       user.Id,
-			Username: user.Username,
-			Password: user.Password,
-		}), settings.TokenExpireDefault)
+		token, err := middleware.GenerateToken(utils.StructToJWTMap(
+			settings.TokenStruct{
+				Id:       user.Id,
+				Username: user.Username,
+			}), settings.TokenExpireDefault)
 		if err != nil {
 			log.Println("生成Token失败！")
 			utils.InternalErrorResponse(ctx)

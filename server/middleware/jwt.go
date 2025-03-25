@@ -19,7 +19,7 @@ func GenerateToken(data *jwt.MapClaims, expireTime time.Duration) (string, error
 	}
 	return tokenString, nil
 }
-func Validate(prefix string) gin.HandlerFunc {
+func Validate(prefix string, check func(claims jwt.MapClaims) bool) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		authHeader := context.GetHeader("Authorization")
 		if authHeader == "" {
@@ -48,6 +48,12 @@ func Validate(prefix string) gin.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if check != nil {
+				if !check(claims) {
+					context.Abort()
+					return
+				}
+			}
 			context.Set("token", claims)
 		}
 		context.Next()

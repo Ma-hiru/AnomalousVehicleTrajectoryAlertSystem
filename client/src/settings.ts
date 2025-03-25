@@ -21,7 +21,7 @@ export const screensConfig = {
 };
 
 export enum API {
-  LoginUrl = "/api/user/login"
+  LoginUrl = "/api/gin/user/login"
 }
 
 export const BUFFER_MAX_DURATION = 30;

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -8,12 +9,25 @@ import (
 	"server/app"
 	"server/ffmpeg"
 	"server/go2rtc"
+	redis "server/redis"
 	"server/settings"
 	"server/utils"
+	"time"
 )
 
 func main() {
 	errMsg := make(chan error)
+	go func() {
+		err := redis.Set(context.Background(), "name", "Mahiru", 5*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		val, err := redis.Get(context.Background(), "name")
+		if err != nil {
+			return
+		}
+		log.Println(val)
+	}()
 	go go2rtc.Run(errMsg)
 	go simulate(errMsg)
 	go extract(errMsg)
