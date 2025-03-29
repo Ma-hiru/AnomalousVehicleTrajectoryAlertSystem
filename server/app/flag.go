@@ -1,4 +1,4 @@
-package settings
+package app
 
 import (
 	"errors"
@@ -18,7 +18,11 @@ var keyFlag = flag.String("key", defaultPemFilePath.Privkey, "私钥文件路径
 var modeFlag = flag.String("mode", gin.DebugMode, "gin运行模式")
 var corsFlag = flag.Bool("cors", true, "是否开启跨域")
 
-func getParams(port *string, ok *bool, path *PemFilePath) error {
+func init() {
+	flag.Parse()
+}
+
+func getParams(port *string, ok *bool, path *pemFilePath) error {
 	portStr := strings.TrimPrefix(*portFlag, ":")
 	if portNum, err := strconv.ParseInt(portStr, 10, 64); err != nil {
 		return errors.New("port参数错误，请输入正确的端口号数值")
@@ -51,7 +55,7 @@ func getParams(port *string, ok *bool, path *PemFilePath) error {
 	return nil
 }
 
-func LoggerStartParams() {
+func loggerStartParams() {
 	const templateStr = `--Start Param: 
 	--isSSL=> {{.ssl}} 
 	--port=> {{.port}} 

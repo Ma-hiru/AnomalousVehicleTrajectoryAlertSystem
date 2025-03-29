@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,40 +8,23 @@ import (
 	"server/app"
 	"server/ffmpeg"
 	"server/go2rtc"
-	redis "server/redis"
-	"server/settings"
+	"server/middleware"
+	"server/routes"
+	"server/static"
 	"server/utils"
-	"time"
 )
 
 func main() {
 	errMsg := make(chan error)
-	go func() {
-		err := redis.Set(context.Background(), "name", "Mahiru", 5*time.Second)
-		if err != nil {
-			log.Println(err)
-		}
-		val, err := redis.Get(context.Background(), "name")
-		if err != nil {
-			return
-		}
-		log.Println(val)
-	}()
 	go go2rtc.Run(errMsg)
 	go simulate(errMsg)
 	go extract(errMsg)
-	go ginStart(errMsg)
+	go gin()
 	log.Println(<-errMsg)
 }
-func ginStart(errMsg chan<- error) {
-	app.StartConfig(settings.IsSSL)
-	defer func() {
-		utils.PrintStack()
-		errMsg <- errors.New("gin exit")
-	}()
-	instance := app.CreateApp()
-	app.ConfigApp(instance)
-	app.RunConfig(instance)
+func gin() {
+	app.Init(routes.UseRoutes, static.UseStatic)
+	app.SetCors(middleware.Cors)
 }
 func simulate(errMsg chan<- error) {
 	err := ffmpeg.SimulateStreams(ffmpeg.SimulateStreamsOptions{
@@ -78,9 +60,12 @@ func simulate(errMsg chan<- error) {
 			ConfigPath: filepath.Join("./video/mediamtx.yml"),
 		},
 	})
+	defer func() {
+		utils.PrintStack()
+		errMsg <- errors.New("SimulateStreams exit")
+	}()
 	if err != nil {
 		log.Println(err)
-		errMsg <- errors.New("SimulateStreams exit")
 	}
 }
 func extract(errMsg chan<- error) {
@@ -107,8 +92,15 @@ func extract(errMsg chan<- error) {
 		},
 	}
 	frames, err := ffmpeg.ExtractVideoFrames(options)
+	defer func() {
+		if err := recover(); err != nil {
+			utils.PrintStack()
+			errMsg <- errors.New("extracted exit")
+		}
+	}()
 	if err != nil {
-		errMsg <- err
+		log.Println(err)
+		return
 	}
 	fmt.Printf("Extracted %d frames", len(frames))
 }

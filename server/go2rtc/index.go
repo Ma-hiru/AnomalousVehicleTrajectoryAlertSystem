@@ -44,7 +44,7 @@ func Run(errMsg chan error) {
 		errMsg <- errors.New("go2rtc exit")
 	}()
 	app.Version = "1.9.9"
-	// 1. Core modules: app, api/ws, streams
+	// 1. Core serviceModule: app, api/ws, streams
 	app.Init()     // init config and logs
 	api.Init()     // init API before all others
 	ws.Init()      // init WS API endpoint
@@ -80,7 +80,7 @@ func Run(errMsg chan error) {
 	gopro.Init()    // gopro source
 	doorbird.Init() // doorbird source
 	v4l2.Init()     // v4l2 source
-	// 6. Helper modules
+	// 6. Helper serviceModule
 	ngrok.Init() // ngrok module
 	srtp.Init()  // SRTP server
 	debug.Init() // debug API

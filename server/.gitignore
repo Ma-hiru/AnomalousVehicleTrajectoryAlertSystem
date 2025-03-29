@@ -62,9 +62,9 @@ go.work.sum
 # .idea/artifacts
 # .idea/compiler.xml
 # .idea/jarRepositories.xml
-# .idea/modules.xml
+# .idea/serviceModule.xml
 # .idea/*.iml
-# .idea/modules
+# .idea/serviceModule
 # *.iml
 # *.ipr
 

@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"io"
 	"server/settings"
 	"server/utils"
 	"strings"
@@ -19,7 +21,7 @@ func GenerateToken(data *jwt.MapClaims, expireTime time.Duration) (string, error
 	}
 	return tokenString, nil
 }
-func Validate(prefix string, check func(claims jwt.MapClaims) bool) gin.HandlerFunc {
+func Validate(prefix string, check func(claims jwt.MapClaims, token string) bool) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		authHeader := context.GetHeader("Authorization")
 		if authHeader == "" {
@@ -49,13 +51,15 @@ func Validate(prefix string, check func(claims jwt.MapClaims) bool) gin.HandlerF
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if check != nil {
-				if !check(claims) {
+				if !check(claims, tokenString) {
 					context.Abort()
 					return
 				}
 			}
 			context.Set("token", claims)
 		}
+		bodyBytes, _ := io.ReadAll(context.Request.Body)
+		context.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		context.Next()
 	}
 }

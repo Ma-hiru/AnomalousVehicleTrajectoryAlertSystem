@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"log"
 	"server/middleware"
 	"server/model"
+	"server/redis"
 	"server/service"
 	"server/settings"
 	"server/utils"
@@ -40,6 +42,12 @@ func HandleUserLogin(ctx *gin.Context) {
 		if err != nil {
 			log.Println("生成Token失败！")
 			utils.InternalErrorResponse(ctx)
+			return
+		}
+		err = redis.Set(context.Background(), token, user.Id, settings.TokenExpireDefault)
+		if err != nil {
+			utils.InternalErrorResponse(ctx)
+			log.Println(err)
 			return
 		}
 		utils.SuccessResponse(ctx, "登录成功！", model.LoginResponseData{
