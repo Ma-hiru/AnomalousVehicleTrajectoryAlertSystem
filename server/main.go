@@ -8,7 +8,6 @@ import (
 	"server/app"
 	"server/ffmpeg"
 	"server/go2rtc"
-	"server/middleware"
 	"server/routes"
 	"server/static"
 	"server/utils"
@@ -17,14 +16,10 @@ import (
 func main() {
 	errMsg := make(chan error)
 	go go2rtc.Run(errMsg)
+	go app.Init(routes.UseRoutes, static.UseStatic)
 	go simulate(errMsg)
 	go extract(errMsg)
-	go gin()
 	log.Println(<-errMsg)
-}
-func gin() {
-	app.Init(routes.UseRoutes, static.UseStatic)
-	app.SetCors(middleware.Cors)
 }
 func simulate(errMsg chan<- error) {
 	err := ffmpeg.SimulateStreams(ffmpeg.SimulateStreamsOptions{
@@ -56,8 +51,8 @@ func simulate(errMsg chan<- error) {
 			F:             "rtsp",
 		},
 		RtspServerConfig: ffmpeg.RtspServerConfig{
-			FilePath:   filepath.Join("./video/rtsp.exe"),
-			ConfigPath: filepath.Join("./video/mediamtx.yml"),
+			FilePath:   filepath.Join("./mediamtx/mediamtx.exe"),
+			ConfigPath: filepath.Join("./mediamtx/mediamtx.yml"),
 		},
 	})
 	defer func() {

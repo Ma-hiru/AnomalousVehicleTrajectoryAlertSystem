@@ -36,6 +36,7 @@ func configApp(withUse ...func(engine *gin.Engine)) {
 	engine = gin.New(func(engine *gin.Engine) {
 		engine.Use(gin.Logger(), gin.Recovery(), customRecovery(errMsg))
 	})
+	setCors()
 	for _, fn := range withUse {
 		fn(engine)
 	}

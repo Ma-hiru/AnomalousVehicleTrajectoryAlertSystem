@@ -40,7 +40,6 @@ const mseSourceBuffer = ref<SourceBuffer>();
 const mseQueue = ref<Array<ArrayBuffer>>([]);
 const mseStreamingStarted = ref(false);
 /* 清理历史缓存 */
-let lastCleanTime = 0;
 const cleanOldBuffers = () => {
   if (!videoMse.value || !mseSourceBuffer.value || mseSourceBuffer.value.updating) return;
   const currentTime = videoMse.value.currentTime;
@@ -48,26 +47,18 @@ const cleanOldBuffers = () => {
   for (let i = 0; i < buffered.length; i++) {
     const start = buffered.start(i);
     const end = buffered.end(i);
-    if (end < (currentTime - BUFFER_MAX_DURATION)) {
-      try {
-        mseSourceBuffer.value.remove(start, end);
-        return;
-      } catch (e) {
-        console.warn("Buffer清理失败:", e);
-      }
-    }
+    if (end < currentTime - BUFFER_MAX_DURATION)
+      removeBuffer(start, end);
+    else if (end - start > BUFFER_MAX_DURATION)
+      removeBuffer(start, end - BUFFER_MAX_DURATION);
   }
 };
-const checkBufferHealth = () => {
-  if (!videoMse.value) return;
-  const buffered = videoMse.value.buffered;
-  let totalDuration = 0;
-  for (let i = 0; i < buffered.length; i++) {
-    totalDuration += buffered.end(i) - buffered.start(i);
-  }
-  if (totalDuration > BUFFER_MAX_DURATION && Date.now() - lastCleanTime > 10000) {
-    cleanOldBuffers();
-    lastCleanTime = Date.now();
+const removeBuffer = (start: number, end: number) => {
+  try {
+    console.log("Buffer clean.");
+    return mseSourceBuffer.value!.remove(start, end);
+  } catch (e) {
+    console.warn("Buffer清理失败:", e);
   }
 };
 /*  播放控制 */
@@ -158,7 +149,7 @@ onMounted(() => {
     //   }
     // });
     startPlay(props.url);
-    cleanTimer = window.setInterval(checkBufferHealth, 5000);
+    cleanTimer = window.setInterval(cleanOldBuffers, 10000);
   }
 });
 onUnmounted(() => {

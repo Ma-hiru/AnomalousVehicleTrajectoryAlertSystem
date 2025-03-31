@@ -12,7 +12,7 @@ const userSlice = createSlice({
   initialState: {
     token: "",
     userProfile: {
-      username: "",
+      username: "test",
       avatar: ""
     }
   } as initialType,
