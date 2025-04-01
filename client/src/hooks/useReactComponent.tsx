@@ -1,6 +1,6 @@
 import { StrictMode, FC } from "react";
 import { createRoot } from "react-dom/client";
-import { watchEffect } from "vue";
+import { watch, watchEffect } from "vue";
 import type { Ref } from "vue";
 import { Provider } from "react-redux";
 import reduxStore, { PersistedRootState } from "@/stores/redux";
@@ -18,18 +18,30 @@ export function renderReact(
   FnComponent: FC<Record<string, any>>,
   HTMLContainer: HTMLDivElement,
   props?: Record<string, any>,
-  key?: string
+  key?: Ref<string | number | undefined>
 ) {
   const root = createRoot(HTMLContainer);
-  root.render((
+  const children = (
     <StrictMode>
       <Provider store={reduxStore}>
         <PersistGate persistor={PersistedRootState}>
-          <FnComponent {...props} key={key} />
+          <FnComponent {...props}/>
         </PersistGate>
       </Provider>
     </StrictMode>
-  ));
+  );
+  root.render(children);
+  if (key) watch(key, () => {
+    root.render((
+      <StrictMode>
+        <Provider store={reduxStore}>
+          <PersistGate persistor={PersistedRootState}>
+            <FnComponent {...props} key={key.value}/>
+          </PersistGate>
+        </Provider>
+      </StrictMode>
+    ));
+  });
 }
 
 /**
@@ -44,11 +56,11 @@ export function useReactComponent<T extends FC<any>>(
   FnComponent: T,
   HTMLContainer: Ref<HTMLDivElement | null | undefined>,
   props?: T extends FC<infer P> ? P : never,
-  key?: Ref<string | undefined>
+  key?: Ref<string | number | undefined>
 ) {
   watchEffect(() => {
     if (HTMLContainer.value) {
-      renderReact(FnComponent, HTMLContainer.value, props, key?.value);
+      renderReact(FnComponent, HTMLContainer.value, props, key);
     }
   });
 }

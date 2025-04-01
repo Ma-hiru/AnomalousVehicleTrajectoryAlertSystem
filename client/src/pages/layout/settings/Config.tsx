@@ -1,18 +1,20 @@
 import Content from "@/pages/layout/settings/Content.tsx";
 import { FC, useEffect, useState, useMemo, memo } from "react";
 import { reqGetGo2rtcConfig } from "@/api/moudules/go2rtcAPI.ts";
-import { ConfigProvider, Menu, MenuProps } from "antd";
-import { AlertOutlined } from "@ant-design/icons";
+import { Button, ConfigProvider, Menu, MenuProps } from "antd";
+import { AlertOutlined, LoadingOutlined } from "@ant-design/icons";
 import { type Updater, useImmer } from "use-immer";
 import { SettingsCtx } from "@/pages/layout/settings/ctx.ts";
+import { createStyleSheet } from "@/utils/createStyleSheet.ts";
+import { JsonToYaml } from "@/utils/handleYaml.ts";
 
 interface props {
-  /* empty */
+  refresh: () => void;
 }
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const Config: FC<props> = () => {
+const Config: FC<props> = ({refresh}) => {
   const [config, setConfig] = useImmer<Go2rtcConfigYaml | undefined>(undefined);
   const [current, setCurrent] = useState("streams");
   const menuItems: MenuItem[] | undefined = useMemo(() => config &&
@@ -23,46 +25,103 @@ const Config: FC<props> = () => {
       }))
     , [config]);
   useEffect(() => {
-    reqGetGo2rtcConfig().then(setConfig);
+    let isMounted = true;
+    reqGetGo2rtcConfig().then((res) => {
+      if (isMounted) {
+        setConfig(res);
+        setIsReqFall(false);
+      }
+    }).catch(() => {
+      if (isMounted) setIsReqFall(true);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [setConfig]);
+  const [isReqFall, setIsReqFall] = useState(false);
+  const test = () => {
+    const res = JsonToYaml({
+      streams: {
+        ffmpeg: [
+          "12",
+          "456"
+        ]
+      },
+      hello: "12"
+    });
+    console.log(res);
+  };
   return (
     <>
       <div
-        className="grid grid-rows-[minmax(0,1fr)_auto] grid-cols-1 h-full w-full">
-        <div
-          className="grid grid-rows-1 grid-cols-[var(--settings-divider-ratio)] h-full w-full">
-          <ConfigProvider theme={{
-            components: {
-              Menu: {
-                itemColor: "var(--settings-tabs-color)",
-                itemSelectedColor: "var(--settings-tabs-active-color)",
-                itemHoverColor: "var(--settings-tabs-active-color)"
-              }
-            }
-          }}>
-            <Menu onClick={({ key }) => setCurrent(key)}
-                  selectedKeys={[current]}
-                  mode="vertical"
-                  items={menuItems}
-                  key={current}
-            />
-          </ConfigProvider>
-          <div>
+        className="grid grid-rows-[minmax(0,1fr)_auto] grid-cols-1 h-full w-full"
+      >
+        {
+          config && (
+            <>
+              <div
+                className="grid grid-rows-1 grid-cols-[var(--settings-divider-ratio)] h-full w-full">
+                <ConfigProvider theme={{
+                  components: {
+                    Menu: {
+                      itemColor: "var(--settings-tabs-color)",
+                      itemSelectedColor: "var(--settings-tabs-active-color)",
+                      itemHoverColor: "var(--settings-tabs-active-color)"
+                    }
+                  }
+                }}>
+                  <Menu
+                    onClick={({ key }) => setCurrent(key)}
+                    selectedKeys={[current]}
+                    mode="vertical"
+                    items={menuItems}
+                    key={current}
+                    className="select-none"
+                  />
+                </ConfigProvider>
+                <div>
+                  <SettingsCtx.Provider value={{
+                    updater: setConfig as Updater<Go2rtcConfigYaml>,
+                    currentTabs: current,
+                    currentItem: ""
+                  }}>
+                    <Content data={config.data[current]} key={current} />
+                  </SettingsCtx.Provider>
+                </div>
+              </div>
+              <div className="w-full flex flex-row justify-end items-center">
+                <Button variant="link" color="blue" onClick={refresh}>
+                  刷新
+                </Button>
+                <Button variant="solid" color="blue" style={styles.saveBtn} onClick={test}>
+                  保存
+                </Button>
+              </div>
+            </>
+          )
+        }
+        {
+          !config &&
+          <div className="flex justify-center items-center w-full h-full">
             {
-              config &&
-              <SettingsCtx.Provider value={{
-                updater: setConfig as Updater<Go2rtcConfigYaml>,
-                currentTabs: current,
-                currentItem: ""
-              }}>
-                <Content data={config.data[current]} key={current} />
-              </SettingsCtx.Provider>
+              isReqFall ?
+                "加载失败！请检查网络或者重新登录。" :
+                <LoadingOutlined style={styles.loadingIcon} />
             }
           </div>
-        </div>
-        <div className="w-full flex justify-end items-center">1</div>
+        }
       </div>
     </>
   );
 };
 export default memo(Config);
+
+const styles = createStyleSheet({
+  loadingIcon: {
+    fontSize: "2rem",
+    color: "var(--settings-loadingIcon-color)"
+  },
+  saveBtn: {
+    marginLeft: "1rem"
+  }
+});

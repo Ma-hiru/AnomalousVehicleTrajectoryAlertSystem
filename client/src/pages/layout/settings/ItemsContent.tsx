@@ -22,7 +22,7 @@ const ItemsContent: FC<props> = ({ data }) => {
       }
     });
   };
-  const newUpdater = debounce(setConfig, 1000);
+  const newUpdater = debounce(setConfig, 500);
   return (
     <>
       {
@@ -41,7 +41,6 @@ const ItemsContent: FC<props> = ({ data }) => {
             <span><NumberOutlined /></span>
             <Input defaultValue={data} variant="underlined" onChange={newUpdater} />
           </div>
-
       }
     </>
   );
@@ -52,6 +51,7 @@ const styles = createStyleSheet({
   ItemBox: {
     fontSize: "1rem",
     height: "1rem",
-    lineHeight: "1rem"
+    lineHeight: "1rem",
+    marginBottom: "1.5rem"
   }
 });

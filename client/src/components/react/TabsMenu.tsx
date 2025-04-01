@@ -53,6 +53,7 @@ export const TabsMenu: FC<props> = ({ currentRoute, setRoute }) => {
               selectedKeys={[current]}
               mode="horizontal"
               items={items}
+              className="select-none"
         />
       </ConfigProvider>
     </>

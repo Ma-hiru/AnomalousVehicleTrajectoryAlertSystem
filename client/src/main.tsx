@@ -1,6 +1,7 @@
 /** `React`*/
 import { createRoot } from "react-dom/client";
 import AppReact from "@/App.tsx";
+import "@ant-design/v5-patch-for-react-19";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(<AppReact />);

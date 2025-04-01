@@ -1,5 +1,6 @@
-import { createApp, DefineComponent } from "vue";
+import { createApp, DefineComponent, defineComponent } from "vue";
 import { RefObject, useEffect } from "react";
+
 /**
  * @description `渲染 Vue 组件到指定容器中。`
  * @param CompositionComponent - Vue组合式API组件
@@ -24,10 +25,10 @@ export function renderVue(
  * @param `props` - 传递给 Vue 组件的属性
  * @returns 无
  * */
-export function useVueComponent<T extends DefineComponent<any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any> | DefineComponent<any, any, any>>(
+export function useVueComponent<T extends ReturnType<typeof defineComponent>>(
   CompositionComponent: T,
   HTMLContainer: RefObject<HTMLDivElement | null>,
-  props?: T extends { new (...args: any[]): { $props: infer P } }
+  props?: T extends { new(...args: any[]): { $props: infer P } }
     ? P
     : never
 ) {

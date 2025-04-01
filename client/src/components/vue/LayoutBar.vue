@@ -1,7 +1,7 @@
 <template>
   <div
     class="w-screen bg-white grid grid-rows-1 grid-cols-[1fr_auto_auto] items-center layout-bar-container shadow-sm" style="height: var(--layout-bar-height);">
-    <div style="color: var(--layout-bar-title-color)">
+    <div style="color: var(--layout-bar-title-color)" class="select-none">
       AnomalousVehicleTrajectoryAlertSystem
     </div>
     <div class="h-full">

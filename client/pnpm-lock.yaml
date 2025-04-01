@@ -11,6 +11,9 @@ importers:
       '@ant-design/icons':
         specifier: ^5.6.1
         version: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@ant-design/v5-patch-for-react-19':
+        specifier: ^1.0.3
+        version: 1.0.3(antd@5.24.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.5.13(typescript@5.8.2))
@@ -41,6 +44,9 @@ importers:
       immutable:
         specifier: ^5.1.1
         version: 5.1.1
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -72,6 +78,9 @@ importers:
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.23.0
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/jsdom':
         specifier: ^21.1.7
         version: 21.1.7
@@ -205,6 +214,14 @@ packages:
     resolution: {integrity: sha512-EzlvzE6xQUBrZuuhSAFTdsr4P2bBBHGZwKFemEfq8gIGyIQCxalYfZW/T2ORbtQx5rU69o+WycP3exY/7T1hGA==}
     peerDependencies:
       react: '>=16.9.0'
+
+  '@ant-design/v5-patch-for-react-19@1.0.3':
+    resolution: {integrity: sha512-iWfZuSUl5kuhqLUw7jJXUQFMMkM7XpW7apmKzQBQHU0cpifYW4A79xIBt9YVO5IBajKpPG5UKP87Ft7Yrw1p/w==}
+    engines: {node: '>=12.x'}
+    peerDependencies:
+      antd: '>=5.22.6'
+      react: '>=19.0.0'
+      react-dom: '>=19.0.0'
 
   '@antfu/utils@0.7.10':
     resolution: {integrity: sha512-+562v9k4aI80m1+VuMHehNJWLOFjBnXn3tdOitzD0il5b7smkSBal4+a3oKiQTbrwMmN/TBUMDvbdoWDehgOww==}
@@ -1055,6 +1072,9 @@ packages:
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
+
+  '@types/js-yaml@4.0.9':
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
 
   '@types/jsdom@21.1.7':
     resolution: {integrity: sha512-yOriVnggzrnQ3a9OKOCxaVuSug3w3/SbOj5i7VwXWZEyUNl3bLF9V3MfxGbZKuwqJOQyRfqXyROBB1CoZLFWzA==}
@@ -3710,6 +3730,12 @@ snapshots:
       resize-observer-polyfill: 1.5.1
       throttle-debounce: 5.0.2
 
+  '@ant-design/v5-patch-for-react-19@1.0.3(antd@5.24.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      antd: 5.24.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
   '@antfu/utils@0.7.10': {}
 
   '@asamuzakjp/css-color@3.1.1':
@@ -4460,6 +4486,8 @@ snapshots:
   '@types/doctrine@0.0.9': {}
 
   '@types/estree@1.0.7': {}
+
+  '@types/js-yaml@4.0.9': {}
 
   '@types/jsdom@21.1.7':
     dependencies:

@@ -19,6 +19,7 @@ const Content: FC<props> = ({ data }) => {
           name={itemsMenu}
           setCurrentItem={setCurrentItem}
           currentItem={currentItem}
+          className="select-none"
         />
         <div style={styles.ItemsContent}>
           <SettingsCtx.Provider value={{
@@ -38,6 +39,8 @@ const styles = createStyleSheet({
   ItemsContent: {
     padding: "var(--settings-content-padding)",
     width: "100%",
-    height: "100%"
+    height: "100%",
+    overflowY: "scroll",
+    scrollbarWidth: "none"
   }
 });

@@ -2,6 +2,12 @@
 streams:
   ffmpeg:
     - rtsp://127.0.0.1:8554/live
+    - rtsp://127.0.0.1:8554/live
+    - rtsp://127.0.0.1:8554/live
+  test:
+    - rtsp://127.0.0.1:123/live
+    - rtsp://127.0.0.1:456/live
+    - rtsp://127.0.0.1:789/live
 rtsp:
   listen: ":3000"
 api:

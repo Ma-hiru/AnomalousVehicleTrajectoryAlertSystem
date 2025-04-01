@@ -5,16 +5,17 @@ interface props {
   name: string[];
   setCurrentItem: Dispatch<SetStateAction<string>>;
   currentItem: string;
+  className?: string;
 }
 
-const ItemsMenu: FC<props> = ({ name, currentItem, setCurrentItem }) => {
+const ItemsMenu: FC<props> = ({ name, currentItem, setCurrentItem,className }) => {
   const renderItem = () =>
     name.map(item =>
       ({ label: item, value: item })
     );
   return (
     <>
-      <div style={{ marginLeft: "0rem" }}>
+      <div style={{ overflowY:"scroll",scrollbarWidth:"none" }} className={className}>
         <ConfigProvider theme={{
           components: {
             Segmented: {
