@@ -44,5 +44,5 @@ sketch
 
 __tests__/
 .idea/
-/dist/
+dist/
 /.env.production

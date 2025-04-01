@@ -1,5 +1,6 @@
 /** 基本URL */
 export const baseUrl = import.meta.env.VITE_URL;
+export const baseWS = import.meta.env.VITE_WS;
 
 /** token prefix type */
 export enum tokenTypePrefix {
@@ -21,7 +22,9 @@ export const screensConfig = {
 };
 
 export enum API {
-  LoginUrl = "/api/gin/user/login"
+  LoginUrl = "/api/gin/user/login",
+  GetGo2rtcConfig = "/api/gin/config",
+  StreamsInfo = "/api/gin/streams",
 }
 
 export const BUFFER_MAX_DURATION = 30;

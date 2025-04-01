@@ -1,7 +1,7 @@
 import axios from "axios";
 import { baseUrl, tokenPrefix } from "@/settings";
 
-export const request = axios.create({
+const request = axios.create({
   timeout: 5000
 });
 request.interceptors.request.use(config => {
@@ -19,4 +19,4 @@ request.interceptors.response.use(res => {
   console.log(`请求出错！code:${err?.response.status}`);
 });
 
-
+export default request;

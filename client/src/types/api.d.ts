@@ -4,3 +4,7 @@ type ReqResponse<T> = {
   message: string;
   data: T;
 }
+type Go2rtcConfigYaml = {
+  data: Record<string, Record<string, string | string[]>>;
+  content: string;
+}

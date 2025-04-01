@@ -9,6 +9,7 @@ import crypto from "node:crypto";
 import MyViteAliases from "./plugins/MyViteAliases";
 import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
 import { fileURLToPath } from "node:url";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig(({ command, mode }) => {
   console.log("command=>", command);
@@ -18,6 +19,9 @@ export default defineConfig(({ command, mode }) => {
   return {
     base: env.VITE_BASE,
     plugins: [
+      nodePolyfills({
+        include: ["buffer"]
+      }),
       tailwindcss(),
       react({
         babel: {

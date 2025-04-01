@@ -17,8 +17,8 @@ func main() {
 	errMsg := make(chan error)
 	go go2rtc.Run(errMsg)
 	go app.Init(routes.UseRoutes, static.UseStatic)
-	go simulate(errMsg)
-	go extract(errMsg)
+	//go simulate(errMsg)
+	//go extract(errMsg)
 	log.Println(<-errMsg)
 }
 func simulate(errMsg chan<- error) {

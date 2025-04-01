@@ -5,7 +5,7 @@
 <script setup lang="ts" name='Track'>
 import { useUserRedux } from "@/hooks/useRedux.ts";
 
-const [userStore, dispatch] = useUserRedux();
+const [userStore] = useUserRedux();
 console.log(userStore);
 </script>
 

@@ -1,12 +1,10 @@
 package middleware
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"io"
 	"server/settings"
 	"server/utils"
 	"strings"
@@ -52,14 +50,13 @@ func Validate(prefix string, check func(claims jwt.MapClaims, token string) bool
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if check != nil {
 				if !check(claims, tokenString) {
+					utils.UnauthorizedResponse(context)
 					context.Abort()
 					return
 				}
 			}
 			context.Set("token", claims)
 		}
-		bodyBytes, _ := io.ReadAll(context.Request.Body)
-		context.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		context.Next()
 	}
 }

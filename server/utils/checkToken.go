@@ -7,6 +7,7 @@ import (
 	"server/model"
 	"server/redis"
 	"server/service"
+	"strconv"
 )
 
 // TokenCheckFn Token Check
@@ -16,8 +17,12 @@ var TokenCheckFn = func(claims jwt.MapClaims, token string) bool {
 		Username: claims["Username"].(string),
 	}); ok {
 		if user.Status.V == 1 {
-			if id, err := redis.Get(context.Background(), token); err != nil {
-				if id.(int) == user.Id {
+			if id, err := redis.Get(context.Background(), token); err == nil {
+				userId, err := strconv.Atoi(id.(string))
+				if err != nil {
+					return false
+				}
+				if userId == user.Id {
 					log.Println("token check success", token, id)
 					return true
 				}

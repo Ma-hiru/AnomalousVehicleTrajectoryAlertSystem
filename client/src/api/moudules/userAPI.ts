@@ -1,4 +1,4 @@
-import { request } from "@/utils/request.ts";
+import request from "@/utils/request.ts";
 import { API } from "@/settings.ts";
 
 

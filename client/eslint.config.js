@@ -11,10 +11,24 @@ import pluginVitest from "@vitest/eslint-plugin";
 import reactCompiler from "eslint-plugin-react-compiler";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  {
+    ignores: [
+      "**/node_modules",
+      "**/dist",
+      "**/coverage",
+      "**/public",
+      "*.config.js"
+    ]
+  },
   {
     ...pluginVitest.configs.recommended,
-    files: ["src/__tests__/**/*"]
+    files: ["src/__tests__/**/*"],
+    languageOptions: {
+      globals: {
+        ...globals.jasmine,
+        ...globals.node
+      }
+    }
   },
   {
     extends: [
@@ -23,7 +37,7 @@ export default tseslint.config(
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: "latest",
       globals: globals.browser
     },
     plugins: {
@@ -38,9 +52,14 @@ export default tseslint.config(
       "react-compiler/react-compiler": "error",
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true }
+        {
+          allowConstantExport: true,
+          allowExportNames: ["loader", "action"]
+        }
       ],
-      "@typescript-eslint/no-explicit-any": "off"
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn"
     }
   },
   {
@@ -52,15 +71,22 @@ export default tseslint.config(
     ],
     files: ["**/*.{vue}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser
+      ecmaVersion: "latest",
+      parser: "vue-eslint-parser",
+      globals: globals.browser,
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
+        extraFileExtensions: [".vue"]
+      }
     },
     plugins: {
       "prettier": prettier
     },
     rules: {
       ...prettierRules.rules,
-      "@typescript-eslint/no-explicit-any": "off"
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn"
     }
   }
 );
