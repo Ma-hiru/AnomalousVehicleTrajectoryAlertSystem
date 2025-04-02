@@ -5,26 +5,28 @@ import (
 	"time"
 )
 
-// TokenExpireDefault Token有效时间
-const TokenExpireDefault = 24 * time.Hour
+var (
+	// SecretKey JWT signedKey
+	SecretKey = []byte("Mahiru")
+	// SigningMethod JWT signedMethods
+	SigningMethod = jwt.SigningMethodHS256
+)
 
-// SecretKey JWT signedKey
-var SecretKey = []byte("Mahiru")
+const (
+	// TokenExpireDefault Token有效时间
+	TokenExpireDefault = 24 * time.Hour
+	// TokenPrefix Token前缀
+	TokenPrefix = "Bearer "
+	// TimeFormat 时间格式
+	TimeFormat = "%4d-%02d-%02d %02d:%02d:%02d"
+	// Go2rtcBaseUrl go2rtc port
+	Go2rtcBaseUrl = "http://localhost:3001"
+)
 
-// SigningMethod JWT signedMethods
-var SigningMethod = jwt.SigningMethodHS256
-
-// TokenPrefix Token前缀
-const TokenPrefix = "Bearer "
-
-// TokenStruct Token Struct
-type TokenStruct = struct {
-	Id       int    `json:"id"`
-	Username string `json:"username"`
-}
-
-// TimeFormat 时间格式
-const TimeFormat = "%4d-%02d-%02d %02d:%02d:%02d"
-
-// Go2rtcBaseUrl go2rtc port
-const Go2rtcBaseUrl = "http://localhost:3001"
+type (
+	// TokenStruct Token Struct
+	TokenStruct = struct {
+		Id       int    `json:"id"`
+		Username string `json:"username"`
+	}
+)

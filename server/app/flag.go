@@ -11,12 +11,14 @@ import (
 	"text/template"
 )
 
-var portFlag = flag.String("port", ":80", "端口号")
-var sslFlag = flag.Bool("ssl", false, "是否开启ssl")
-var chainFlag = flag.String("chain", defaultPemFilePath.Fullchain, "证书文件路径")
-var keyFlag = flag.String("key", defaultPemFilePath.Privkey, "私钥文件路径")
-var modeFlag = flag.String("mode", gin.DebugMode, "gin运行模式")
-var corsFlag = flag.Bool("cors", true, "是否开启跨域")
+var (
+	portFlag  = flag.String("port", ":80", "端口号")
+	sslFlag   = flag.Bool("ssl", false, "是否开启ssl")
+	chainFlag = flag.String("chain", defaultPemFilePath.Fullchain, "证书文件路径")
+	keyFlag   = flag.String("key", defaultPemFilePath.Privkey, "私钥文件路径")
+	modeFlag  = flag.String("mode", gin.DebugMode, "gin运行模式")
+	corsFlag  = flag.Bool("cors", true, "是否开启跨域")
+)
 
 func init() {
 	flag.Parse()

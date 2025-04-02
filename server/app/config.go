@@ -6,12 +6,14 @@ import (
 	"log"
 )
 
-var port string
-var isSSL bool
-var path pemFilePath
-var serverType string
-var engine *gin.Engine
-var mode string
+var (
+	port       string
+	isSSL      bool
+	path       pemFilePath
+	serverType string
+	engine     *gin.Engine
+	mode       string
+)
 
 func configSSL() {
 	if err := getParams(&port, &isSSL, &path); err != nil {

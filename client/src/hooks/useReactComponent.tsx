@@ -1,66 +1,51 @@
-import { StrictMode, FC } from "react";
-import { createRoot } from "react-dom/client";
-import { watch, watchEffect } from "vue";
-import type { Ref } from "vue";
 import { Provider } from "react-redux";
-import reduxStore, { PersistedRootState } from "@/stores/redux";
+import { watchEffect, type Ref } from "vue";
+import { createRoot } from "react-dom/client";
+import { StrictMode, FC, ReactNode } from "react";
 import { PersistGate } from "redux-persist/integration/react";
-
-/**
- * @description `渲染 React 组件到指定容器中。`
- * @param `FnComponent` -React函数组件
- * @param `HTMLContainer` -组件的容器
- * @param `props` - 传递给 React 组件的属性
- * @param key
- * @returns 无
- * */
-export function renderReact(
-  FnComponent: FC<Record<string, any>>,
-  HTMLContainer: HTMLDivElement,
-  props?: Record<string, any>,
-  key?: Ref<string | number | undefined>
-) {
-  const root = createRoot(HTMLContainer);
-  const children = (
-    <StrictMode>
-      <Provider store={reduxStore}>
-        <PersistGate persistor={PersistedRootState}>
-          <FnComponent {...props}/>
-        </PersistGate>
-      </Provider>
-    </StrictMode>
-  );
-  root.render(children);
-  if (key) watch(key, () => {
-    root.render((
-      <StrictMode>
-        <Provider store={reduxStore}>
-          <PersistGate persistor={PersistedRootState}>
-            <FnComponent {...props} key={key.value}/>
-          </PersistGate>
-        </Provider>
-      </StrictMode>
-    ));
-  });
-}
+import reduxStore, { PersistedRootState } from "@/stores/redux";
 
 /**
  * @description`useReactComponent 是一个自定义 Hook，用于在 Vue 组件中渲染 React 组件。`
  * @param FnComponent - React函数组件
  * @param HTMLContainer - 组件的容器
- * @param `props` - 传递给 React 组件的属性
- * @param key
- * @returns 无
+ * @param props - 传递给 React 组件的属性
+ * @param key - 用于设置组件的key属性
+ * @returns void
  * */
-export function useReactComponent<T extends FC<any>>(
-  FnComponent: T,
+export function useReactComponent<P>(
+  FnComponent: FC<P>,
   HTMLContainer: Ref<HTMLDivElement | null | undefined>,
-  props?: T extends FC<infer P> ? P : never,
+  props?: P,
   key?: Ref<string | number | undefined>
 ) {
   watchEffect(() => {
     if (HTMLContainer.value) {
-      renderReact(FnComponent, HTMLContainer.value, props, key);
+      const root = createRoot(HTMLContainer.value);
+      watchEffect(() => root.render(renderReactNode<P>(FnComponent, props, key)));
     }
   });
+}
+
+/**
+ * @description`renderReactNode 是一个函数，用于渲染 React 组件。`
+ * @param FnComponent - React函数组件
+ * @param props - 传递给 React 组件的属性
+ * @param key - 传递给 React 组件的key属性
+ * @returns ReactNode
+ * */
+export function renderReactNode<P>(
+  FnComponent: FC<any>,
+  props?: P,
+  key?: Ref<string | number | undefined>
+): ReactNode {
+  return (
+    <StrictMode>
+      <Provider store={reduxStore}>
+        <PersistGate persistor={PersistedRootState}>
+          <FnComponent {...props} key={key?.value} />
+        </PersistGate>
+      </Provider>
+    </StrictMode>
+  );
 }

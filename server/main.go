@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"server/app"
 	"server/ffmpeg"
 	"server/go2rtc"
-	"server/routes"
-	"server/static"
 	"server/utils"
 )
 
 func main() {
 	errMsg := make(chan error)
-	go go2rtc.Run(errMsg)
-	go app.Init(routes.UseRoutes, static.UseStatic)
-	//go simulate(errMsg)
+	go simulate(errMsg)
+	go2rtc.Run(errMsg)
+	//go app.Init(routes.UseRoutes, static.UseStatic)
+
 	//go extract(errMsg)
 	log.Println(<-errMsg)
 }
