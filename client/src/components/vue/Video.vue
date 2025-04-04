@@ -72,6 +72,7 @@
         worker = new Worker(new URL("@/worker/VideoStream.worker.ts", import.meta.url), { type: "module" });
         worker.postMessage({ type: "init", url });
         worker.onmessage = (ev) => {
+          console.log(typeof ev.data);
           if (typeof ev.data === "string") {
             const msg = JSON.parse(ev.data);
             mseSourceBuffer.value = mediaSource!.addSourceBuffer(msg.value);

@@ -109,8 +109,33 @@ func apiWS(w http.ResponseWriter, r *http.Request) {
 	tr := &Transport{Request: r}
 	tr.OnWrite(func(msg any) error {
 		_ = ws.SetWriteDeadline(time.Now().Add(time.Second * 5))
-
+		//if Msg, ok := msg.(*Message); ok {
+		//	tr.myMx.RLock()
+		//	fmt.Println(strconv.Itoa(tr.isFirst)+"Msg(msg)=>", Message(*Msg))
+		//	if tr.isFirst == 0 {
+		//		fmt.Println("pipe", tr.pipeWriter)
+		//	}
+		//	tr.myMx.RUnlock()
+		//} else if Msg, ok := msg.([]byte); ok {
+		//	tr.myMx.RLock()
+		//	fmt.Println(strconv.Itoa(tr.isFirst)+"Msg([]byte)=>", string(Msg))
+		//	tr.myMx.RUnlock()
+		//} else if Msg, ok := msg.(string); ok {
+		//	tr.myMx.RLock()
+		//	fmt.Println(strconv.Itoa(tr.isFirst)+"Msg(string)=>", Msg)
+		//	tr.myMx.RUnlock()
+		//} else {
+		//	tr.myMx.RLock()
+		//	fmt.Println(strconv.Itoa(tr.isFirst)+"Msg(unknown)=>", msg)
+		//	tr.myMx.RUnlock()
+		//}
+		//tr.myMx.Lock()
+		//tr.isFirst++
+		//tr.myMx.Unlock()
 		if data, ok := msg.([]byte); ok {
+			if tr.pipeWriter != nil {
+				_, _ = tr.pipeWriter.Write(data)
+			}
 			return ws.WriteMessage(websocket.BinaryMessage, data)
 		} else {
 			return ws.WriteJSON(msg)
@@ -152,9 +177,13 @@ type Transport struct {
 	mx     sync.Mutex
 	wrmx   sync.Mutex
 
-	onChange func()
-	onWrite  func(msg any) error
-	onClose  []func()
+	onChange   func()
+	onWrite    func(msg any) error
+	onClose    []func()
+	pipeWriter *io.PipeWriter
+
+	myMx    sync.RWMutex
+	isFirst int
 }
 
 func (t *Transport) OnWrite(f func(msg any) error) {
@@ -208,6 +237,10 @@ func (t *Transport) WithContext(f func(ctx map[any]any)) {
 }
 
 func (t *Transport) Writer() io.Writer {
+	return &writer{t: t}
+}
+func (t *Transport) MultiWriter(pipeWriter *io.PipeWriter) io.Writer {
+	t.pipeWriter = pipeWriter
 	return &writer{t: t}
 }
 

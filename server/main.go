@@ -15,7 +15,6 @@ func main() {
 	go simulate(errMsg)
 	go2rtc.Run(errMsg)
 	//go app.Init(routes.UseRoutes, static.UseStatic)
-
 	//go extract(errMsg)
 	log.Println(<-errMsg)
 }
@@ -62,38 +61,36 @@ func simulate(errMsg chan<- error) {
 	}
 }
 func extract(errMsg chan<- error) {
+	fmt.Println("Test")
 	options := ffmpeg.ExtractFramesOptions{
 		InputPath: filepath.Join("./video/test_hd.mp4"),
 		InputOpt: ffmpeg.ExtractInputOption{
-			StreamLoop: 1,
-			StartTime:  "00:00:05",
-			Duration:   "00:00:35",
-			Hwaccel:    "cuda",
-			CV:         "h264_cuvid",
+			StreamLoop:  -1,
+			StartTime:   "00:00:35",
+			Duration:    "00:01:05",
+			InputFormat: "mp4",
+			Loglevel:    "debug",
+			Hwaccel:     "cuda",
+			CV:          "h264_cuvid",
 		},
 		OutputDir:      filepath.Join("./frames"),
 		OutputTemplate: "test_hd_frame_%04d.jpg",
 		OutputOpt: ffmpeg.ExtractOutputOption{
-			FPS:         2,
-			Quality:     2,
-			SelectMode:  "all",
-			ImageFormat: "jpg",
-			Vsync:       "vfr",
-			F:           "image2",
-			Loglevel:    "warning",
-			FrameType:   "I",
+			FPS:          2,
+			Quality:      2,
+			SelectMode:   "all",
+			ImageFormat:  "jpg",
+			FpsMode:      "vfr",
+			OutputFormat: "image2",
+			FrameType:    "I",
 		},
 	}
-	frames, err := ffmpeg.ExtractVideoFrames(options)
-	defer func() {
-		if err := recover(); err != nil {
-			utils.PrintStack()
-			errMsg <- errors.New("extracted exit")
-		}
-	}()
+	frames, err := ffmpeg.ExtractVideoFrames(nil, options)
 	if err != nil {
 		log.Println(err)
+		errMsg <- errors.New("extracted exit")
 		return
 	}
 	fmt.Printf("Extracted %d frames", len(frames))
+	errMsg <- nil
 }

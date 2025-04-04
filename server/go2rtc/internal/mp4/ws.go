@@ -2,15 +2,19 @@ package mp4
 
 import (
 	"errors"
-
+	"fmt"
+	"io"
+	"server/ffmpeg"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/streams"
 	"server/go2rtc/pkg/core"
 	"server/go2rtc/pkg/mp4"
+	"server/settings"
 )
 
 func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
+	fmt.Println("handlerWSMSE")
 	stream := streams.GetOrPatch(tr.Request.URL.Query())
 	if stream == nil {
 		return errors.New(api.StreamNotFound)
@@ -33,10 +37,21 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 
 	tr.Write(&ws.Message{Type: "mse", Value: mp4.ContentType(cons.Codecs())})
 
-	go cons.WriteTo(tr.Writer())
-
+	pr, pw := io.Pipe()
+	go func() {
+		defer func(pr *io.PipeReader) {
+			_ = pr.Close()
+		}(pr)
+		if _, err := ffmpeg.ExtractVideoFrames(pr, settings.ExtractOptions()); err != nil {
+			log.Error().Err(err).Msg("抽帧失败")
+		}
+	}()
+	go func() {
+		_, _ = cons.WriteTo(tr.MultiWriter(pw))
+	}()
 	tr.OnClose(func() {
 		stream.RemoveConsumer(cons)
+		_ = pw.Close()
 	})
 
 	return nil

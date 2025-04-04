@@ -11,3 +11,7 @@ func Init(withUse ...func(engine *gin.Engine)) {
 	configApp(withUse...)
 	configRun()
 }
+
+func GetApp() *gin.Engine {
+	return engine
+}

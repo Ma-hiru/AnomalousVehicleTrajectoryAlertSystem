@@ -180,10 +180,8 @@ func (c *Consumer) WriteTo(wr io.Writer) (int64, error) {
 	if c.ScaleX != 0 && c.ScaleY != 0 {
 		PatchVideoScale(init, c.ScaleX, c.ScaleY)
 	}
-
 	if _, err = wr.Write(init); err != nil {
 		return 0, err
 	}
-
 	return c.wr.WriteTo(wr)
 }

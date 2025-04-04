@@ -4,7 +4,7 @@
     <Video :width="styles.videoItem.width"
            :url="urlList[0]"
            :meta="{id:i,name:'test'+i}"
-           v-for="i in 8"
+           v-for="i in 1"
            :key="i"
     />
   </div>
