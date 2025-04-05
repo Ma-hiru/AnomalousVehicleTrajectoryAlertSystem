@@ -1,6 +1,6 @@
 import Content from "@/pages/layout/settings/Content.tsx";
 import { FC, useEffect, useState, useMemo, memo } from "react";
-import { reqGetGo2rtcConfig } from "@/api/moudules/go2rtcAPI.ts";
+import { reqGetGo2rtcConfig, reqPatchGo2rtcConfig } from "@/api/moudules/go2rtcAPI.ts";
 import { Button, ConfigProvider, Menu, MenuProps } from "antd";
 import { AlertOutlined, LoadingOutlined } from "@ant-design/icons";
 import { type Updater, useImmer } from "use-immer";
@@ -14,7 +14,7 @@ interface props {
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const Config: FC<props> = ({refresh}) => {
+const Config: FC<props> = ({ refresh }) => {
   const [config, setConfig] = useImmer<Go2rtcConfigYaml | undefined>(undefined);
   const [current, setCurrent] = useState("streams");
   const menuItems: MenuItem[] | undefined = useMemo(() => config &&
@@ -39,17 +39,17 @@ const Config: FC<props> = ({refresh}) => {
     };
   }, [setConfig]);
   const [isReqFall, setIsReqFall] = useState(false);
-  const test = () => {
-    const res = JsonToYaml({
-      streams: {
-        ffmpeg: [
-          "12",
-          "456"
-        ]
-      },
-      hello: "12"
-    });
-    console.log(res);
+  const saveConfig = async () => {
+    if (config?.data) {
+      try {
+        const yaml = JsonToYaml(config.data);
+        console.log(yaml);
+        await reqPatchGo2rtcConfig(yaml);
+        refresh();
+      } catch (e) {
+        console.log(e);
+      }
+    }
   };
   return (
     <>
@@ -93,7 +93,7 @@ const Config: FC<props> = ({refresh}) => {
                 <Button variant="link" color="blue" onClick={refresh}>
                   刷新
                 </Button>
-                <Button variant="solid" color="blue" style={styles.saveBtn} onClick={test}>
+                <Button variant="solid" color="blue" style={styles.saveBtn} onClick={saveConfig}>
                   保存
                 </Button>
               </div>

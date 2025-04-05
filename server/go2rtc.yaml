@@ -1,17 +1,19 @@
----
-streams:
-  ffmpeg:
-    - rtsp://127.0.0.1:8554/live
-    - rtsp://127.0.0.1:8554/live
-    - rtsp://127.0.0.1:8554/live
-  test:
-    - rtsp://127.0.0.1:123/live
-    - rtsp://127.0.0.1:456/live
-    - rtsp://127.0.0.1:789/live
-rtsp:
-  listen: ":3000"
 api:
-  listen: ":3001"
-  origin: "*"
+    listen: :3001
+    origin: '*'
+rtsp:
+    listen: :3000
+streams:
+    ffmpeg:
+        - rtsp://127.0.0.1:8554/live
+        - null
+    test1:
+        - rtsp://127.0.0.1:123/live
+        - rtsp://127.0.0.1:456/live
+        - rtsp://127.0.0.1:789/live
+    test2:
+        - rtsp://127.0.0.1:777/live
+        - rtsp://127.0.0.1:888/live
+        - rtsp://127.0.0.1:999/live
 webrtc:
-  listen: ":3002"
+    listen: :3002

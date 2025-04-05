@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = ".;yolov8";
+service YoloService {
+  //TODO waiting for yolo service
+  rpc DetectSingle (ImageRequest) returns (DetectionResult) {}
+  rpc DetectStream (stream ImageRequest) returns (stream DetectionResult) {}
+}
+message ImageRequest{
+  bytes imageData = 1;
+  optional int32 width = 2;
+  optional int32 height = 3;
+  float confidenceThreshold = 4;
+}
+message DetectionResult{
+  repeated BoundingBox boxes = 1;
+  int64 processTimeMs = 2;
+}
+message BoundingBox{
+  float xMin = 1;
+  float yMin = 2;
+  float xMax = 3;
+  float yMax = 4;
+  string label = 5;
+  float confidence = 6;
+  optional bytes mask = 7;
+}

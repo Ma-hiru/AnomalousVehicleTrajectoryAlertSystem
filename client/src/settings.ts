@@ -23,8 +23,8 @@ export const screensConfig = {
 
 export enum API {
   LoginUrl = "/api/gin/user/login",
-  GetGo2rtcConfig = "/api/gin/config",
-  StreamsInfo = "/api/gin/streams",
+  Go2rtcConfig = "/api/gin/config",
+  Go2rtcStreams = "/api/gin/streams",
 }
 
 export const BUFFER_MAX_DURATION = 30;

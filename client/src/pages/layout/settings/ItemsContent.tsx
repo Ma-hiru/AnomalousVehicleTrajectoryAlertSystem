@@ -3,7 +3,7 @@ import { Input } from "antd";
 import { NumberOutlined } from "@ant-design/icons";
 import { SettingsCtx } from "@/pages/layout/settings/ctx.ts";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 
 interface props {
   data: any;
@@ -16,13 +16,26 @@ const ItemsContent: FC<props> = ({ data }) => {
     updater((draft) => {
       if (isArray) {
         (draft.data[currentTabs][currentItem] as string[])[index!] = value;
-        console.log((draft.data[currentTabs][currentItem] as string[])[index!]);
       } else {
         draft.data[currentTabs][currentItem] = value;
       }
     });
   };
   const newUpdater = debounce(setConfig, 500);
+  const delLine = (index: number) => {
+    updater((draft) => {
+      if (isArray) {
+        if ((draft.data[currentTabs][currentItem] as string[]).length === 1) {
+          (draft.data[currentTabs][currentItem] as string[])[0] = "";
+        } else
+          (draft.data[currentTabs][currentItem] as string[]).splice(index, 1);
+      }
+    });
+  };
+  const newLine = () => {
+
+  };
+
   return (
     <>
       {

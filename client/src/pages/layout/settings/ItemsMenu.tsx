@@ -8,14 +8,18 @@ interface props {
   className?: string;
 }
 
-const ItemsMenu: FC<props> = ({ name, currentItem, setCurrentItem,className }) => {
+const ItemsMenu: FC<props> = ({ name, currentItem, setCurrentItem, className }) => {
   const renderItem = () =>
     name.map(item =>
       ({ label: item, value: item })
     );
+  const delLine = () => {
+  };
+  const newLine = () => {
+  };
   return (
     <>
-      <div style={{ overflowY:"scroll",scrollbarWidth:"none" }} className={className}>
+      <div style={{ overflowY: "scroll", scrollbarWidth: "none" }} className={className}>
         <ConfigProvider theme={{
           components: {
             Segmented: {

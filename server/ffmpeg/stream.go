@@ -8,9 +8,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func SimulateStreams(options SimulateStreamsOptions) error {
@@ -93,8 +93,8 @@ func ExtractVideoFrames(streams *io.PipeReader, options ExtractFramesOptions) ([
 		"f":        options.OutputOpt.OutputFormat,
 		"fps_mode": options.OutputOpt.FpsMode,
 	})
-	NewFFmpeg.AddOutputFlag(filepath.Join(options.OutputDir, options.OutputTemplate))
-	if err = NewFFmpeg.Build().AddTimeStamp(filepath.Join("./frames/stamps.txt")).Run(); err != nil {
+	NewFFmpeg.AddOutput(options.OutputDir, options.OutputTemplate)
+	if err = NewFFmpeg.Build().AddTimeStamp().AddClearStamp(time.Second*5, 45).Run(); err != nil {
 		return nil, err
 	}
 	return nil, nil

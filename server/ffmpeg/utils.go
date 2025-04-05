@@ -14,3 +14,13 @@ func mkdir(dir string) (err error) {
 	}
 	return file.Close()
 }
+
+// rmfile 删除多个文件
+func rmfile(name []string) error {
+	for _, n := range name {
+		if err := os.Remove(n); err != nil {
+			return err
+		}
+	}
+	return nil
+}

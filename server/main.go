@@ -1,25 +1,24 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"path/filepath"
+	"server/app"
 	"server/ffmpeg"
 	"server/go2rtc"
-	"server/utils"
+	"server/routes"
+	"server/static"
 )
 
 func main() {
 	errMsg := make(chan error)
-	go simulate(errMsg)
-	go2rtc.Run(errMsg)
-	//go app.Init(routes.UseRoutes, static.UseStatic)
-	//go extract(errMsg)
+	//go simulate(errMsg)
+	go go2rtc.Run(errMsg)
+	go app.Init(routes.UseRoutes, static.UseStatic)
 	log.Println(<-errMsg)
 }
 func simulate(errMsg chan<- error) {
-	err := ffmpeg.SimulateStreams(ffmpeg.SimulateStreamsOptions{
+	errMsg <- ffmpeg.SimulateStreams(ffmpeg.SimulateStreamsOptions{
 		FilePath:   filepath.Join("./video/test.mp4"),
 		FileOutput: "rtsp://127.0.0.1:8554/live",
 		InputOpt: ffmpeg.SimulateInputOption{
@@ -52,45 +51,4 @@ func simulate(errMsg chan<- error) {
 			ConfigPath: filepath.Join("./mediamtx/mediamtx.yml"),
 		},
 	})
-	defer func() {
-		utils.PrintStack()
-		errMsg <- errors.New("SimulateStreams exit")
-	}()
-	if err != nil {
-		log.Println(err)
-	}
-}
-func extract(errMsg chan<- error) {
-	fmt.Println("Test")
-	options := ffmpeg.ExtractFramesOptions{
-		InputPath: filepath.Join("./video/test_hd.mp4"),
-		InputOpt: ffmpeg.ExtractInputOption{
-			StreamLoop:  -1,
-			StartTime:   "00:00:35",
-			Duration:    "00:01:05",
-			InputFormat: "mp4",
-			Loglevel:    "debug",
-			Hwaccel:     "cuda",
-			CV:          "h264_cuvid",
-		},
-		OutputDir:      filepath.Join("./frames"),
-		OutputTemplate: "test_hd_frame_%04d.jpg",
-		OutputOpt: ffmpeg.ExtractOutputOption{
-			FPS:          2,
-			Quality:      2,
-			SelectMode:   "all",
-			ImageFormat:  "jpg",
-			FpsMode:      "vfr",
-			OutputFormat: "image2",
-			FrameType:    "I",
-		},
-	}
-	frames, err := ffmpeg.ExtractVideoFrames(nil, options)
-	if err != nil {
-		log.Println(err)
-		errMsg <- errors.New("extracted exit")
-		return
-	}
-	fmt.Printf("Extracted %d frames", len(frames))
-	errMsg <- nil
 }

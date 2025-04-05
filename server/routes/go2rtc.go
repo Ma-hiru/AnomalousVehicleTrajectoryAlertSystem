@@ -13,6 +13,9 @@ func go2rtcRoutes(app *gin.RouterGroup) {
 		root.GET("/config", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
 			return settings.Go2rtcBaseUrl + "/api/config"
 		}, nil, nil))
+		root.PATCH("/config", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
+			return settings.Go2rtcBaseUrl + "/api/config"
+		}, nil, nil))
 		root.GET("/streams", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
 			return settings.Go2rtcBaseUrl + "/api/streams"
 		}, nil, nil))
