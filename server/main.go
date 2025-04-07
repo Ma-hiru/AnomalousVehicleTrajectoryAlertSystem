@@ -1,21 +1,19 @@
 package main
 
 import (
-	"log"
 	"path/filepath"
-	"server/app"
 	"server/ffmpeg"
-	"server/go2rtc"
-	"server/routes"
-	"server/static"
+	"server/yolo"
 )
 
 func main() {
-	errMsg := make(chan error)
+	//errMsg := make(chan error)
 	//go simulate(errMsg)
-	go go2rtc.Run(errMsg)
-	go app.Init(routes.UseRoutes, static.UseStatic)
-	log.Println(<-errMsg)
+	//go go2rtc.Run(errMsg)
+	//go app.Init(routes.UseRoutes, static.UseStatic)
+	//log.Println(<-errMsg)
+	//yolo.Test(filepath.Join("./yolo/yolov8n.onnx"), filepath.Join("./yolo/test.jpg"), filepath.Join("./yolo/res.jpg"))
+	yolo.Init(filepath.Join("./yolo/yolov8n.onnx"), filepath.Join("./yolo/test.jpg"), filepath.Join("./yolo/res.jpg"))
 }
 func simulate(errMsg chan<- error) {
 	errMsg <- ffmpeg.SimulateStreams(ffmpeg.SimulateStreamsOptions{

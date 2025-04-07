@@ -1,3 +1,4 @@
 /node_modules
 /server/.idea
 server/gocv/yolov8n.onnx
+/server
