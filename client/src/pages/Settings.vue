@@ -4,8 +4,8 @@
 
 <script setup lang="ts" name='Settings'>
   import { ref, useTemplateRef } from "vue";
-  import { useReactComponent } from "@/hooks";
-  import Config from "@/pages/layout/settings/Config.tsx";
+  import { useReactComponent } from "@/hooks/useReactComponent.tsx";
+  import Config from "@/components/Settings/Config.tsx";
 
   const key = ref(0);
   const ConfigReact = useTemplateRef("ConfigReact");

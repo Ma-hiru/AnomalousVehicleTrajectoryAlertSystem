@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, memo, useContext } from "react";
 import { Input } from "antd";
 import { NumberOutlined } from "@ant-design/icons";
-import { SettingsCtx } from "@/pages/layout/settings/ctx.ts";
+import { SettingsCtx } from "@/components/Settings/ctx.ts";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { debounce } from "lodash-es";
 
@@ -22,6 +22,8 @@ const ItemsContent: FC<props> = ({ data }) => {
     });
   };
   const newUpdater = debounce(setConfig, 500);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
   const delLine = (index: number) => {
     updater((draft) => {
       if (isArray) {
@@ -32,10 +34,6 @@ const ItemsContent: FC<props> = ({ data }) => {
       }
     });
   };
-  const newLine = () => {
-
-  };
-
   return (
     <>
       {

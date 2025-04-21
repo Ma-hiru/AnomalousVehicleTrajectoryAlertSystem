@@ -1,6 +1,7 @@
 import { useSyncExternalStore, useCallback } from "react";
+import { onMounted, onUnmounted, Ref, ref } from "vue";
 
-export const useFullScreen = (): [isfull: boolean, change: () => Promise<void>] => {
+export const useFullScreenReact = (): [isfull: boolean, change: () => Promise<void>] => {
   return [
     useSyncExternalStore(
       (listener) => {
@@ -21,4 +22,24 @@ export const useFullScreen = (): [isfull: boolean, change: () => Promise<void>] 
         }
       }, [])
   ];
+};
+export const useFullScreenVue = (): [isfull: Ref<boolean>, change: () => Promise<void>] => {
+  const isFull = ref(false);
+  const listener = () => {
+    isFull.value = !!document.fullscreenElement;
+  };
+  const change = async () => {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await document.documentElement.requestFullscreen();
+    }
+  };
+  onMounted(() => {
+    document.addEventListener("fullscreenchange", listener);
+  });
+  onUnmounted(() => {
+    document.removeEventListener("fullscreenchange", listener);
+  });
+  return [isFull, change];
 };

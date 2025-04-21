@@ -1,8 +1,8 @@
 import { FC, memo, useContext, useState } from "react";
-import ItemsMenu from "@/pages/layout/settings/ItemsMenu.tsx";
-import ItemsContent from "@/pages/layout/settings/ItemsContent.tsx";
+import ItemsMenu from "@/components/Settings/ItemsMenu.tsx";
+import ItemsContent from "@/components/Settings/ItemsContent.tsx";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { SettingsCtx } from "@/pages/layout/settings/ctx.ts";
+import { SettingsCtx } from "@/components/Settings/ctx.ts";
 
 interface props {
   data: any;

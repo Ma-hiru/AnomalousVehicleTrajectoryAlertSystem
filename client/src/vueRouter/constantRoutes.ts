@@ -4,7 +4,7 @@ const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "layout",
-    component: () => import("@/pages/layout/Layout.vue"),
+    component: () => import("@/pages/Layout.vue"),
     meta: {
       title: ""
     },
@@ -16,7 +16,7 @@ const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "实时数据"
         },
-        component: () => import("@/pages/layout/analysis/Analysis.vue")
+        component: () => import("@/pages/Analysis.vue")
       },
       {
         path: "/track",
@@ -24,7 +24,7 @@ const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "轨迹追踪"
         },
-        component: () => import("@/pages/layout/track/Track.vue")
+        component: () => import("@/pages/Track.vue")
       },
       {
         path: "/settings",
@@ -32,7 +32,7 @@ const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "设置"
         },
-        component: () => import("@/pages/layout/settings/Settings.vue")
+        component: () => import("@/pages/Settings.vue")
       }
     ]
   }

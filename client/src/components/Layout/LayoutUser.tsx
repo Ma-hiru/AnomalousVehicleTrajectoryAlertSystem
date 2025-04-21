@@ -10,16 +10,16 @@ import {
 } from "@ant-design/icons";
 import "./LayoutUser.scss";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { useFullScreen } from "@/hooks/useFullScreen.ts";
-import { useDarkMode } from "@/hooks/useDarkMode.ts";
+import { useFullScreenReact } from "@/hooks/useFullScreen.ts";
+import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
 
 interface props {
   reload: () => void;
 }
 
 const LayoutUser: FC<props> = ({ reload }) => {
-  const [isDark, changeDarkMode] = useDarkMode();
-  const [isFull, changeFullscreen] = useFullScreen();
+  const [isDark, changeDarkMode] = useDarkModeReact();
+  const [isFull, changeFullscreen] = useFullScreenReact();
   return (
     <>
       <div className="flex items-center layout-user-container"

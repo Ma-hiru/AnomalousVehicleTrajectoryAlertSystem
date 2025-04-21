@@ -6,8 +6,8 @@
 
 <script setup lang="ts" name='LayoutMenu'>
 import { useTemplateRef } from "vue";
-import TabsMenu from "@/components/react/TabsMenu.tsx";
-import { useReactComponent } from "@/hooks";
+import TabsMenu from "@/components/Layout/TabsMenu.tsx";
+import { useReactComponent } from "@/hooks/useReactComponent";
 import { useRouter } from "vue-router";
 
 

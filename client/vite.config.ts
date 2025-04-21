@@ -12,10 +12,10 @@ import { fileURLToPath } from "node:url";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig(({ command, mode }) => {
-  console.log("command=>", command);
-  console.log("mode=>", mode);
+  console.log("command", command);
+  console.log("mode", mode);
   const env = loadEnv(mode, process.cwd(), "VITE_");
-  console.log("env=>", env);
+  console.log("env",env);
   return {
     base: env.VITE_BASE,
     plugins: [

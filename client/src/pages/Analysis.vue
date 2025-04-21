@@ -10,10 +10,10 @@
 
 <script setup lang="ts" name="Home">
 import { useTemplateRef } from "vue";
-import { useReactComponent } from "@/hooks";
+import { useReactComponent } from "@/hooks/useReactComponent.tsx";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import VideoList from "@/pages/layout/analysis/VideoList.vue";
-import Charts from "@/pages/layout/analysis/Charts.tsx";
+import VideoList from "@/components/Analysis/VideoList.vue";
+import Charts from "@/components/Analysis/Charts.tsx";
 
 const ChartsContainer = useTemplateRef("ChartsContainer");
 const styles = createStyleSheet({

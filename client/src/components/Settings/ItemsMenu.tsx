@@ -13,10 +13,6 @@ const ItemsMenu: FC<props> = ({ name, currentItem, setCurrentItem, className }) 
     name.map(item =>
       ({ label: item, value: item })
     );
-  const delLine = () => {
-  };
-  const newLine = () => {
-  };
   return (
     <>
       <div style={{ overflowY: "scroll", scrollbarWidth: "none" }} className={className}>

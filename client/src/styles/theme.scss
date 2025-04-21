@@ -21,6 +21,20 @@
   --settings-segmented-trackPadding: 0.5rem;
   --settings-content-padding: 1rem;
   --settings-loadingIcon-color: #1677ff;
+  /* AntdModal */
+  --antd-modal-header-bg: #ffffff;
+  --antd-modal-content-bg: #ffffff;
+  --antd-modal-title-color: #1677ff;
+  --antd-modal-footer-bg: #ffffff;
+  /* AntdModal-Cancel */
+  --antd-modal-cancel-textColor: #0958d9;
+  /* AntdModal-Confirm */
+  --antd-modal-Confirm-defaultBg: #1677ff;
+  --antd-modal-Confirm-defaultColor: #fff;
+  --antd-modal-Confirm-defaultActiveBg: #fff;
+  --antd-modal-Confirm-defaultActiveColor: #0958d9;
+  --antd-modal-Confirm-defaultHoverBg: #ffffff;
+  --antd-modal-Confirm-defaultHoverColor: #0958d9;
 }
 
 :root.darkMode {

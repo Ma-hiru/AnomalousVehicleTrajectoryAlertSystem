@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@amap/amap-jsapi-loader':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@amap/amap-jsapi-types':
+        specifier: ^0.0.15
+        version: 0.0.15
       '@ant-design/icons':
         specifier: ^5.6.1
         version: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -176,6 +182,12 @@ importers:
         version: 2.2.8(typescript@5.8.2)
 
 packages:
+
+  '@amap/amap-jsapi-loader@1.0.1':
+    resolution: {integrity: sha512-nPyLKt7Ow/ThHLkSvn2etQlUzqxmTVgK7bIgwdBRTg2HK5668oN7xVxkaiRe3YZEzGzfV2XgH5Jmu2T73ljejw==}
+
+  '@amap/amap-jsapi-types@0.0.15':
+    resolution: {integrity: sha512-oqyRqHpVDZh5bUe2mAJh41ZsziSj0eUzwcfIbiaBNB0eiTJnZNhKsTdk77VOklOjwuwNfsblpKW9LjmWNpeQ7A==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -3636,6 +3648,10 @@ packages:
     resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
 
 snapshots:
+
+  '@amap/amap-jsapi-loader@1.0.1': {}
+
+  '@amap/amap-jsapi-types@0.0.15': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:

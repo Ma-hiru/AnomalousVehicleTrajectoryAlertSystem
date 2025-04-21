@@ -12,7 +12,7 @@
 
 <script setup lang="ts" name='VideoList'>
 import { CSSProperties } from "react";
-import Video from "@/components/vue/Video.vue";
+import Video from "@/components/Analysis/Video.vue";
 import { ref } from "vue";
 
 const props = defineProps<{

@@ -1,10 +1,10 @@
-import Content from "@/pages/layout/settings/Content.tsx";
+import Content from "@/components/Settings/Content.tsx";
 import { FC, useEffect, useState, useMemo, memo } from "react";
 import { reqGetGo2rtcConfig, reqPatchGo2rtcConfig } from "@/api/moudules/go2rtcAPI.ts";
 import { Button, ConfigProvider, Menu, MenuProps } from "antd";
 import { AlertOutlined, LoadingOutlined } from "@ant-design/icons";
 import { type Updater, useImmer } from "use-immer";
-import { SettingsCtx } from "@/pages/layout/settings/ctx.ts";
+import { SettingsCtx } from "@/components/Settings/ctx.ts";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { JsonToYaml } from "@/utils/handleYaml.ts";
 
