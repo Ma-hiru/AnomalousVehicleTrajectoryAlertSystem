@@ -1,16 +1,7 @@
 <template>
   <div
     class="w-screen h-screen bg-[var(--layout-container-bg)] grid grid-cols-1 grid-rows-[auto_1fr]">
-    <div>
-      <LayoutBar>
-        <template #tap>
-          <LayoutMenu />
-        </template>
-        <template #user>
-          <LayoutUser />
-        </template>
-      </LayoutBar>
-    </div>
+    <div ref="LayoutBarRef" />
     <LayoutCard>
       <router-view v-slot="{ Component }">
         <keep-alive>
@@ -22,10 +13,19 @@
 </template>
 
 <script setup lang="ts" name='Layout'>
-import LayoutBar from "@/components/Layout/LayoutBar.vue";
-import LayoutMenu from "@/components/Layout/LayoutMenu.vue";
-import LayoutUser from "@/components/Layout/LayoutUser.vue";
-import LayoutCard from "@/components/Layout/LayoutCard.vue";
+  import LayoutCard from "@/components/Layout/LayoutCard.vue";
+  import { useTemplateRef } from "vue";
+  import { useReactComponent } from "@/hooks/useReactComponent.tsx";
+  import LayoutBar from "@/components/Layout/LayoutBar.tsx";
+  import { useRouter } from "vue-router";
+
+  const { currentRoute, push, go } = useRouter();
+  const LayoutBarRef = useTemplateRef("LayoutBarRef");
+  useReactComponent(LayoutBar, LayoutBarRef, {
+    currentRoute: currentRoute.value.path,
+    setRoute: push,
+    reload: () => go(0)
+  });
 </script>
 
 <style scoped lang="scss"></style>
