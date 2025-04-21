@@ -1,12 +1,17 @@
-import { FC, useEffect } from "react";
-import AMapLoader from "@amap/amap-jsapi-loader";
 import "./Map.scss";
-import { MAP_SECURITY_CODE, MAP_KEY } from "@/settings.ts";
 import "@amap/amap-jsapi-types";
+import logger from "@/utils/logger.ts";
+import AMapLoader from "@amap/amap-jsapi-loader";
+import { CSSProperties, FC, useEffect } from "react";
+import { MAP_SECURITY_CODE, MAP_KEY } from "@/settings.ts";
+import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 
-type props = object;
+type props = {
+  containerStyle?: CSSProperties
+};
 
-const Map: FC<props> = () => {
+const Map: FC<props> = ({ containerStyle = styles.container }) => {
+  // 地图实例
   let map: AMap.Map;
   useEffect(() => {
     window._AMapSecurityConfig = {
@@ -23,8 +28,9 @@ const Map: FC<props> = () => {
         zoom: 11,
         center: [116.397428, 39.90923]
       });
-    }).catch((e) => {
-      console.log(e);
+    }).catch((err) => {
+      logger.Message.Error("地图加载失败！");
+      logger.Echo({ err });
     });
     return () => {
       map?.destroy();
@@ -32,8 +38,16 @@ const Map: FC<props> = () => {
   }, []);
   return (
     <>
-      <div id="Map-container"></div>
+      <div id="Map-container" style={containerStyle} />
     </>
   );
 };
 export default Map;
+const styles = createStyleSheet({
+  container: {
+    padding: 0,
+    margin: 0,
+    width: "100%",
+    height: " 500px"
+  }
+});

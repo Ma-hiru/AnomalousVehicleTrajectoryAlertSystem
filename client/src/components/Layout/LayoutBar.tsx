@@ -16,10 +16,10 @@ const LayoutBar: FC<props> = ({ currentRoute, setRoute, reload }) => {
         className="w-screen grid grid-rows-1 grid-cols-[1fr_auto_auto] items-center shadow-sm"
         style={styles.container}
       >
-        <div style={styles.title} className="select-none">
+        <div style={styles.title}>
           AnomalousVehicleTrajectoryAlertSystem
         </div>
-        <div className="h-full">
+        <div style={styles.TabsMenu}>
           <TabsMenu currentRoute={currentRoute} setRoute={setRoute} />
         </div>
         <div>
@@ -39,6 +39,11 @@ const styles = createStyleSheet({
     color: "var(--layout-bar-color)"
   },
   title: {
-    color: "var(--layout-bar-title-color)"
+    color: "var(--layout-bar-title-color)",
+    userSelect: "none"
+  },
+  TabsMenu: {
+    minWidth: "20rem",
+    height: "100%"
   }
 });
