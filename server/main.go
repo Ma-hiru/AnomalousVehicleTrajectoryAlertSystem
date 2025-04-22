@@ -25,12 +25,12 @@ func simulate(errMsg chan<- error) {
 			Threads:             "20",
 			Async:               "1",
 			Vsync:               "1",
-			Hwaccel:             "cuda",
-			HwaccelOutputFormat: "cuda",
+			Hwaccel:             "cuda", //"qsv" "cuda"
+			HwaccelOutputFormat: "cuda", //"qsv" "cuda"
 		},
 		OutputOpt: ffmpeg.SimulateOutputOption{
-			CV:            "h264_nvenc",
-			Preset:        "p6",
+			CV:            "h264_nvenc", //"h264_qsv" "h264_nvenc"
+			Preset:        "p6",         //"veryfast" "p6"
 			BV:            "1500k",
 			Maxrate:       "3000k",
 			Bufsize:       "4500k",

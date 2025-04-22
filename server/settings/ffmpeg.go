@@ -8,7 +8,7 @@ import (
 func ExtractOptions() ffmpeg.ExtractFramesOptions {
 	return ffmpeg.ExtractFramesOptions{
 		InputOpt: ffmpeg.ExtractInputOption{
-			Hwaccel:     "cuda",
+			Hwaccel:     "cuda", //"qsv" "cuda"
 			InputFormat: "mp4",
 			Loglevel:    "debug",
 			CV:          "h264",
