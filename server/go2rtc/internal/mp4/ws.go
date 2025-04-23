@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"server/ffmpeg"
+	"server/core/ffmpeg"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/streams"

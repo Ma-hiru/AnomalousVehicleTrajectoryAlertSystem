@@ -2,7 +2,7 @@ package settings
 
 import (
 	"path/filepath"
-	"server/ffmpeg"
+	"server/core/ffmpeg"
 )
 
 func ExtractOptions() ffmpeg.ExtractFramesOptions {

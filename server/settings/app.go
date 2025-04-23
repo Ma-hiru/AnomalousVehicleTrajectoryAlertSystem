@@ -2,8 +2,8 @@ package settings
 
 import (
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"path/filepath"
-	"server/model"
 	"time"
 )
 
@@ -37,10 +37,10 @@ var (
 	}
 
 	// ErrMsg 500错误信息
-	ErrMsg = model.Response{
-		Code:    500,
-		Message: "服务器错误",
-		Ok:      false,
-		Data:    nil,
+	ErrMsg = gin.H{
+		"code":    500,
+		"message": "服务器错误",
+		"ok":      false,
+		"data":    nil,
 	}
 )

@@ -39,7 +39,7 @@ import (
 	"server/go2rtc/pkg/shell"
 )
 
-func Run(errMsg chan error) {
+func Run(errMsg chan<- error) {
 	defer func() {
 		errMsg <- errors.New("go2rtc exit")
 	}()
