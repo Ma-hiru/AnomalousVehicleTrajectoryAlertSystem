@@ -1,16 +1,32 @@
 package main
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"server/controller"
 	"server/core/api"
 	"server/go2rtc"
 	"server/routes"
 	"server/settings"
 	"server/static"
+	"server/utils"
 )
 
-func APIServer() {
+func APIServer(errMsg chan<- error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var err error
+			switch v := r.(type) {
+			case string:
+				err = errors.New(v)
+			case error:
+				err = v
+			default:
+				err = fmt.Errorf("panic %v", v)
+			}
+			errMsg <- err
+		}
+	}()
 	api.InjectSettings(api.Settings{
 		DefaultPemFilePath: settings.DefaultPemFilePath,
 		ErrMsg:             settings.ErrMsg,
@@ -27,7 +43,7 @@ func StreamServer(errMsg chan<- error) {
 func main() {
 	//ctx := context.Background()
 	errMsg := make(chan error)
-	go APIServer()
+	go APIServer(errMsg)
 	go StreamServer(errMsg)
-	log.Println(<-errMsg)
+	utils.Logger().Println(<-errMsg)
 }
