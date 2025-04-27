@@ -1,7 +1,8 @@
 /// <reference types="vitest/config" />
 import vue from "@vitejs/plugin-vue";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 import { defineConfig, loadEnv } from "vite";
 import viteCompression from "vite-plugin-compression2";
 import VueDevTools from "vite-plugin-vue-devtools";
@@ -11,18 +12,18 @@ import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
 import { fileURLToPath } from "node:url";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
+
 export default defineConfig(({ command, mode }) => {
   console.log("command", command);
   console.log("mode", mode);
   const env = loadEnv(mode, process.cwd(), "VITE_");
-  console.log("env",env);
+  console.log("env", env);
   return {
     base: env.VITE_BASE,
     plugins: [
       nodePolyfills({
         include: ["buffer"]
       }),
-      tailwindcss(),
       react({
         babel: {
           plugins: [
@@ -55,7 +56,10 @@ export default defineConfig(({ command, mode }) => {
         }
       },
       postcss: {
-        plugins: []
+        plugins: [
+          tailwindcss,
+          autoprefixer
+        ]
       }
     },
     build: {

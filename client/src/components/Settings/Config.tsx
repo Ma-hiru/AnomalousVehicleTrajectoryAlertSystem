@@ -1,94 +1,94 @@
-import Content from "@/components/Settings/Content.tsx";
-import { FC, useEffect, useState, useMemo, memo } from "react";
-import { reqGetGo2rtcConfig, reqPatchGo2rtcConfig } from "@/api/moudules/go2rtcAPI.ts";
-import { Button, ConfigProvider, Menu, MenuProps } from "antd";
-import { AlertOutlined, LoadingOutlined } from "@ant-design/icons";
-import { type Updater, useImmer } from "use-immer";
-import { SettingsCtx } from "@/components/Settings/ctx.ts";
+import { FC, useEffect, memo } from "react";
+import { Button } from "antd";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { JsonToYaml } from "@/utils/handleYaml.ts";
+import { useMyState } from "@/hooks/useMyState.ts";
+import Loading from "@/components/Settings/Loading.tsx";
+import { useFetchDataReact } from "@/hooks/useFetchData.ts";
+import Logger from "@/utils/logger.ts";
+import Menu from "@/components/Settings/Menu.tsx";
+import Content from "@/components/Settings/Content.tsx";
 
 interface props {
   refresh: () => void;
 }
 
-type MenuItem = Required<MenuProps>["items"][number];
 
 const Config: FC<props> = ({ refresh }) => {
-  const [config, setConfig] = useImmer<Go2rtcConfigYaml | undefined>(undefined);
-  const [current, setCurrent] = useState("streams");
-  const menuItems: MenuItem[] | undefined = useMemo(() => config &&
-      Object.keys(config?.data).map(key => ({
-        label: key,
-        key: key,
-        icon: <AlertOutlined />
-      }))
-    , [config]);
+  const config = useMyState<Go2rtcConfigYaml | undefined>(undefined);
+  const loading = useMyState({
+    loading: false,
+    result: false
+  });
+  const { fetchData, API } = useFetchDataReact();
   useEffect(() => {
     let isMounted = true;
-    reqGetGo2rtcConfig().then((res) => {
-      if (isMounted) {
-        setConfig(res);
-        setIsReqFall(false);
+    loading.set(draft => {
+      draft.loading = true;
+    });
+    fetchData(
+      API.reqGetGo2rtcConfig,
+      [],
+      (res) => {
+        if (isMounted) {
+          config.set(res.data!);
+          loading.set(draft => {
+            draft.result = true;
+          });
+        }
+      },
+      (res) => {
+        if (isMounted) {
+          loading.set(draft => {
+            draft.result = false;
+          });
+          Logger.Message.Error(res.message);
+        }
       }
-    }).catch(() => {
-      if (isMounted) setIsReqFall(true);
+    ).finally(() => {
+      loading.set(draft => {
+        draft.loading = false;
+      });
     });
     return () => {
       isMounted = false;
     };
-  }, [setConfig]);
-  const [isReqFall, setIsReqFall] = useState(false);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API.reqGetGo2rtcConfig, fetchData]);
   const saveConfig = async () => {
-    if (config?.data) {
+    const currentConfig = config.get();
+    if (currentConfig && currentConfig.data) {
       try {
-        const yaml = JsonToYaml(config.data);
-        console.log(yaml);
-        await reqPatchGo2rtcConfig(yaml);
+        const yaml = JsonToYaml(currentConfig.data);
+        Logger.Echo({ yaml });
+        await fetchData(API.reqPatchGo2rtcConfig, [yaml]);
         refresh();
-      } catch (e) {
-        console.log(e);
+      } catch (err) {
+        //jsonToYaml error
+        Logger.Echo({ err });
+        Logger.Message.Error("保存失败！");
       }
     }
   };
+  const currentContent = useMyState<string | string[]>("");
+  const currentIndex = useMyState<string[]>([]);
+
   return (
     <>
-      <div
-        className="grid grid-rows-[minmax(0,1fr)_auto] grid-cols-1 h-full w-full"
-      >
+      <div className="grid grid-cols-1 grid-rows-[1fr_auto] h-full w-full">
         {
-          config && (
+          config.get() && (
             <>
               <div
                 className="grid grid-rows-1 grid-cols-[var(--settings-divider-ratio)] h-full w-full">
-                <ConfigProvider theme={{
-                  components: {
-                    Menu: {
-                      itemColor: "var(--settings-tabs-color)",
-                      itemSelectedColor: "var(--settings-tabs-active-color)",
-                      itemHoverColor: "var(--settings-tabs-active-color)"
-                    }
-                  }
-                }}>
-                  <Menu
-                    onClick={({ key }) => setCurrent(key)}
-                    selectedKeys={[current]}
-                    mode="vertical"
-                    items={menuItems}
-                    key={current}
-                    className="select-none"
-                  />
-                </ConfigProvider>
-                <div>
-                  <SettingsCtx.Provider value={{
-                    updater: setConfig as Updater<Go2rtcConfigYaml>,
-                    currentTabs: current,
-                    currentItem: ""
-                  }}>
-                    <Content data={config.data[current]} key={current} />
-                  </SettingsCtx.Provider>
+                <Menu config={config.get()} currentContent={currentContent}
+                      currentIndex={currentIndex} />
+                {/*内容*/}
+                <div className="pl-[--layout-card-inset-padding] pr-[--layout-card-inset-padding]">
+                  <Content currentContent={currentContent.get()} currentIndex={currentIndex.get()} config={config}/>
                 </div>
               </div>
+              {/*底部按钮*/}
               <div className="w-full flex flex-row justify-end items-center">
                 <Button variant="link" color="blue" onClick={refresh}>
                   刷新
@@ -101,14 +101,8 @@ const Config: FC<props> = ({ refresh }) => {
           )
         }
         {
-          !config &&
-          <div className="flex justify-center items-center w-full h-full">
-            {
-              isReqFall ?
-                "加载失败！请检查网络或者重新登录。" :
-                <LoadingOutlined style={styles.loadingIcon} />
-            }
-          </div>
+          !config.get() &&
+          <Loading loading={loading.get().loading} result={loading.get().result} />
         }
       </div>
     </>
@@ -117,10 +111,6 @@ const Config: FC<props> = ({ refresh }) => {
 export default memo(Config);
 
 const styles = createStyleSheet({
-  loadingIcon: {
-    fontSize: "2rem",
-    color: "var(--settings-loadingIcon-color)"
-  },
   saveBtn: {
     marginLeft: "1rem"
   }

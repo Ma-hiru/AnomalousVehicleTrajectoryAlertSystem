@@ -6,7 +6,6 @@ rtsp:
 streams:
     ffmpeg:
         - rtsp://127.0.0.1:8554/live
-        - null
     test1:
         - rtsp://127.0.0.1:123/live
         - rtsp://127.0.0.1:456/live

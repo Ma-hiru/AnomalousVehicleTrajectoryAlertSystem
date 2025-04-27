@@ -5,9 +5,11 @@ const Console = (...data: any[]) => {
   return console.log(`\x1B[31m${dayjs(new Date()).format("YY-MM-DD hh:mm:ss").toString()}\x1B[0m`, ...data);
 };
 const Echo = (data: object) => {
-  Object.keys(data).forEach((key) => {
-    Console(key, data[key as keyof typeof data]);
-  });
+  if (data) {
+    Object.keys(data).forEach((key) => {
+      Console(key, data[key as keyof typeof data]);
+    });
+  }
 };
 const Info = (data: string | MessageParams) => {
   if (typeof data === "string") ElMessage.info(data);

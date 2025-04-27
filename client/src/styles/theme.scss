@@ -11,15 +11,20 @@
   /* Analysis */
   --analysis-divider-ratio: 3fr 2fr;
   /* Settings */
-  --settings-divider-ratio: minmax(0, 1fr) 5fr;
-  --settings-tabs-color: #000;
-  --settings-tabs-active-color: #1677ff;
-  --settings-segmented-selectedBg: #f5f5f5;
-  --settings-segmented-Color: #000;
-  --settings-segmented-selectedColor: #1677ff;
-  --settings-segmented-trackBg: #fff;
-  --settings-segmented-trackPadding: 0.5rem;
-  --settings-content-padding: 1rem;
+  --settings-divider-ratio: minmax(0,1fr) 5fr;
+  --settings-menu-actived-bg: #1677ff;
+  --settings-menu-actived-color: #ffffff;
+  --settings-menu-active-bg: #f5f5f5;
+  --settings-menu-active-color: #000000;
+
+  //--settings-tabs-color: #000;
+  //--settings-tabs-active-color: #1677ff;
+  //--settings-segmented-selectedBg: #f5f5f5;
+  //--settings-segmented-Color: #000;
+  //--settings-segmented-selectedColor: #1677ff;
+  //--settings-segmented-trackBg: #fff;
+  //--settings-segmented-trackPadding: 0.5rem;
+  //--settings-content-padding: 1rem;
   --settings-loadingIcon-color: #1677ff;
   /* AntdModal */
   --antd-modal-header-bg: #ffffff;

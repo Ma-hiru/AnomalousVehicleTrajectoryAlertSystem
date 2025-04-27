@@ -5,6 +5,6 @@ type ReqResponse<T> = {
   data: T;
 }
 type Go2rtcConfigYaml = {
-  data: Record<string, Record<string, string | string[]>>;
+  data: Record<string, Record<string, string | string[]>> | null;
   content: string;
 }

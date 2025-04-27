@@ -13,6 +13,7 @@ export const fetchData = async <T extends ReqResponse<any>, P extends any[]>(
     } else {
       fail && fail(res);
     }
+    return res?.code || 201;
   } catch (err) {
     Logger.Echo({ err });
     Logger.Message.Error("请求失败，请检查网络连接！");

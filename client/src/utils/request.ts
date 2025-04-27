@@ -11,6 +11,7 @@ request.interceptors.request.use(config => {
       config.url = baseUrl + config.url;
   return config;
 });
+//TODO 权限认证、服务器错误处理
 request.interceptors.response.use(res => {
   if (res.headers.Authorization)
     localStorage.setItem("token", res.headers.Authorization);
@@ -20,3 +21,19 @@ request.interceptors.response.use(res => {
 });
 
 export default request;
+
+interface NewResponseData {
+  <T>(): ReqResponse<T | null>;
+
+  <T>(data?: T, code?: number, ok?: boolean, message?: string): ReqResponse<T>;
+}
+
+export const NewResponseData = (<T>(data?: T, code?: number, ok?: boolean, message?: string): ReqResponse<T | null> => {
+  return {
+    code: code || 0,
+    ok: ok || false,
+    message: message || "",
+    data: data || null
+  };
+}) as NewResponseData;
+

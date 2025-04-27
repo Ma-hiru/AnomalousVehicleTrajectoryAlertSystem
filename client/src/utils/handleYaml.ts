@@ -1,5 +1,6 @@
 import jsyaml from "js-yaml";
 import { omitBy } from "lodash-es";
+import Logger from "@/utils/logger.ts";
 
 export const JsonToYaml = (json: Record<string, any>) => {
   try {
@@ -23,11 +24,11 @@ export const YamlToJson = (yaml: string): Go2rtcConfigYaml => {
       data: jsyaml.load(yaml) as any,
       content: yaml
     };
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    Logger.Echo({ err });
     return {
       content: yaml,
-      data: {}
+      data: null
     };
   }
 };

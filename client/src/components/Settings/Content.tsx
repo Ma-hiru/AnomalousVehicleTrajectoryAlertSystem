@@ -1,46 +1,44 @@
-import { FC, memo, useContext, useState } from "react";
-import ItemsMenu from "@/components/Settings/ItemsMenu.tsx";
-import ItemsContent from "@/components/Settings/ItemsContent.tsx";
-import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { SettingsCtx } from "@/components/Settings/ctx.ts";
+import { FC, memo } from "react";
+import { MyState } from "@/hooks/useMyState.ts";
 
 interface props {
-  data: any;
+  currentContent: string | string[];
+  currentIndex: string[];
+  config: MyState<Go2rtcConfigYaml | undefined>;
 }
 
-const Content: FC<props> = ({ data }) => {
-  const itemsMenu = Object.keys(data);
-  const [currentItem, setCurrentItem] = useState(itemsMenu[0]);
-  const ctxData = useContext(SettingsCtx);
+const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
+  const updateConfig = (newContent: string | string[]) => {
+    config.set(draft => {
+      if (draft) {
+        if (draft) {
+          const level1 = currentIndex[0];
+          const level2 = currentIndex[1];
+          if (draft.data) {
+            draft.data[level1][level2] = newContent;
+          }
+        }
+      }
+    });
+  };
+  const render = () => {
+    if (typeof currentContent === "string") {
+      return <div>{currentContent}</div>;
+    } else if (typeof currentContent === "object") {
+      return (currentContent as string[]).map(item => {
+        return <div>{item}</div>;
+      });
+    }
+  };
   return (
     <>
-      <div className="grid grid-rows-1 grid-cols-[auto_1fr] h-full w-full">
-        <ItemsMenu
-          name={itemsMenu}
-          setCurrentItem={setCurrentItem}
-          currentItem={currentItem}
-          className="select-none"
-        />
-        <div style={styles.ItemsContent}>
-          <SettingsCtx.Provider value={{
-            ...ctxData,
-            currentItem
-          }}>
-            <ItemsContent data={data[currentItem]} key={currentItem} />
-          </SettingsCtx.Provider>
-        </div>
+      <div onClick={() => {
+        updateConfig(currentContent);
+      }}>
+        {render()}
       </div>
     </>
   );
 };
 export default memo(Content);
 
-const styles = createStyleSheet({
-  ItemsContent: {
-    padding: "var(--settings-content-padding)",
-    width: "100%",
-    height: "100%",
-    overflowY: "scroll",
-    scrollbarWidth: "none"
-  }
-});
