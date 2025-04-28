@@ -72,20 +72,33 @@ const Config: FC<props> = ({ refresh }) => {
   };
   const currentContent = useMyState<string | string[]>("");
   const currentIndex = useMyState<string[]>([]);
-
+  useEffect(() => {
+    const currentConfig = config.get();
+    if (currentIndex.get().length > 0 && currentConfig && currentConfig.data) {
+      currentContent.set(currentConfig.data[currentIndex.get()[0]][currentIndex.get()[1]]);
+    }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, currentIndex]);
   return (
     <>
-      <div className="grid grid-cols-1 grid-rows-[1fr_auto] h-full w-full">
+      <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)_auto] h-full w-full">
         {
           config.get() && (
             <>
               <div
                 className="grid grid-rows-1 grid-cols-[var(--settings-divider-ratio)] h-full w-full">
-                <Menu config={config.get()} currentContent={currentContent}
-                      currentIndex={currentIndex} />
+                <Menu
+                  config={config}
+                  currentContent={currentContent}
+                  currentIndex={currentIndex}
+                />
                 {/*内容*/}
                 <div className="pl-[--layout-card-inset-padding] pr-[--layout-card-inset-padding]">
-                  <Content currentContent={currentContent.get()} currentIndex={currentIndex.get()} config={config}/>
+                  <Content
+                    currentContent={currentContent.get()}
+                    currentIndex={currentIndex.get()}
+                    config={config}
+                  />
                 </div>
               </div>
               {/*底部按钮*/}

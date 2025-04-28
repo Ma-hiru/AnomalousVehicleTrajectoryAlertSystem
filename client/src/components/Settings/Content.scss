@@ -1,0 +1,26 @@
+#settings-content {
+  .mockup-code {
+    &:before {
+      display: none;
+    }
+
+    pre {
+      &::before {
+        width: auto;
+        margin-left: 0.5rem;
+      }
+    }
+
+    margin-top: 0;
+    padding-left: 0;
+    padding-top: 1rem;
+
+    #editableText {
+      textarea {
+        width: 1000px;
+      }
+    }
+
+
+  }
+}

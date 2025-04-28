@@ -1,9 +1,54 @@
-#menu-item:active {
-  background: var(--settings-menu-active-bg);
-  color: var(--settings-menu-active-color);
-}
+.settings-menu-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
 
-#menu-summary:active {
-  background: var(--settings-menu-active-bg);
-  color: var(--settings-menu-active-color);
+
+  #menu-item {
+    &:active {
+      background: var(--settings-menu-active-bg);
+      color: var(--settings-menu-active-color);
+    }
+    
+    .remove-item {
+      display: none;
+      transition: all 0.3s ease-in-out;
+
+      &#remove-item-actived {
+        display: none;
+      }
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+
+    &:hover .remove-item {
+      display: block;
+    }
+  }
+
+  #menu-summary {
+    &:active {
+      background: var(--settings-menu-active-bg);
+      color: var(--settings-menu-active-color);
+    }
+
+    &::after {
+      display: none;
+    }
+
+    .add-item {
+      display: none;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+
+    &:hover .add-item {
+      display: block;
+    }
+  }
 }

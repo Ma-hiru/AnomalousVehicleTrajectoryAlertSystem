@@ -1,7 +1,6 @@
 import { FC, ReactNode } from "react";
 import { Modal, Button, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme.ts";
-import { useMyState } from "@/hooks/useMyState.ts";
 
 type props = {
   open: boolean;
@@ -12,30 +11,20 @@ type props = {
 };
 
 const MyModal: FC<props> = ({ open, title, onCancel, onOk, children }) => {
-  const show = useMyState(open)
   return (
     <>
       <ConfigProvider theme={themes.MyModal}>
         <Modal
-          open={show.get()}
+          open={open}
           title={title}
-          onCancel={()=>{
-            onCancel();
-            show.set(false);
-          }}
+          onCancel={onCancel}
           footer={
             <>
               <ConfigProvider theme={themes.CancelBtn}>
-                <Button type="text" color="default" onClick={()=>{
-                  onCancel();
-                  show.set(false);
-                }}>取消</Button>
+                <Button type="text" color="default" onClick={onCancel}>取消</Button>
               </ConfigProvider>
               <ConfigProvider theme={themes.ConfirmBtn}>
-                <Button color="default" type="default" onClick={()=>{
-                  onOk();
-                  show.set(false);
-                }}>确认</Button>
+                <Button color="default" type="default" onClick={onOk}>确认</Button>
               </ConfigProvider>
             </>
           }

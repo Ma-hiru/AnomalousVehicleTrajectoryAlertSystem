@@ -17,5 +17,5 @@ var logger = gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 	//	param.Request.UserAgent(),
 	//)
 	SPrintf := color.New(color.FgMagenta, color.Bold).SprintfFunc()
-	return SPrintf("[LOG] %16dbytes | ", param.BodySize) + color.New(color.BgYellow, color.FgRed).Sprintf("%v", param.Keys) + "\n"
+	return SPrintf("[LOG] %16dbytes |", param.BodySize) + color.New(color.BgYellow, color.FgRed).Sprintf(" %v", param.Keys) + "\n"
 })

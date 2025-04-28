@@ -14,5 +14,7 @@ streams:
         - rtsp://127.0.0.1:777/live
         - rtsp://127.0.0.1:888/live
         - rtsp://127.0.0.1:999/live
+    test3:
+        - rtsp://
 webrtc:
     listen: :3002
