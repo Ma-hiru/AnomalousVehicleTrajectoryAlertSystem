@@ -6,6 +6,72 @@ type StreamPosition = {
   longitude: number;
 }
 declare namespace AMap {
+  export class ToolBar {
+    constructor(options?: any)
+  }
+
+  export class Scale {
+    constructor(options?: any)
+  }
+
+  export class Geolocation {
+    constructor(options?: any)
+  }
+
+  export class AutoComplete {
+    constructor(options?: any)
+
+    on: (eventType: string, callback: (event: {
+      type: string, poi: {
+        adcode: string;
+        address: string;
+        city: unknown[];
+        //所属区域
+        district: string;
+        //POI唯一标识
+        id: string;
+        //名称
+        name: string;
+        typecode: string;
+        //位置
+        location: {
+          KL: number;
+          className: string;
+          KT: number;
+          lat: number;
+          lng: number;
+          pos: [number, number];
+        }
+      }
+    }) => any) => void;
+    off: (eventType: string, callback: (event: {
+      type: string, poi: {
+        adcode: string;
+        address: string;
+        city: unknown[];
+        //区
+        district: string;
+        id: string;
+        name: string;
+        typecode: string;
+        location: {
+          KL: number;
+          className: string;
+          KT: number;
+          lat: number;
+          lng: number;
+          pos: [number, number];
+        }
+      }
+    }) => any) => void;
+  }
+
+  export class PlaceSearch {
+    constructor(options?: any)
+
+    search: (data: string) => any;
+  }
+
   /**此对象用于表示地图、覆盖物、叠加层上的各种鼠标事件返回，包含以下字段：
    高德的事件说明文档有问题； 不是 LngLat 类，而是一个普通对象;
    **/

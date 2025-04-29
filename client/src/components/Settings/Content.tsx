@@ -91,7 +91,7 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
         updateConfig(currentContent);
       }} id="settings-content" className="grid grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] h-full">
         <section>
-          <Typography>
+          <Typography className="select-none">
             <Typography.Title level={4} className="text-right">
             <span
               className="bg-[#1677ff] text-white text-sm pl-2 pr-2  font-bold">
@@ -119,8 +119,8 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
           }
           {currentIndex[0] !== STREAMS
             && <>
-              <Typography.Title level={4}>
-              <span className="mr-2">
+              <Typography.Title level={4} className="select-none">
+              <span className="mr-2 select-none">
                 <SettingsIcon name={currentIndex[1]} />
               </span>
                 {

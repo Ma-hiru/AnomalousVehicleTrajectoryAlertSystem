@@ -27,10 +27,11 @@ const Map: FC<props> = (
       AMapLoader.load({
         key: MAP_KEY,
         version: "2.0",
-        plugins: ["AMap.ToolBar", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar"]
+        plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar","AMap.AutoComplete"]
       }).then((AMap: typeof window.AMap) => {
         map.set(new AMap.Map("Map-container", {
           viewMode: "3D",
+          resizeEnable: true,
           zoom: 16,
           mapStyle: "amap://styles/whitesmoke"
         }));

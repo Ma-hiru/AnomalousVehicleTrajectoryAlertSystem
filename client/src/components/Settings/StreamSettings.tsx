@@ -15,7 +15,7 @@ const StreamSettings: FC<props> = ({ children }) => {
       <div className="grid grid-cols-[auto_1fr] grid-rows-1 h-full">
         <section className="flex flex-col justify-start items-start h-full ">
           <div>
-            <Typography.Title level={4}>
+            <Typography.Title level={4} className="select-none">
               <span className="mr-2">
                 <SettingsIcon name={STREAMS} />
               </span>
@@ -24,7 +24,7 @@ const StreamSettings: FC<props> = ({ children }) => {
             {children}
           </div>
           <div>
-            <Typography.Title level={4}>
+            <Typography.Title level={4} className="select-none">
               <span className="mr-2">
                 <SettingsIcon name={STREAMS} />
               </span>
