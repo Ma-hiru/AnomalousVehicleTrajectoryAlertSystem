@@ -13,5 +13,11 @@
     width: 100%;
     height: 100%;
     padding: var(--layout-card-inset-padding);
+    background: var(--layout-card-content-bg);
+
+  }
+
+  .el-card {
+    border-color: var(--layout-card-border-color);
   }
 </style>

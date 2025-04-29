@@ -141,7 +141,7 @@ const SelectMap: FC<props> = ({ position }) => {
             amap={amap}
             containerStyle={{
               width: "100%",
-              height: "90%"
+              height: "95%"
             }}
           />
         </div>

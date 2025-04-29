@@ -6,6 +6,8 @@ import { MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { ConfigProvider, Tooltip } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme.ts";
 import AddMenu from "@/components/Settings/AddMenu.tsx";
+import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
+import { STREAMS_CONF_NAME } from "@/settings";
 
 type props = {
   config: MyState<Go2rtcConfigYaml | undefined>;
@@ -13,16 +15,25 @@ type props = {
   currentIndex: MyState<string[]>;
 };
 const _ = undefined;
-const STREAMS = "streams";
-const subMenuPrefixIcon = (active: boolean, level1: string, level2: string) => {
-  if (active) return <SettingsIcon
-    name={level1 === STREAMS ? "linkWhite" : level2+"White"}
-  />;
-  else return <SettingsIcon
-    name={level1 === STREAMS ? "link" : level2}
-  />;
+const subMenuPrefixIcon = (active: boolean, level1: string, level2: string, isDark: boolean) => {
+  if (isDark) {
+    if (active) return <SettingsIcon
+      name={level1 === STREAMS_CONF_NAME ? "linkWhite" : level2 + "White"}
+    />;
+    else return <SettingsIcon
+      name={level1 === STREAMS_CONF_NAME ? "linkWhite" : level2 + "White"}
+    />;
+  } else {
+    if (active) return <SettingsIcon
+      name={level1 === STREAMS_CONF_NAME ? "linkWhite" : level2 + "White"}
+    />;
+    else return <SettingsIcon
+      name={level1 === STREAMS_CONF_NAME ? "link" : level2}
+    />;
+  }
 };
 const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
+  const [isDark] = useDarkModeReact();
   const configContent = useMemo(() => {
     if (config.get() && config.get()!.data) return config.get()!.data;
   }, [config]);
@@ -44,8 +55,8 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
           <details open onClick={(e) => {
             e.stopPropagation();
           }}>
-            <summary id="menu-summary">
-              {<SettingsIcon name={level1} />}
+            <summary id="menu-summary" style={{ color: "var(--settings-content-text-color)" }}>
+              {<SettingsIcon name={isDark ? level1 + "White" : level1} />}
               {level1}
               {level1 === "streams" &&
                 <ConfigProvider theme={theme.AddItemTooltip}>
@@ -67,7 +78,7 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
                 </ConfigProvider>
               }
             </summary>
-            <ul>{
+            <ul style={{ color: "var(--settings-content-text-color)" }}>{
               Object.keys(configContent[level1]).map(
                 (level2) => {
                   if (currentIndex.get().length === 0 && firstSet) {
@@ -95,9 +106,9 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
                           color: "var(--settings-menu-actived-color)"
                         } : undefined}
                       >
-                        {subMenuPrefixIcon(active, level1,level2)}
+                        {subMenuPrefixIcon(active, level1, level2, isDark)}
                         <span>{level2}</span>
-                        {level1 === STREAMS &&
+                        {level1 === STREAMS_CONF_NAME &&
                           <ConfigProvider theme={theme.RemoveItemTooltip}>
                             <Tooltip
                               title={"删除视频流" + level2}
@@ -124,12 +135,12 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
         </li>
       );
     }
-  }, [configContent, currentContent, currentIndex, openAddItemModal, removeItem]);
+  }, [configContent, currentContent, currentIndex, isDark, openAddItemModal, removeItem]);
 
   return (
     <>
       <div className="settings-menu-container">
-        <ul className="menu menu-xs bg-white rounded-lg  max-w-xs w-full min-w-36">
+        <ul className="menu menu-xs bg-transparent rounded-lg  max-w-xs w-full min-w-36">
           {MenuTree}
         </ul>
       </div>

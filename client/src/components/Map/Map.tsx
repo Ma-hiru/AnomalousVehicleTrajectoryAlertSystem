@@ -1,10 +1,11 @@
 import "@amap/amap-jsapi-types";
 import logger from "@/utils/logger.ts";
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { CSSProperties, FC, useEffect } from "react";
-import { MAP_SECURITY_CODE, MAP_KEY } from "@/settings.ts";
+import { CSSProperties, FC, memo, useEffect } from "react";
+import { MAP_SECURITY_CODE, MAP_KEY, MAP_THEME_DARK, MAP_THEME_Light } from "@/settings";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { MyState } from "@/hooks/useMyState.ts";
+import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
 
 
 type props = {
@@ -19,6 +20,7 @@ const Map: FC<props> = (
     map,
     amap
   }) => {
+  const [isDark] = useDarkModeReact();
   useEffect(() => {
     if (map.get() === null) {
       window._AMapSecurityConfig = {
@@ -27,13 +29,13 @@ const Map: FC<props> = (
       AMapLoader.load({
         key: MAP_KEY,
         version: "2.0",
-        plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar","AMap.AutoComplete"]
+        plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar", "AMap.AutoComplete"]
       }).then((AMap: typeof window.AMap) => {
         map.set(new AMap.Map("Map-container", {
           viewMode: "3D",
           resizeEnable: true,
           zoom: 16,
-          mapStyle: "amap://styles/whitesmoke"
+          mapStyle: isDark ? MAP_THEME_DARK : MAP_THEME_Light
         }));
         amap.set(AMap);
       }).catch((err) => {
@@ -44,14 +46,22 @@ const Map: FC<props> = (
         map.get()?.destroy();
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amap, map]);
+  useEffect(() => {
+    const currentMap = map.get();
+    if (currentMap) {
+      isDark && currentMap.setMapStyle(MAP_THEME_DARK);
+      !isDark && currentMap.setMapStyle(MAP_THEME_Light);
+    }
+  }, [isDark, map]);
   return (
     <>
       <div id="Map-container" style={containerStyle} />
     </>
   );
 };
-export default Map;
+export default memo(Map);
 const styles = createStyleSheet({
   container: {
     padding: 0,

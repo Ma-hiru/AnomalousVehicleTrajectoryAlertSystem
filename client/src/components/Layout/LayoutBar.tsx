@@ -36,7 +36,9 @@ const styles = createStyleSheet({
     paddingRight: "calc(var(--spacing) * 4)",
     paddingLeft: "calc(var(--spacing) * 4)",
     backgroundColor: " var(--layout-bar-bg)",
-    color: "var(--layout-bar-color)"
+    color: "var(--layout-bar-color)",
+    borderBottom: "1px solid var(--layout-bar-border-color)",
+    overflow: "hidden"
   },
   title: {
     color: "var(--layout-bar-title-color)",

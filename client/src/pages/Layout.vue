@@ -4,9 +4,11 @@
     <div ref="LayoutBarRef" />
     <LayoutCard>
       <router-view v-slot="{ Component }">
-        <keep-alive>
-          <component :is="Component" />
-        </keep-alive>
+        <transition>
+          <keep-alive>
+            <component :is="Component" />
+          </keep-alive>
+        </transition>
       </router-view>
     </LayoutCard>
   </div>
@@ -28,4 +30,24 @@
   });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+  .v-enter-active {
+    transition: all 0.5s ease-in-out;
+  }
+
+  .v-leave-active {
+    transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+  }
+
+  .v-enter-from,
+  .v-leave-to {
+    opacity: 0;
+    transform: translateX(5rem);
+  }
+
+  .v-enter-to,
+  .v-leave-form {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+</style>

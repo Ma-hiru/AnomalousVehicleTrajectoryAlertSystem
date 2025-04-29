@@ -2,22 +2,31 @@
   /* layout */
   --layout-container-bg: #f5f5f5;
   --layout-bar-bg: #ffffff;
+  --layout-bar-border-color: transparent;
   --layout-bar-height: 2.9rem;
   --layout-bar-color: #000000;
   --layout-bar-title-color: #1677ff;
   --layout-bar-menu-active-color: #1677ff;
+  --layout-bar-btn-tooltip-bgColor: #ffffff;
+  --layout-bar-btn-tooltip-textColor: #1677ff;
   --layout-content-padding: 1.5rem;
   --layout-card-inset-padding: 1rem;
+  --layout-card-border-color: #ffffff;
+  --layout-card-content-bg: #ffffff;
+  --layout-card-content-height-calc: calc(100vh - var(--layout-bar-height) - 2 * var(--layout-content-padding) - 2 * var(--layout-card-inset-padding));
+  --layout-card-content-width-calc: calc(100vw - 2 * var(--layout-content-padding) - 2 * var(--layout-card-inset-padding));
+  --layout-card-height-calc: calc(100vh - var(--layout-bar-height) - 2 * var(--layout-content-padding));
+  --layout-card-width-calc: calc(100vw - 2 * var(--layout-content-padding));
   /* Analysis */
   --analysis-divider-ratio: 3fr 2fr;
   /* Settings */
-  --settings-divider-ratio: minmax(0,1fr) 5fr;
+  --settings-divider-ratio: minmax(0, 1fr) 5fr;
   --settings-menu-actived-bg: #1677ff;
   --settings-menu-actived-color: #ffffff;
   --settings-menu-active-bg: #f5f5f5;
   --settings-menu-active-color: #000000;
   --settings-content-title-divider: #999999;
-  --settings-content-content-divider: rgba(5,5,5,0.15);
+  --settings-content-content-divider: rgba(5, 5, 5, 0.15);
   --settings-content-removeItem-tooltip: #fff;
   --settings-content-removeItem-tooltip-color: red;
   --settings-content-addItem-tooltip: #fff;
@@ -51,15 +60,62 @@
 
 :root.darkMode {
   /* layout */
-  --layout-container-bg: #333;
-  --layout-bar-bg: #ffffff;
+  --layout-container-bg: #1f1f1f;
+  --layout-bar-bg: #1f1f1f;
+  --layout-bar-border-color: #999999;
   --layout-bar-height: 2.9rem;
-  --layout-bar-color: #000000;
-  --layout-bar-title-color: #1677ff;
-  --layout-bar-menu-active-color: #1677ff;
+  --layout-bar-color: #ffffff;
+  --layout-bar-title-color: #1890ff;
+  --layout-bar-menu-active-color: #1890ff;
+  --layout-bar-btn-tooltip-bgColor: #262626;
+  --layout-bar-btn-tooltip-textColor: #1890ff;
   --layout-content-padding: 1.5rem;
+  --layout-card-border-color: #999999;
   --layout-card-inset-padding: 1rem;
+  --layout-card-content-bg: #434343;
+  --layout-card-content-height-calc: calc(100vh - var(--layout-bar-height) - 2 * var(--layout-content-padding) - 2 * var(--layout-card-inset-padding));
+  --layout-card-content-width-calc: calc(100vw - 2 * var(--layout-content-padding) - 2 * var(--layout-card-inset-padding));
+  --layout-card-height-calc: calc(100vh - var(--layout-bar-height) - 2 * var(--layout-content-padding));
+  --layout-card-width-calc: calc(100vw - 2 * var(--layout-content-padding));
   /* Analysis */
-  --analysis-divider-ratio: 3fr 2fr
+  --analysis-divider-ratio: 3fr 2fr;
+  /* Settings */
+  --settings-divider-ratio: minmax(0, 1fr) 5fr;
+  --settings-menu-actived-bg: #1890ff;
+  --settings-menu-actived-color: #ffffff;
+  --settings-menu-active-bg: #333333;
+  --settings-menu-active-color: #ffffff;
+  --settings-content-title-divider: #999999;
+  --settings-content-text-color: #ffffff;
+  --settings-content-content-divider: rgba(255, 255, 255, 0.3);
+  --settings-content-removeItem-tooltip: #fff;
+  --settings-content-removeItem-tooltip-color: red;
+  --settings-content-addItem-tooltip: #fff;
+  --settings-content-addItem-tooltip-color: #1890ff;
+  --settings-content-item-editIcon-color: #1890ff;
+
+  //--settings-tabs-color: #000;
+  //--settings-tabs-active-color: #1890ff;
+  //--settings-segmented-selectedBg: #f5f5f5;
+  //--settings-segmented-Color: #000;
+  //--settings-segmented-selectedColor: #1890ff;
+  //--settings-segmented-trackBg: #fff;
+  //--settings-segmented-trackPadding: 0.5rem;
+  //--settings-content-padding: 1rem;
+  --settings-loadingIcon-color: #1890ff;
+  /* AntdModal */
+  --antd-modal-header-bg: #141414;
+  --antd-modal-content-bg: #141414;
+  --antd-modal-title-color: #1890ff;
+  --antd-modal-footer-bg: #141414;
+  /* AntdModal-Cancel */
+  --antd-modal-cancel-textColor: #0958d9;
+  /* AntdModal-Confirm */
+  --antd-modal-Confirm-defaultBg: #1890ff;
+  --antd-modal-Confirm-defaultColor: #fff;
+  --antd-modal-Confirm-defaultActiveBg: #fff;
+  --antd-modal-Confirm-defaultActiveColor: #0958d9;
+  --antd-modal-Confirm-defaultHoverBg: #ffffff;
+  --antd-modal-Confirm-defaultHoverColor: #0958d9;
 
 }

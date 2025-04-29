@@ -3,6 +3,7 @@ import MyModal from "@/components/MyModal.tsx";
 import { Input, Space } from "antd";
 import { MyState, useMyState } from "@/hooks/useMyState.ts";
 import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
+import { STREAMS_CONF_NAME } from "@/settings.ts";
 
 type props = {
   openAddItemModal: MyState<boolean>;
@@ -10,7 +11,7 @@ type props = {
   currentContent: MyState<string | string[]>;
   currentIndex: MyState<string[]>;
 };
-const STREAMS = "streams";
+
 const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
   const stream = useMyState({
     name: "",
@@ -19,8 +20,8 @@ const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
   const addItem = () => {
     const currentConfig = config.get();
     if (currentConfig && currentConfig.data) {
-      if (typeof currentConfig.data[STREAMS] === "object") {
-        currentConfig.data[STREAMS][stream.get().name] = [stream.get().stream];
+      if (typeof currentConfig.data[STREAMS_CONF_NAME] === "object") {
+        currentConfig.data[STREAMS_CONF_NAME][stream.get().name] = [stream.get().stream];
         config.set(currentConfig);
       }
     }

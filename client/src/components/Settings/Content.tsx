@@ -1,4 +1,4 @@
-import { FC, memo, useEffect } from "react";
+import { FC, memo } from "react";
 import { MyState } from "@/hooks/useMyState.ts";
 import { Typography, Divider, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme.ts";
@@ -6,6 +6,7 @@ import "./Content.scss";
 import { FormOutlined } from "@ant-design/icons";
 import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
 import StreamSettings from "@/components/Settings/StreamSettings.tsx";
+import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
 
 interface props {
   currentContent: string | string[];
@@ -34,7 +35,11 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
        <code>
           <ConfigProvider theme={theme.EditItemTooltip}>
             <Typography.Paragraph
-              style={{ display: "inline-block", minWidth: "15rem" }}
+              style={{
+                display: "inline-block",
+                minWidth: "15rem",
+                color: "var(--settings-content-text-color)"
+              }}
               editable={{
                 icon: <FormOutlined style={{
                   color: "var(--settings-content-item-editIcon-color)",
@@ -51,13 +56,15 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
       </pre>;
     } else if (typeof currentContent === "object") {
       return (currentContent as string[]).map((item, index) => {
-        return <pre data-prefix={index + 1} key={index + item}>
+        return <pre data-prefix={index + 1} key={index + item}
+                    style={{ color: "var(--settings-content-text-color)" }}>
           <code>
             <ConfigProvider theme={theme.EditItemTooltip}>
              <Typography.Paragraph
                style={{
                  display: "inline-block",
-                 minWidth: "15rem"
+                 minWidth: "15rem",
+                 color: "var(--settings-content-text-color)"
                }}
                editable={{
                  icon: <FormOutlined
@@ -82,17 +89,17 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
       });
     }
   };
-  useEffect(() => {
-
-  }, []);
+  const [isDark] = useDarkModeReact();
   return (
     <>
       <div onClick={() => {
         updateConfig(currentContent);
-      }} id="settings-content" className="grid grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] h-full">
+      }} id="settings-content"
+           className="grid grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] h-full ">
         <section>
           <Typography className="select-none">
-            <Typography.Title level={4} className="text-right">
+            <Typography.Title level={4} className="text-right"
+                              style={{ color: "var(--settings-content-text-color)" }}>
             <span
               className="bg-[#1677ff] text-white text-sm pl-2 pr-2  font-bold">
               {currentIndex[0]}
@@ -119,17 +126,21 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
           }
           {currentIndex[0] !== STREAMS
             && <>
-              <Typography.Title level={4} className="select-none">
-              <span className="mr-2 select-none">
-                <SettingsIcon name={currentIndex[1]} />
-              </span>
+              <Typography.Title
+                level={4} className="select-none"
+                style={{ color: "var(--settings-content-text-color)" }}
+              >
+                <span className="mr-2 select-none">
+                  <SettingsIcon name={isDark ? currentIndex[1] + "White" : currentIndex[1]} />
+                </span>
                 {
                   currentIndex[1] === "listen"
                     ? "监听地址"
                     : "跨域访问地址"
                 }
               </Typography.Title>
-              <div className="mockup-code bg-transparent text-black">
+              <div className="mockup-code bg-transparent text-black"
+                   style={{ color: "var(--settings-content-text-color)" }}>
                 {render()}
               </div>
             </>

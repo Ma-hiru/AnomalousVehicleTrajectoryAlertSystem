@@ -4,10 +4,10 @@
 
 <script setup lang="ts" name='Track'>
   import { useReactComponent } from "@/hooks/useReactComponent.tsx";
-  import Map from "@/components/Map/Map.tsx";
   import { useTemplateRef } from "vue";
+  import TrackMap from "@/components/Map/TrackMap.tsx";
   const MapRef = useTemplateRef("MapRef");
-  useReactComponent(Map, MapRef);
+  useReactComponent(TrackMap, MapRef);
 </script>
 
 <style scoped lang="scss">
