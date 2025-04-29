@@ -33,12 +33,12 @@ const StreamSettings: FC<props> = ({ children }) => {
             <div className="mockup-code bg-transparent text-black">
             <pre data-prefix={1}>
               <code>
-                <span>经度：90.00</span>
+                <span>经度：{StreamPosition.get().longitude}</span>
               </code>
             </pre>
               <pre data-prefix={2}>
               <code>
-                <span>纬度：90.00</span>
+                <span>纬度：{StreamPosition.get().latitude}</span>
               </code>
             </pre>
             </div>

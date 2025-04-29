@@ -1,6 +1,8 @@
 type StreamPosition = {
   name: string;
+  /** 纬度 */
   latitude: number;
+  /** 经度 */
   longitude: number;
 }
 declare namespace AMap {
@@ -9,10 +11,23 @@ declare namespace AMap {
    **/
   export class MapsEvent {
     /** 发生事件时光标所在处的经纬度坐标 **/
-    public lnglat: { lng: number; lat: number, pos: [number, number], KL: number, kT: number };
+    public lnglat: {
+      /** 点击位置的经度 */
+      lng: number;
+      /** 点击位置的纬度 */
+      lat: number;
+      pos: [number, number];
+      KL: number;
+      kT: number
+    };
 
     /** 发生事件时光标所在处的像素坐标 **/
-    public pixel: { x: number; y: number };
+    public pixel: {
+      /** 相对于地图容器左上角的横向像素坐标 */
+      x: number;
+      /** 相对于地图容器左上角的纵向像素坐标 */
+      y: number;
+    };
 
     /** 事件类型。 **/
     public type: EventType;
