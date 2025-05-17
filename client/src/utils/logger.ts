@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import { ElMessage, MessageParams } from "element-plus";
+import { ElLoading, ElMessage, MessageParams } from "element-plus";
 
 const Console = (...data: any[]) => {
-  return console.log(`\x1B[31m${dayjs(new Date()).format("YY-MM-DD hh:mm:ss").toString()}\x1B[0m`, ...data);
+  return console.log(`\x1B[31m${dayjs(new Date()).format("hh:mm:ss").toString()}\x1B[0m`, ...data);
 };
 const Echo = (data: object) => {
   if (data) {
@@ -35,10 +35,13 @@ const Error = (data: string | MessageParams) => {
     ...data
   } as MessageParams);
 };
-
+const Loading = (options: Parameters<typeof ElLoading["service"]>[0]) => {
+  return ElLoading.service(options);
+};
 const Logger = {
   Console,
   Echo,
+  Loading,
   Message: {
     Info,
     Success,

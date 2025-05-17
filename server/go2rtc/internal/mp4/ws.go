@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"server/core/ffmpeg"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
@@ -11,6 +13,7 @@ import (
 	"server/go2rtc/pkg/core"
 	"server/go2rtc/pkg/mp4"
 	"server/settings"
+	"strconv"
 )
 
 func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
@@ -42,13 +45,32 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 		defer func(pr *io.PipeReader) {
 			_ = pr.Close()
 		}(pr)
-		if _, err := ffmpeg.ExtractVideoFrames(pr, settings.ExtractOptions()); err != nil {
+
+		// 设置抽帧配置，确保ImageFormat为jpg
+		options := settings.ExtractOptions()
+		options.OutputOpt.ImageFormat = "jpg"
+
+		if imgFrame, err := ffmpeg.ExtractVideoFramesWithStream(pr, options); err != nil {
 			log.Error().Err(err).Msg("抽帧失败")
+		} else {
+			fmt.Println("开始处理视频帧")
+			var index = 0
+			for img := range imgFrame {
+				fmt.Println(img.Index, img.Timestamp)
+				file, _ := os.Create(filepath.Join("./frames",
+					strconv.Itoa(index)+strconv.FormatInt(img.Index, 10)+
+						"-"+strconv.FormatFloat(img.Timestamp, 'f', 6, 64)+".jpg"))
+				_, _ = file.Write(img.Data)
+				index++
+			}
+			fmt.Println("视频帧处理结束")
 		}
 	}()
+
 	go func() {
 		_, _ = cons.WriteTo(tr.MultiWriter(pw))
 	}()
+
 	tr.OnClose(func() {
 		stream.RemoveConsumer(cons)
 		_ = pw.Close()

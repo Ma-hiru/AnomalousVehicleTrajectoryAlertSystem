@@ -66,10 +66,10 @@ type SPS struct {
 	chroma_sample_loc_type_top_field    uint32
 	chroma_sample_loc_type_bottom_field uint32
 
-	timing_info_present_flag byte
-	num_units_in_tick        uint32
-	time_scale               uint32
-	fixed_frame_rate_flag    byte
+	Timing_info_present_flag byte
+	Num_units_in_tick        uint32
+	Time_scale               uint32
+	Fixed_frame_rate_flag    byte
 }
 
 func (s *SPS) Width() uint16 {
@@ -203,11 +203,11 @@ func DecodeSPS(sps []byte) *SPS {
 			s.chroma_sample_loc_type_bottom_field = r.ReadUEGolomb()
 		}
 
-		s.timing_info_present_flag = r.ReadBit()
-		if s.timing_info_present_flag != 0 {
-			s.num_units_in_tick = r.ReadUint32()
-			s.time_scale = r.ReadUint32()
-			s.fixed_frame_rate_flag = r.ReadBit()
+		s.Timing_info_present_flag = r.ReadBit()
+		if s.Timing_info_present_flag != 0 {
+			s.Num_units_in_tick = r.ReadUint32()
+			s.Time_scale = r.ReadUint32()
+			s.Fixed_frame_rate_flag = r.ReadBit()
 		}
 		//...
 	}

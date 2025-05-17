@@ -1,5 +1,5 @@
 import request from "@/utils/request.ts";
-import { API } from "@/settings.ts";
+import AppSettings from "@/settings";
 
 
-export const reqLogin = (loginParams: LoginParams): Promise<ReqResponse<LoginResponseData>> => request.post(API.LoginUrl, loginParams);
+export const reqLogin = (loginParams: LoginParams): Promise<ReqResponse<LoginResponseData>> => request.post(AppSettings.API.LoginUrl, loginParams);

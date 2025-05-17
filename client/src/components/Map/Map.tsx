@@ -2,10 +2,10 @@ import "@amap/amap-jsapi-types";
 import logger from "@/utils/logger.ts";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { CSSProperties, FC, memo, useEffect } from "react";
-import { MAP_SECURITY_CODE, MAP_KEY, MAP_THEME_DARK, MAP_THEME_Light } from "@/settings";
 import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { MyState } from "@/hooks/useMyState.ts";
 import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
+import AppSettings from "@/settings";
 
 
 type props = {
@@ -24,10 +24,10 @@ const Map: FC<props> = (
   useEffect(() => {
     if (map.get() === null) {
       window._AMapSecurityConfig = {
-        securityJsCode: MAP_SECURITY_CODE
+        securityJsCode: AppSettings.MAP_SECURITY_CODE
       };
       AMapLoader.load({
-        key: MAP_KEY,
+        key: AppSettings.MAP_KEY,
         version: "2.0",
         plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar", "AMap.AutoComplete"]
       }).then((AMap: typeof window.AMap) => {
@@ -35,7 +35,7 @@ const Map: FC<props> = (
           viewMode: "3D",
           resizeEnable: true,
           zoom: 16,
-          mapStyle: isDark ? MAP_THEME_DARK : MAP_THEME_Light
+          mapStyle: isDark ? AppSettings.MAP_THEME_DARK : AppSettings.MAP_THEME_Light
         }));
         amap.set(AMap);
       }).catch((err) => {
@@ -51,8 +51,8 @@ const Map: FC<props> = (
   useEffect(() => {
     const currentMap = map.get();
     if (currentMap) {
-      isDark && currentMap.setMapStyle(MAP_THEME_DARK);
-      !isDark && currentMap.setMapStyle(MAP_THEME_Light);
+      isDark && currentMap.setMapStyle(AppSettings.MAP_THEME_DARK);
+      !isDark && currentMap.setMapStyle(AppSettings.MAP_THEME_Light);
     }
   }, [isDark, map]);
   return (

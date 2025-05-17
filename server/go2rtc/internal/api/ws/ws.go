@@ -239,6 +239,8 @@ func (t *Transport) WithContext(f func(ctx map[any]any)) {
 func (t *Transport) Writer() io.Writer {
 	return &writer{t: t}
 }
+
+// MultiWriter - Writer修改版 同时写入自定义管道
 func (t *Transport) MultiWriter(pipeWriter *io.PipeWriter) io.Writer {
 	t.pipeWriter = pipeWriter
 	return &writer{t: t}

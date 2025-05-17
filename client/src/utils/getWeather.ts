@@ -1,6 +1,6 @@
 import { getLocation } from "@/utils/getLocation";
 import axios from "axios";
-import { WEATHER_KEY } from "@/settings.ts";
+import { WEATHER_KEY } from "@/settings/settings.ts";
 
 
 const enum API {

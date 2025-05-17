@@ -2,16 +2,15 @@
   <div ref="ConfigReact" class="w-full h-full" />
 </template>
 
-<script setup lang="ts" name='Settings'>
+<script setup lang="ts" name="Settings">
   import { onMounted, ref, useTemplateRef } from "vue";
   import { useReactComponent } from "@/hooks/useReactComponent.tsx";
-  import Config from "@/components/Settings/Config.tsx";
+  import SettingsLayout from "@/components/Settings/SettingsLayout.tsx";
 
   const key = ref(0);
   const ConfigReact = useTemplateRef("ConfigReact");
   onMounted(() => {
-    console.log(12);
-    useReactComponent(Config, ConfigReact, {
+    useReactComponent(SettingsLayout, ConfigReact, {
       refresh: () => key.value++
     }, key);
   });

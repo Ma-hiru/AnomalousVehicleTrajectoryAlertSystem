@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"server/controller"
 	"server/core/api"
 	"server/go2rtc"
 	"server/routes"
@@ -36,7 +37,7 @@ func APIServer(errMsg chan<- error) {
 	api.Init(routes.UseRoutes, static.UseStatic)
 }
 func StreamServer(errMsg chan<- error) {
-	//go controller.SimulateStream(errMsg)
+	go controller.SimulateStream(errMsg)
 	go2rtc.Run(errMsg)
 }
 func main() {

@@ -4,7 +4,7 @@ import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
 import SelectMap from "@/components/Map/SelectMap.tsx";
 import { useMyState } from "@/hooks/useMyState.ts";
 import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
-import { STREAMS_CONF_NAME } from "@/settings.ts";
+import AppSettings from "@/settings";
 
 type props = {
   children?: ReactNode;
@@ -16,12 +16,13 @@ const StreamSettings: FC<props> = ({ children }) => {
   return (
     <>
       <div className="grid grid-cols-[auto_1fr] grid-rows-1 h-full">
-        <section className="flex flex-col justify-start items-start h-full " >
+        <section className="flex flex-col justify-start items-start h-full ">
           <div>
             <Typography.Title level={4} className="select-none"
                               style={{ color: "var(--settings-content-text-color)" }}>
               <span className="mr-2">
-                <SettingsIcon name={isDark ? STREAMS_CONF_NAME + "White" : STREAMS_CONF_NAME} />
+                <SettingsIcon
+                  name={isDark ? AppSettings.STREAMS_CONF_NAME + "White" : AppSettings.STREAMS_CONF_NAME} />
               </span>
               视频流地址
             </Typography.Title>
@@ -31,7 +32,8 @@ const StreamSettings: FC<props> = ({ children }) => {
             <Typography.Title level={4} className="select-none"
                               style={{ color: "var(--settings-content-text-color)" }}>
               <span className="mr-2">
-                <SettingsIcon name={isDark ? STREAMS_CONF_NAME + "White" : STREAMS_CONF_NAME} />
+                <SettingsIcon
+                  name={isDark ? AppSettings.STREAMS_CONF_NAME + "White" : AppSettings.STREAMS_CONF_NAME} />
               </span>
               视频源位置
             </Typography.Title>

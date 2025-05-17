@@ -2,16 +2,20 @@ package webrtc
 
 import (
 	"errors"
-	"strings"
-
-	pion "github.com/pion/webrtc/v3"
-	"github.com/rs/zerolog"
+	"fmt"
+	"io"
+	"os"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/app"
 	"server/go2rtc/internal/streams"
 	"server/go2rtc/pkg/core"
 	"server/go2rtc/pkg/webrtc"
+	"server/stream_consumer"
+	"strings"
+
+	pion "github.com/pion/webrtc/v3"
+	"github.com/rs/zerolog"
 )
 
 func Init() {
@@ -181,6 +185,49 @@ func asyncHandler(tr *ws.Transport, msg *ws.Message) (err error) {
 
 	switch mode {
 	case core.ModePassiveConsumer:
+		videoProcessor := func(reader *io.PipeReader, metadata *stream_consumer.VideoMetadata, streamInfo map[string]any) {
+			defer reader.Close()
+			fmt.Println("流名称", streamInfo["name"].(string))
+			buf := make([]byte, 65536)
+			file, err := os.OpenFile(
+				"./frames/test.mp4",
+				os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+				0644,
+			)
+			defer file.Close()
+			if err != nil {
+				fmt.Println("err")
+				return
+			}
+			for {
+				// 读取视频帧
+				n, err := reader.Read(buf)
+				if err != nil {
+					if !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrClosedPipe) {
+						fmt.Println("读取视频数据错误")
+					} else {
+						fmt.Println("视频流结束")
+					}
+					break
+				}
+				_, err = file.Write(buf[:n])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+			fmt.Println("退出")
+		}
+		myConsumer := stream_consumer.NewStreamConsumer(&stream_consumer.StreamConsumerOptions{
+			StreamName:     query.Get("src"),
+			FormatName:     "video_processor",
+			VideoProcessFn: videoProcessor,
+		})
+		if err := stream.AddConsumer(myConsumer); err != nil {
+			fmt.Println("添加视频消费者失败")
+		} else {
+			fmt.Println("成功添加视频消费者")
+		}
 		// 2. AddConsumer, so we get new tracks
 		if err = stream.AddConsumer(conn); err != nil {
 			log.Debug().Err(err).Msg("[webrtc] add consumer")

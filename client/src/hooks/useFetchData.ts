@@ -5,6 +5,6 @@ import { useMemo } from "react";
 export const useFetchDataReact = () => {
   return useMemo(() => ({ fetchData, API }), []);
 };
-export const useFetchDataVue = () => {
+export const fetchDataVue = () => {
   return { fetchData, API };
 };

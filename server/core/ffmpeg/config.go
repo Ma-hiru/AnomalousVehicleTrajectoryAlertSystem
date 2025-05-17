@@ -39,6 +39,13 @@ type (
 	}
 )
 
+// FrameData 存储视频帧及其时间戳
+type FrameData struct {
+	Data      []byte  // 图片二进制数据
+	Timestamp float64 // 帧的时间戳（秒）
+	Index     int64   // 帧序号
+}
+
 type (
 	ExtractInputOption struct {
 		StreamLoop  int    // 循环次数（-1为无限循环）

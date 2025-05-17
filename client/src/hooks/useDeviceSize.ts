@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from "vue";
-import { screensConfig } from "@/settings";
+import { screensConfig } from "@/settings/settings.ts";
 import { useSyncExternalStore } from "react";
 
 export function useDeviceSizeVue(size: keyof typeof screensConfig, mode: "min" | "max") {
