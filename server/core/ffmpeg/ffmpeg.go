@@ -269,7 +269,7 @@ func (f *FFmpeg) readIMG(imgReader *io.PipeReader, frameChannel chan FrameData) 
 			break
 		}
 		imgBuffer.Write(buffer[:n])
-		// 注意：这里假设输出图像格式为JPEG，根据实际情况可能需要调整
+		// 假设输出图像格式为JPEG
 		data := imgBuffer.Bytes()
 		if len(data) > 2 && data[0] == 0xFF && data[1] == 0xD8 {
 			imgStart = true
@@ -279,7 +279,7 @@ func (f *FFmpeg) readIMG(imgReader *io.PipeReader, frameChannel chan FrameData) 
 			for i := 0; i < len(data)-1; i++ {
 				if data[i] == 0xFF && data[i+1] == 0xD9 {
 					// 找到完整图像，从frameDataChan读取对应的时间戳信息
-					// 注意：这里简化处理，可能需要更精确的帧与时间戳匹配逻辑
+					// 简化处理，可能需要更精确的帧与时间戳匹配逻辑
 					select {
 					case frameData, ok := <-f.frameDataChan:
 						if !ok {

@@ -1,6 +1,5 @@
 /** 基本URL */
 export const baseUrl = import.meta.env.VITE_URL;
-export const baseWS = import.meta.env.VITE_WS;
 export const MAP_SECURITY_CODE = import.meta.env.VITE_MAP_SECURITY_CODE;
 export const MAP_KEY = import.meta.env.VITE_MAP_KEY;
 export const WEATHER_KEY = import.meta.env.VITE_WEATHER_KEY;
@@ -19,7 +18,14 @@ export enum tokenTypePrefix {
 export const tokenPrefix = tokenTypePrefix.Bearer;
 
 export enum API {
-  LoginUrl = "/api/gin/user/login",
-  Go2rtcConfig = "/api/gin/config",
-  Go2rtcStreams = "/api/gin/streams",
+  Go2rtcConfig = "/api/go2rtc/config",
+  Go2rtcStreams = "/api/go2rtc/streams",
 }
+
+export const GetStreamURL = (name: string) => {
+  const url = baseUrl.replace("http", "ws").replace("https", "wss");
+  return {
+    stream: `${url}/api/go2rtc/ws?src=${name}`,
+    frame: `${url}/api/gin/frames?name=${name}`
+  } as const;
+};

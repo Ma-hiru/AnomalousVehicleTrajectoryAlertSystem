@@ -1,6 +1,6 @@
 import { getLocation } from "@/utils/getLocation";
 import axios from "axios";
-import { WEATHER_KEY } from "@/settings/settings.ts";
+import AppSettings from "@/settings";
 
 
 const enum API {
@@ -11,7 +11,7 @@ const enum API {
 const getLocalWeatherData = async (city: string): Promise<WeatherType> => {
   const res = await axios.get(`${API.LOCAL_WEATHER}?location=${city}&lang=zh&unit=m`, {
     headers: {
-      "X-QW-Api-Key": WEATHER_KEY
+      "X-QW-Api-Key": AppSettings.WEATHER_KEY
     }
   });
   return res.data;
@@ -19,7 +19,7 @@ const getLocalWeatherData = async (city: string): Promise<WeatherType> => {
 const getCityLocation = async (city: string = "北京"): Promise<CityType> => {
   const res = await axios.get(`${API.LOCAL_CITY}?location=${city}`, {
     headers: {
-      "X-QW-Api-Key": WEATHER_KEY
+      "X-QW-Api-Key": AppSettings.WEATHER_KEY
     }
   });
   return res.data;

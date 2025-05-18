@@ -2,7 +2,7 @@ package utils
 
 import (
 	"net/http"
-	"server/model"
+	"server/apiServer/model"
 	"server/settings"
 
 	"github.com/gin-gonic/gin"

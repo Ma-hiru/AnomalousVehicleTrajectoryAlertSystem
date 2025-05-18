@@ -11,7 +11,7 @@ import (
 	"server/go2rtc/internal/streams"
 	"server/go2rtc/pkg/core"
 	"server/go2rtc/pkg/webrtc"
-	"server/stream_consumer"
+	"server/streamServer"
 	"strings"
 
 	pion "github.com/pion/webrtc/v3"
@@ -185,7 +185,7 @@ func asyncHandler(tr *ws.Transport, msg *ws.Message) (err error) {
 
 	switch mode {
 	case core.ModePassiveConsumer:
-		videoProcessor := func(reader *io.PipeReader, metadata *stream_consumer.VideoMetadata, streamInfo map[string]any) {
+		videoProcessor := func(reader *io.PipeReader, metadata *streamServer.VideoMetadata, streamInfo map[string]any) {
 			defer reader.Close()
 			fmt.Println("流名称", streamInfo["name"].(string))
 			buf := make([]byte, 65536)
@@ -218,7 +218,7 @@ func asyncHandler(tr *ws.Transport, msg *ws.Message) (err error) {
 			}
 			fmt.Println("退出")
 		}
-		myConsumer := stream_consumer.NewStreamConsumer(&stream_consumer.StreamConsumerOptions{
+		myConsumer := streamServer.NewStreamConsumer(&streamServer.StreamConsumerOptions{
 			StreamName:     query.Get("src"),
 			FormatName:     "video_processor",
 			VideoProcessFn: videoProcessor,

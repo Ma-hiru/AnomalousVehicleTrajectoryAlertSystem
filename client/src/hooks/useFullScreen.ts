@@ -5,7 +5,7 @@ export const useFullScreenReact = (): [isfull: boolean, change: () => Promise<vo
   return [
     useSyncExternalStore(
       (listener) => {
-        document.addEventListener("fullscreenchange", listener);
+        document.addEventListener("fullscreenchange", listener, { passive: true });
         return () => {
           document.removeEventListener("fullscreenchange", listener);
         };

@@ -4,21 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
-	"server/core/ffmpeg"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/streams"
 	"server/go2rtc/pkg/core"
 	"server/go2rtc/pkg/mp4"
-	"server/settings"
-	"strconv"
+	"server/streamServer"
 )
 
 func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
-	fmt.Println("handlerWSMSE")
-	stream := streams.GetOrPatch(tr.Request.URL.Query())
+	query := tr.Request.URL.Query()
+	fmt.Println("handlerWSMSE:", query)
+	stream := streams.GetOrPatch(query)
 	if stream == nil {
 		return errors.New(api.StreamNotFound)
 	}
@@ -41,32 +38,8 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	tr.Write(&ws.Message{Type: "mse", Value: mp4.ContentType(cons.Codecs())})
 
 	pr, pw := io.Pipe()
-	go func() {
-		defer func(pr *io.PipeReader) {
-			_ = pr.Close()
-		}(pr)
-
-		// 设置抽帧配置，确保ImageFormat为jpg
-		options := settings.ExtractOptions()
-		options.OutputOpt.ImageFormat = "jpg"
-
-		if imgFrame, err := ffmpeg.ExtractVideoFramesWithStream(pr, options); err != nil {
-			log.Error().Err(err).Msg("抽帧失败")
-		} else {
-			fmt.Println("开始处理视频帧")
-			var index = 0
-			for img := range imgFrame {
-				fmt.Println(img.Index, img.Timestamp)
-				file, _ := os.Create(filepath.Join("./frames",
-					strconv.Itoa(index)+strconv.FormatInt(img.Index, 10)+
-						"-"+strconv.FormatFloat(img.Timestamp, 'f', 6, 64)+".jpg"))
-				_, _ = file.Write(img.Data)
-				index++
-			}
-			fmt.Println("视频帧处理结束")
-		}
-	}()
-
+	//复制MSE流以便处理
+	go streamServer.HandleStreamWithMSE(pr, query)
 	go func() {
 		_, _ = cons.WriteTo(tr.MultiWriter(pw))
 	}()

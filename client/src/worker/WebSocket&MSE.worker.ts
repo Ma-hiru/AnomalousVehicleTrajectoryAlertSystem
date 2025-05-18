@@ -1,23 +1,37 @@
+import { io, Socket } from "@/my_socketio-client";
+
 const WebSocketInstance = {
   stream: null as WebSocket | null,
-  info: null as WebSocket | null,
-  url: ""
+  info: null as Socket | null,
+  url: { stream: "", frame: "" }
 };
 
-self.onmessage = (workerEvent: WebSocketMSEWorkerEV) => {
+self.addEventListener("message", (workerEvent: WebSocketMSEWorkerEV) => {
   if (workerEvent.data.type === "init") {
-    WebSocketInstance.url = workerEvent.data.url;
-    init();
-  } else if (workerEvent.data.type === "terminate") {
-    WebSocketInstance.stream?.close();
-    WebSocketInstance.stream = null;
-    WebSocketInstance.info?.close();
-    WebSocketInstance.info = null;
-  }
-};
+    WebSocketInstance.url.stream = workerEvent.data.stream;
+    WebSocketInstance.url.frame = workerEvent.data.frame;
+    try {
+      init();
+    } catch (e) {
+      self.postMessage({
+        type: "error",
+        error: e
+      } as WebSocketMSE);
+      terminate();
+    }
+  } else if (workerEvent.data.type === "terminate") terminate();
+}, { passive: true });
 
 const init = () => {
-  WebSocketInstance.stream = new WebSocket(WebSocketInstance.url);
+  WebSocketInstance.stream = new WebSocket(WebSocketInstance.url.stream);
+  WebSocketInstance.info = io(WebSocketInstance.url.frame);
+  WebSocketInstance.info.on("frame", (data) => {
+    self.postMessage({
+      type: "frame",
+      data: data
+    } satisfies WebSocketMSE);
+  });
+
   // 设置接收二进制数据类型为ArrayBuffer
   WebSocketInstance.stream.binaryType = "arraybuffer";
 
@@ -33,7 +47,7 @@ const init = () => {
   };
 
   // 优化：直接判断数据类型，减少不必要的序列化/反序列化
-  WebSocketInstance.stream.onmessage = (ev) => {
+  WebSocketInstance.stream.addEventListener("message", (ev) => {
     if (typeof ev.data === "string") {
       // 接收到字符串消息，一般是初始化信息
       console.log(ev.data);
@@ -50,7 +64,13 @@ const init = () => {
         packet: ev.data
       }, [ev.data]);  // 使用transferable对象
     }
-  };
+  }, { passive: true });
 };
 
+const terminate = () => {
+  WebSocketInstance.stream?.close();
+  WebSocketInstance.stream = null;
+  WebSocketInstance.info?.disconnect();
+  WebSocketInstance.info = null;
+};
 

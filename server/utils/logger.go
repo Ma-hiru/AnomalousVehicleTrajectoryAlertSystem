@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/fatih/color"
 	"io"
 	"time"
@@ -49,6 +50,7 @@ func (l *Log) Printf(format string, data ...any) {
 	text := l.fn.PrintfFunc()
 	l.logTime()
 	text(format, data...)
+	fmt.Println()
 }
 func (l *Log) SPrintf(format string, data ...any) string {
 	text := l.fn.SprintfFunc()

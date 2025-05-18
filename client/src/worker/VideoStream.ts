@@ -7,14 +7,16 @@ export class VideoStream {
   sourceBuffer: SourceBuffer | null = null;
   bufferQueue: ArrayBuffer[] = [];
   timer: number | undefined = undefined;
-  url: string = "";
+  url: { stream: string; frame: string };
   ready = false;
+  streamName = "";
 
-  constructor(video: HTMLVideoElement, url: string) {
+  constructor(video: HTMLVideoElement, url: { stream: string; frame: string }, streamName: string) {
     this.video = video;
     this.url = url;
+    this.streamName = streamName;
     this.mediaSource = new MediaSource();
-    this.mediaSource.addEventListener("sourceopen", this.sourceopen.bind(this));
+    this.mediaSource.addEventListener("sourceopen", this.sourceopen.bind(this), { passive: true });
     this.video.src = URL.createObjectURL(this.mediaSource);
   }
 
@@ -26,20 +28,36 @@ export class VideoStream {
     this.worker = new Worker(new URL("@/worker/WebSocket&MSE.worker.ts", import.meta.url), {
       type: "module"
     });
-    this.worker.postMessage({ type: "init", url: this.url } satisfies WebSocketMSE);
-    this.worker.onmessage = (ev: WebSocketMSEWorkerEV) => {
-      if (ev.data.type === "sdp") {
-        // 创建SourceBuffer，添加到MediaSource
-        this.sourceBuffer = this.mediaSource.addSourceBuffer(ev.data.sdp.value);
-        // 设置为片段模式
-        this.sourceBuffer.mode = "segments";
-        // 修复：使用bind绑定this上下文
-        this.sourceBuffer.addEventListener("updateend", this.pushPacket.bind(this));
-      } else if (ev.data.type === "new-packet") {
-        // 接收到二进制数据，添加到媒体源
-        this.readPacket(ev.data.packet);
+    this.worker.postMessage({
+      type: "init",
+      stream: this.url.stream,
+      frame: this.url.frame
+    } satisfies WebSocketMSE);
+    this.worker.addEventListener("message", (ev: WebSocketMSEWorkerEV) => {
+      switch (ev.data.type) {
+        case "sdp":
+          // 创建SourceBuffer，添加到MediaSource
+          this.sourceBuffer = this.mediaSource.addSourceBuffer(ev.data.sdp.value);
+          // 设置为片段模式
+          this.sourceBuffer.mode = "segments";
+          // 修复：使用bind绑定this上下文
+          this.sourceBuffer.addEventListener("updateend", this.pushPacket.bind(this), { passive: true });
+          break;
+        case "new-packet":
+          // 接收到二进制数据，添加到媒体源
+          this.readPacket(ev.data.packet);
+          break;
+        case "frame":
+          if (ev.data.data.streamName === this.streamName) {
+            /*empty*/
+          }
+          break;
+        case "error":
+          console.error(ev.data.error);
+          this.stop();
+          break;
       }
-    };
+    }, { passive: true });
     this.timer = window.setInterval(this.clearBuffer.bind(this), 10000);
   }
 

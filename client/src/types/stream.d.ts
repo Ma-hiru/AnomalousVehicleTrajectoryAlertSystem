@@ -1,7 +1,8 @@
 type WebSocketMSE =
   | {
   type: "init";
-  url: string;
+  stream: string;
+  frame: string
 }
   | {
   type: "terminate"
@@ -16,5 +17,17 @@ type WebSocketMSE =
   | {
   type: "new-packet",
   packet: ArrayBuffer
+}
+  | {
+  type: "frame",
+  data: {
+    streamName: string;
+    timestamp: number;
+    data: any;
+  }
+}
+  | {
+  type: "error",
+  error: any
 }
 type WebSocketMSEWorkerEV = MessageEvent<WebSocketMSE>

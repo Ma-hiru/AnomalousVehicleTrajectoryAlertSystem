@@ -2,7 +2,10 @@
 let ws: WebSocket | null = null;
 
 // 监听主线程消息
-self.onmessage = (event: MessageEvent<{ type: "init" | "terminate"; url: string }>) => {
+self.addEventListener("message", (event: MessageEvent<{
+  type: "init" | "terminate";
+  url: string
+}>) => {
   if (event.data.type === "init") {
     // 初始化WebSocket连接
     if (ws) ws.close(); // 如果已存在连接则关闭
@@ -29,9 +32,9 @@ self.onmessage = (event: MessageEvent<{ type: "init" | "terminate"; url: string 
     // 接收服务器发来的消息并转发到主线程
     ws.addEventListener("message", (ev) => {
       self.postMessage(ev.data); // 将接收到的数据直接传递给主线程
-    });
+    }, { passive: true });
   } else if (event.type === "terminate") {
     // 终止连接
     if (ws) ws.close();
   }
-};
+}, { passive: true });

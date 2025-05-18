@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt"
 	"log"
+	"server/apiServer/model"
+	"server/apiServer/service"
 	"server/core/redis"
-	"server/model"
-	"server/service"
 	"strconv"
 )
 
