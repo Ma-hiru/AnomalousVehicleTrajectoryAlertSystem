@@ -1,18 +1,20 @@
 <template>
   <div class="h-full flex justify-center items-center flex-col">
     <MapCharts />
-    <div ref="MapModuleRef"/>
+    <TrackMapReact :layoutSpiltSize="layoutSplitSize" />
   </div>
 </template>
 
 <script setup lang="ts" name="AnalysisModule">
-import MapCharts from "@/components/Charts/MapCharts.vue";
-import { useTemplateRef } from "vue";
-import { useReactComponent } from "@/hooks/useReactComponent.tsx";
-import MapModule from "@/components/Map/MapModule.tsx";
+  import MapCharts from "@/components/Charts/MapCharts.vue";
+  import { inject } from "vue";
+  import TrackMap from "@/components/Map/TrackMap.tsx";
+  import { LayoutSplitSize } from "@/ctx/vueKey.ts";
+  import { applyReactInVue } from "veaury";
 
-const MapModuleRef = useTemplateRef("MapModuleRef");
-useReactComponent(MapModule, MapModuleRef)
+  const layoutSplitSize = inject(LayoutSplitSize);
+  const TrackMapReact = applyReactInVue(TrackMap);
+
 </script>
 
 <style scoped lang="scss">

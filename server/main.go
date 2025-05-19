@@ -14,5 +14,14 @@ func main() {
 	go apiServer.Init(errMsg)
 	go streamServer.SimulateStream(errMsg)
 	go go2rtc.Run(errMsg)
-	utils.Logger().Println(<-errMsg)
+	for {
+		select {
+		case err, ok := <-errMsg:
+			if !ok {
+				return
+			}
+			utils.Logger().Println(err)
+		}
+	}
+
 }

@@ -1,12 +1,10 @@
 <template>
-  <div class="relative video-container">
-    <!-- 视频播放元素 -->
-    <video ref="videoMse"
-           class="relative"
-           :style="styles.videoStyle"
-           autoplay muted controls
+  <div class="video-container">
+    <video
+      class="w-full"
+      ref="videoMse"
+      autoplay muted controls
     />
-    <!-- 视频元数据信息，鼠标悬停时显示 -->
     <div class="meta">
       <div>ID: {{ props.meta.id }}</div>
       <div>Name: {{ props.meta.name }}</div>
@@ -20,20 +18,13 @@
 
   /* 组件属性定义 */
   const props = defineProps<{
-    width: string;          // 视频宽度
-    url: { stream: string; frame: string };            // WebSocket URL
-    meta: {                 // 视频元数据
+    url: { stream: string; frame: string };
+    meta: {
       id: string | number;
       name: string;
     }
   }>();
-  const styles = {
-    videoStyle: {
-      width: props.width,
-      height: "auto",
-      margin: "10px"
-    }
-  };
+
   const videoMse = useTemplateRef("videoMse");
   const videoStream = ref<VideoStream>();
   onMounted(() => {
@@ -49,6 +40,8 @@
 
 <style scoped lang="scss">
   .video-container {
+    position: relative;
+
     .meta {
       display: none;
     }

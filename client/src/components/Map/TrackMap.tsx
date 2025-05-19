@@ -6,9 +6,10 @@ import { getLocation } from "@/utils/getLocation.ts";
 import Logger from "@/utils/logger.ts";
 import "./SelectMap.scss";
 
-
-type props = object;
-const TrackMap: FC<props> = () => {
+type props = {
+  layoutSpiltSize: number;
+};
+const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
     const map = useMyState<AMap.Map | null>(null);
     const amap = useMyState<typeof window.AMap | null>(null);
     //初始化当前位置作为中心点
@@ -17,7 +18,8 @@ const TrackMap: FC<props> = () => {
       const currentAMap = amap.get();
       if (currentMap !== null && currentAMap !== null) {
         getLocation().then((pos) => {
-          if (pos) currentMap.setCenter(new currentAMap.LngLat(112.86, 27.88));
+          //TODO 模拟数据
+          if (pos) currentMap.setCenter([112.86, 27.88]);
         }).catch(() => {
           Logger.Message.Error("地点定位失败！");
         });
@@ -42,6 +44,7 @@ const TrackMap: FC<props> = () => {
         const Geolocation = new currentAMap.Geolocation();
         currentMap.addControl(Geolocation);
         return () => {
+          const currentMap = map.get();
           if (currentMap) {
             currentMap.removeControl(ToolBar);
             currentMap.removeControl(Scale);
@@ -52,12 +55,13 @@ const TrackMap: FC<props> = () => {
     }, [amap, map]);
     return (
       <>
+        {layoutSpiltSize}
         <Map
           map={map}
           amap={amap}
           containerStyle={{
-            width: "100%",
-            height: "var(--layout-card-content-height-calc)"
+            width: "500px",
+            height: "30vh"
           }}
         />
       </>
