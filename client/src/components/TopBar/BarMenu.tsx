@@ -1,4 +1,4 @@
-import { type FC, memo, MouseEventHandler, useRef } from "react";
+import { type FC, memo, MouseEventHandler, useRef, useState } from "react";
 import { Button, Tooltip, ConfigProvider } from "antd";
 import {
   FullscreenExitOutlined,
@@ -13,50 +13,32 @@ import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 import { useFullScreenReact } from "@/hooks/useFullScreen.ts";
 import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
 import { createAntdTheme } from "@/utils/createAntdTheme.ts";
+import MyModal from "@/components/MyModal.tsx";
+import SettingsLayout from "@/components/Settings/SettingsLayout.tsx";
 
 type props = object
 
 const BarMenu: FC<props> = () => {
-  const [isDark, changeDarkMode] = useDarkModeReact();
+  const { isDark, darkAnimate } = useDarkModeReact();
   const [isFull, changeFullscreen] = useFullScreenReact();
   const darkModeRef = useRef<HTMLButtonElement>(null);
   const changeMode: MouseEventHandler<HTMLButtonElement> = (e) => {
-    const pos = {
-      x: e.nativeEvent.clientX,
-      y: e.nativeEvent.clientY
-    };
-    const Animate = () => {
-      const radius = Math.hypot(
-        Math.max(pos.x, window.innerWidth - pos.x),
-        Math.max(pos.y, window.innerHeight - pos.y)
-      );
-      const clipPath = [
-        `circle(0px at ${pos.x}px ${pos.y}px)`,
-        `circle(${radius}px at ${pos.x}px ${pos.y}px)`
-      ];
-      document.documentElement.animate(
-        { clipPath: isDark ? clipPath.reverse() : clipPath },
-        {
-          duration: 600,
-          pseudoElement: isDark
-            ? "::view-transition-old(root)"
-            : "::view-transition-new(root)"
-        }
-      );
-    };
-    document.startViewTransition
-      ? document.startViewTransition(changeDarkMode).ready.then(Animate)
-      : changeDarkMode();
+    darkAnimate(e.nativeEvent.clientX,
+      e.nativeEvent.clientY, isDark);
   };
+  const [openSettings, setOpenSettings] = useState(false);
   return (
     <>
-      <div className="flex items-center layout-user-container"
+      <div className="flex items-center justify-end layout-user-container"
            style={{ height: "var(--layout-bar-height)" }}>
         <ConfigProvider theme={theme.All}>
           <Tooltip title="设置">
             <Button type="text"
                     shape="circle"
                     icon={<SettingOutlined style={styles.iconColor} />}
+                    onClick={() => {
+                      setOpenSettings(true);
+                    }}
             />
           </Tooltip>
           <Tooltip title="刷新">
@@ -87,6 +69,14 @@ const BarMenu: FC<props> = () => {
           </Tooltip>
         </ConfigProvider>
       </div>
+      <MyModal title={"设置"} open={openSettings} onCancel={() => {
+        setOpenSettings(false);
+      }} onOk={() => {
+        setOpenSettings(false);
+      }}>
+        <SettingsLayout refresh={() => {
+        }} />
+      </MyModal>
     </>
   );
 };

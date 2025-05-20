@@ -59,6 +59,7 @@ const SelectMap: FC<props> = ({ position }) => {
     //绑定点击事件以便于更新标记点
     const UpdatePosition = useMemoizedFn((e: AMap.MapsEvent) => {
       position.set(draft => {
+        console.log(e);
         draft.latitude = e.lnglat.lat;
         draft.longitude = e.lnglat.lng;
       });
@@ -137,6 +138,7 @@ const SelectMap: FC<props> = ({ position }) => {
             <Button type="primary" shape="circle" icon={<SearchOutlined />} />
           </div>
           <Map
+            id="SelectMap-container"
             map={map}
             amap={amap}
             containerStyle={{

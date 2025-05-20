@@ -56,6 +56,9 @@ export class VideoStream {
           console.error(ev.data.error);
           this.stop();
           break;
+        case "close":
+          console.error(ev.data.reason);
+          this.stop();
       }
     }, { passive: true });
     this.timer = window.setInterval(this.clearBuffer.bind(this), 10000);

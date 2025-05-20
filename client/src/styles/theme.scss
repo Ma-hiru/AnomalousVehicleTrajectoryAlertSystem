@@ -123,9 +123,11 @@
 :root.lightMode {
   --layout-bg-color: #fff;
   --layout-bar-height: 3rem;
+  --settings-divider-ratio: minmax(0, 1fr) 5fr;
 }
 
 :root.darkMode {
   --layout-bg-color: #fff;
   --layout-bar-height: 3rem;
+  --settings-divider-ratio: minmax(0, 1fr) 5fr;
 }

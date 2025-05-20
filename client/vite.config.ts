@@ -11,7 +11,8 @@ import MyViteAliases from "./plugins/MyViteAliases";
 import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
 import { fileURLToPath } from "node:url";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-
+import Components from "unplugin-vue-components/vite";
+import MotionResolver from "motion-v/resolver";
 
 export default defineConfig(({ command, mode }) => {
   console.log("command", command);
@@ -45,7 +46,11 @@ export default defineConfig(({ command, mode }) => {
           key: "title",
           val: env.VITE_TITLE
         }
-      ])
+      ]),
+      Components({
+        dts: true,
+        resolvers: [MotionResolver()]
+      })
     ],
     css: {
       preprocessorMaxWorkers: true,
@@ -68,7 +73,7 @@ export default defineConfig(({ command, mode }) => {
           main: fileURLToPath(new URL("index.html", import.meta.url))
         },
         output: {
-          manualChunks: (id) => {
+          "manualChunks": (id) => {
             if (id.includes("node_modules"))
               if (id.includes(".pnpm"))
                 return crypto.createHash("sha256").update(id.split(".pnpm/")[1].split("/")[0].toString()).digest("hex");

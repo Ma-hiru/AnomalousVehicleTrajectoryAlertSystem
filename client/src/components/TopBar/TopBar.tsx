@@ -1,7 +1,8 @@
 import { FC, memo } from "react";
-import BarUser from "@/components/TopBar/BarMenu.tsx";
+import BarMenu from "@/components/TopBar/BarMenu.tsx";
 import BarTitle from "@/components/TopBar/BarTitle.tsx";
 import styled from "styled-components";
+import BarInfo from "@/components/TopBar/BarInfo.tsx";
 
 type props = {
   currentRoute: string;
@@ -13,14 +14,11 @@ const TopBar: FC<props> = () => {
   return (
     <>
       <StyledContainer
-        className="w-screen grid grid-rows-1 grid-cols-[1fr_auto] items-center shadow-sm overflow-hidden"
+        className="w-screen grid grid-rows-1 grid-cols-[1fr_1fr_1fr] items-center shadow-sm overflow-hidden"
       >
-        <StyledTitle className="select-none">
-          <BarTitle />
-        </StyledTitle>
-        <div>
-          <BarUser />
-        </div>
+        <BarInfo />
+        <BarTitle />
+        <BarMenu />
       </StyledContainer>
     </>
   );
@@ -31,6 +29,5 @@ const StyledContainer = styled.div`
   padding-right: calc(var(--spacing) * 4);
   padding-left: calc(var(--spacing) * 4);
 `;
-const StyledTitle = styled.div`
-`;
+
 

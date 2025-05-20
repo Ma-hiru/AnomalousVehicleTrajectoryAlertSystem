@@ -89,13 +89,13 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
       });
     }
   };
-  const [isDark] = useDarkModeReact();
+  const {isDark} = useDarkModeReact();
   return (
     <>
       <div onClick={() => {
         updateConfig(currentContent);
       }} id="settings-content"
-           className="grid grid-cols-1 grid-rows-[auto_auto_minmax(0,1fr)] h-full ">
+           className="grid grid-cols-1 grid-rows-[auto_minmax(0,1fr)] h-full ">
         <section>
           <Typography className="select-none">
             <Typography.Title level={4} className="text-right"
@@ -110,11 +110,6 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
               {currentIndex[1]}
             </Typography.Title>
           </Typography>
-        </section>
-        <section>
-          <ConfigProvider theme={theme.ContentDivider}>
-            <Divider />
-          </ConfigProvider>
         </section>
         <section>
           {

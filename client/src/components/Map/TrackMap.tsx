@@ -55,14 +55,14 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
     }, [amap, map]);
     return (
       <>
-        {layoutSpiltSize}
         <Map
           map={map}
           amap={amap}
           containerStyle={{
-            width: "500px",
-            height: "30vh"
+            width: `calc(${1 - layoutSpiltSize - 0.05}*(100vw - 8*var(--spacing)))`,
+            height: "40vh"
           }}
+          id="TrackMap-container"
         />
       </>
     );

@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name='Layout'>
+<script setup lang="ts" name="Layout">
   import { provide, ref } from "vue";
   import TopBar from "@/components/TopBar/TopBar.tsx";
   import VideoModule from "@/components/Video/VideoModule.vue";

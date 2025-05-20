@@ -1,9 +1,9 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createMemoryHistory } from "vue-router";
 import constantRoutes from "./constantRoutes.ts";
 import { beforeEach, onError } from "@/vueRouter/permission.ts";
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createMemoryHistory(),
   routes: constantRoutes
 });
 router.beforeEach(beforeEach);

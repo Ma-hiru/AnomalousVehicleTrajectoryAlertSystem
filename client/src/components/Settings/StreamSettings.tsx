@@ -12,7 +12,7 @@ type props = {
 
 const StreamSettings: FC<props> = ({ children }) => {
   const StreamPosition = useMyState<StreamPosition>({ name: "", latitude: 0, longitude: 0 });
-  const [isDark] = useDarkModeReact();
+  const {isDark} = useDarkModeReact();
   return (
     <>
       <div className="grid grid-cols-[auto_1fr] grid-rows-1 h-full">

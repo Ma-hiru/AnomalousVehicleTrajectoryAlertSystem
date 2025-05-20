@@ -81,7 +81,7 @@ const Config: FC<props> = ({ refresh }) => {
   }, [config, currentIndex]);
   return (
     <>
-      <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)_auto] h-full w-full">
+      <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)_auto]  w-full min-h-[75vh]">
         {
           config.get() && (
             <>

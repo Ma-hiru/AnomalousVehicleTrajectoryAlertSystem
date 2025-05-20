@@ -1,5 +1,5 @@
 import { FC, ReactNode } from "react";
-import { Modal, Button, ConfigProvider } from "antd";
+import { Modal, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme.ts";
 
 type props = {
@@ -10,7 +10,7 @@ type props = {
   children?: ReactNode;
 };
 
-const MyModal: FC<props> = ({ open, title, onCancel, onOk, children }) => {
+const MyModal: FC<props> = ({ open, title, onCancel, children }) => {
   return (
     <>
       <ConfigProvider theme={themes.MyModal}>
@@ -18,16 +18,18 @@ const MyModal: FC<props> = ({ open, title, onCancel, onOk, children }) => {
           open={open}
           title={title}
           onCancel={onCancel}
-          footer={
-            <>
-              <ConfigProvider theme={themes.CancelBtn}>
-                <Button type="text" color="default" onClick={onCancel}>取消</Button>
-              </ConfigProvider>
-              <ConfigProvider theme={themes.ConfirmBtn}>
-                <Button color="default" type="default" onClick={onOk}>确认</Button>
-              </ConfigProvider>
-            </>
-          }
+          width="auto"
+          footer={null}
+          // footer={
+          //   <>
+          //     <ConfigProvider theme={themes.CancelBtn}>
+          //       <Button type="text" color="default" onClick={onCancel}>取消</Button>
+          //     </ConfigProvider>
+          //     <ConfigProvider theme={themes.ConfirmBtn}>
+          //       <Button color="default" type="default" onClick={onOk}>确认</Button>
+          //     </ConfigProvider>
+          //   </>
+          // }
         >
           {children}
         </Modal>
@@ -40,10 +42,10 @@ export default MyModal;
 const themes = createAntdTheme({
   MyModal: {
     Modal: {
-      contentBg: "var(--antd-modal-content-bg)",
-      headerBg: "var(--antd-modal-header-bg)",
-      titleColor: "var(--antd-modal-title-color)",
-      footerBg: "var(--antd-modal-footer-bg)"
+      // contentBg: "var(--antd-modal-content-bg)",
+      // headerBg: "var(--antd-modal-header-bg)",
+      // titleColor: "var(--antd-modal-title-color)",
+      // footerBg: "var(--antd-modal-footer-bg)"
     }
   },
   CancelBtn: {

@@ -11,15 +11,17 @@ type props = {
   containerStyle?: CSSProperties;
   map: MyState<AMap.Map | null>;
   amap: MyState<typeof window.AMap | null>;
+  id:string;
 };
 
 const Map: FC<props> = (
   {
     containerStyle,
     map,
-    amap
+    amap,
+    id
   }) => {
-  const [isDark] = useDarkModeReact();
+  const {isDark} = useDarkModeReact();
   useEffect(() => {
     if (map.get() === null) {
       window._AMapSecurityConfig = {
@@ -31,7 +33,7 @@ const Map: FC<props> = (
         plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar", "AMap.AutoComplete"]
       }).then((AMap: typeof window.AMap) => {
         amap.set(AMap);
-        map.set(new AMap.Map("Map-container", {
+        map.set(new AMap.Map(id, {
           viewMode: "3D",
           resizeEnable: true,
           zoom: 16,
@@ -54,7 +56,7 @@ const Map: FC<props> = (
       !isDark && currentMap.setMapStyle(AppSettings.MAP_THEME_Light);
     }
   }, [isDark, map]);
-  return <Container id="Map-container" style={containerStyle} />;
+  return <Container id={id} style={containerStyle} />;
 };
 export default memo(Map);
 

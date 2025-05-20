@@ -33,7 +33,7 @@ const subMenuPrefixIcon = (active: boolean, level1: string, level2: string, isDa
   }
 };
 const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
-  const [isDark] = useDarkModeReact();
+  const { isDark } = useDarkModeReact();
   const configContent = useMemo(() => {
     if (config.get() && config.get()!.data) return config.get()!.data;
   }, [config]);

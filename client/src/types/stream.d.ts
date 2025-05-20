@@ -30,4 +30,8 @@ type WebSocketMSE =
   type: "error",
   error: any
 }
+  | {
+  type: "close",
+  reason: CloseEvent
+}
 type WebSocketMSEWorkerEV = MessageEvent<WebSocketMSE>

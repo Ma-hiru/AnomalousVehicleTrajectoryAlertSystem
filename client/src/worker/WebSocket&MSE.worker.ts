@@ -31,27 +31,19 @@ const init = () => {
       data: data
     } satisfies WebSocketMSE);
   });
-
   // 设置接收二进制数据类型为ArrayBuffer
   WebSocketInstance.stream.binaryType = "arraybuffer";
-
-  // WebSocket连接成功时发送媒体配置信息
-  WebSocketInstance.stream.onopen = () => {
-    WebSocketInstance.stream!.send(
-      JSON.stringify({
-        type: "mse",
-        // 支持的编解码器列表
-        value: "avc1.640029,avc1.64002A,avc1.640033,hvc1.1.6.L153.B0,mp4a.40.2,mp4a.40.5,flac,opus"
-      })
-    );
-  };
-
-  // 优化：直接判断数据类型，减少不必要的序列化/反序列化
-  WebSocketInstance.stream.addEventListener("message", (ev) => {
+  WebSocketInstance.stream.onmessage = (ev) => {
     if (typeof ev.data === "string") {
       // 接收到字符串消息，一般是初始化信息
-      console.log(ev.data);
       const msg = JSON.parse(ev.data);
+      if (msg.type === "error") {
+        self.postMessage({
+          type: "error",
+          error: msg
+        } as WebSocketMSE);
+        return;
+      }
       self.postMessage({
         type: "sdp",
         sdp: msg
@@ -64,12 +56,43 @@ const init = () => {
         packet: ev.data
       }, [ev.data]);  // 使用transferable对象
     }
-  }, { passive: true });
+  };
+  WebSocketInstance.stream.onopen = () => {
+    WebSocketInstance.stream!.send(
+      JSON.stringify({
+        type: "mse",
+        // 支持的编解码器列表
+        value: "avc1.640029,avc1.64002A,avc1.640033,hvc1.1.6.L153.B0,mp4a.40.2,mp4a.40.5,flac,opus"
+      })
+    );
+  };
+  WebSocketInstance.stream.onerror = (ev) => {
+    self.postMessage({
+      type: "error",
+      error: ev
+    } as WebSocketMSE);
+  };
+  WebSocketInstance.stream.onclose = (ev) => {
+    self.postMessage({
+      type: "close",
+      reason: {
+        code: ev.code,
+        reason: ev.reason,
+        wasClean: ev.wasClean
+      }
+    } as WebSocketMSE);
+  };
 };
 
 const terminate = () => {
-  WebSocketInstance.stream?.close();
-  WebSocketInstance.stream = null;
+  if (WebSocketInstance.stream) {
+    WebSocketInstance.stream.onopen = null;
+    WebSocketInstance.stream.onmessage = null;
+    WebSocketInstance.stream.onerror = null;
+    WebSocketInstance.stream.onclose = null;
+    WebSocketInstance.stream.close();
+    WebSocketInstance.stream = null;
+  }
   WebSocketInstance.info?.disconnect();
   WebSocketInstance.info = null;
 };
