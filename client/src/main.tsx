@@ -39,5 +39,4 @@ app.use(router);
 //scss
 import "./styles/index.scss";
 
-
 app.mount("#app");

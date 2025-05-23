@@ -5,7 +5,10 @@ import { onBeforeUnmount, onMounted, Reactive, ref, ShallowRef, watch } from "vu
 
 echarts.use([SunburstChart, CanvasRenderer]);
 
-export const useEcharts = <T extends echarts.EChartsCoreOption>(container: Readonly<ShallowRef<HTMLDivElement | null>>, options: Reactive<T>) => {
+export const useEcharts = <T extends echarts.EChartsCoreOption>(
+  container: Readonly<ShallowRef<HTMLDivElement | null>>,
+  options: Reactive<T>
+) => {
   const instance = ref<echarts.ECharts>();
   const updateChart = () => {
     if (instance.value) {
@@ -16,9 +19,9 @@ export const useEcharts = <T extends echarts.EChartsCoreOption>(container: Reado
     instance.value = echarts.init(container.value);
     instance.value.setOption(options);
   });
-  onBeforeUnmount(()=>{
+  onBeforeUnmount(() => {
     instance.value?.dispose();
-  })
+  });
   watch(options, updateChart);
   return { instance, updateChart };
 };

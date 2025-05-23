@@ -8,14 +8,12 @@ type props = {
   currentRoute: string;
   setRoute: (path: string) => void;
   reload: () => void;
-}
+};
 
 const TopBar: FC<props> = () => {
   return (
     <>
-      <StyledContainer
-        className="w-screen grid grid-rows-1 grid-cols-[1fr_1fr_1fr] items-center shadow-sm overflow-hidden"
-      >
+      <StyledContainer className="w-screen grid grid-rows-1 grid-cols-[1fr_1fr_1fr] items-center shadow-sm overflow-hidden">
         <BarInfo />
         <BarTitle />
         <BarMenu />
@@ -29,5 +27,3 @@ const StyledContainer = styled.div`
   padding-right: calc(var(--spacing) * 4);
   padding-left: calc(var(--spacing) * 4);
 `;
-
-

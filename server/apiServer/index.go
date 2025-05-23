@@ -7,6 +7,7 @@ import (
 	"server/apiServer/static"
 	"server/core/gin_server"
 	"server/settings"
+	"server/socketServer"
 )
 
 func Init(errMsg chan<- error) {
@@ -26,6 +27,7 @@ func Init(errMsg chan<- error) {
 	}()
 	routes.Init()
 	static.Init()
+	socketServer.FramesSocketInit()
 	gin_server.InitWithInject(gin_server.Settings{
 		DefaultPemFilePath: settings.DefaultPemFilePath,
 		ErrMsg:             settings.ErrMsg,

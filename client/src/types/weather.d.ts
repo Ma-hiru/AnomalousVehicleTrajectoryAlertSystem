@@ -32,7 +32,7 @@ type CityType = {
       rank: string;
       /** 该地区的天气预报网页链接，便于嵌入你的网站或应用*/
       fxLink: string;
-    },
+    }
   ];
   refer: {
     /** 原始数据来源，或数据源说明，可能为空 */

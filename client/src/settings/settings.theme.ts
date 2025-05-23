@@ -1,10 +1,10 @@
 export const MAP_THEME_DARK = "amap://styles/dark";
 export const MAP_THEME_Light = "amap://styles/light";
 export const screensConfig = {
-  "xs": 480,
-  "sm": 640,
-  "md": 768,
-  "lg": 1024,
-  "xl": 1280,
+  xs: 480,
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
   "2xl": 1536
 };

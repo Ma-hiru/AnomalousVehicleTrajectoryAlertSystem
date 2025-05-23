@@ -21,7 +21,9 @@ const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
     const currentConfig = config.get();
     if (currentConfig && currentConfig.data) {
       if (typeof currentConfig.data[AppSettings.STREAMS_CONF_NAME] === "object") {
-        currentConfig.data[AppSettings.STREAMS_CONF_NAME][stream.get().name] = [stream.get().stream];
+        currentConfig.data[AppSettings.STREAMS_CONF_NAME][stream.get().name] = [
+          stream.get().stream
+        ];
         config.set(currentConfig);
       }
     }
@@ -40,10 +42,11 @@ const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
           <Space.Compact className="w-full">
             <Input
               prefix={<SettingsIcon name="streams" />}
-              placeholder="请输入视频流名称" allowClear
+              placeholder="请输入视频流名称"
+              allowClear
               value={stream.get().name}
               onChange={(e) => {
-                stream.set(draft => {
+                stream.set((draft) => {
                   draft.name = e.target.value;
                 });
               }}
@@ -52,10 +55,11 @@ const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
           <Space.Compact className="w-full">
             <Input
               prefix={<SettingsIcon name="link" />}
-              placeholder="请输入视频流地址" allowClear
+              placeholder="请输入视频流地址"
+              allowClear
               value={stream.get().stream}
               onChange={(e) => {
-                stream.set(draft => {
+                stream.set((draft) => {
                   draft.stream = e.target.value;
                 });
               }}

@@ -25,19 +25,15 @@
       status: false
     }
   ];
-  data.push(...data)
-  data.push(...data)
-  const tableRowClassName = ({ row }: {
-    row: typeof data[number]
-  }) => {
+  data.push(...data);
+  data.push(...data);
+  const tableRowClassName = ({ row }: { row: (typeof data)[number] }) => {
     if (!row.status) {
       return "warning-row";
     } else {
       return "success-row";
     }
-
   };
-
 </script>
 
 <style scoped lang="scss">

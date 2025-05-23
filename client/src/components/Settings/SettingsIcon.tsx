@@ -19,7 +19,7 @@ import { createStyleSheet } from "@/utils/createStyleSheet.ts";
 
 type props = {
   name: string;
-}
+};
 const SettingsIcon: FC<props> = ({ name }) => {
   const render = () => {
     switch (name) {
@@ -59,9 +59,7 @@ const SettingsIcon: FC<props> = ({ name }) => {
         return <img src={defaultIcon} alt="" style={styles.Level1} />;
     }
   };
-  return <>
-    {render()}
-  </>;
+  return <>{render()}</>;
 };
 export default memo(SettingsIcon);
 const styles = createStyleSheet({

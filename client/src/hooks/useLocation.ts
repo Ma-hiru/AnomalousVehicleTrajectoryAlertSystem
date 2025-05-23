@@ -15,23 +15,23 @@ export const useLocation = () => {
     err: null
   });
   useEffect(() => {
-    status.set(draft => {
+    status.set((draft) => {
       draft.loading = true;
     });
     getLocation()
       .then((location) => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.location = location;
         });
       })
       .catch((error) => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.err = error;
         });
         logger.Message.Error("获取位置失败！");
       })
       .finally(() => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.loading = false;
         });
       });

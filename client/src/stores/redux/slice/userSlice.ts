@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootStateType } from "@/stores/redux";
 
-
 interface initialType {
   token: string;
   userProfile: Omit<LoginResponseData, "token">;

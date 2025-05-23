@@ -3,8 +3,10 @@
     <TopBarReact class="layout-bar" />
     <div class="layout-content">
       <a-split min="0.2" max="0.8" v-model:size="size" class="layout-split">
-        <template #resize-trigger-icon>
-          <span class="trigger" />
+        <template #resize-trigger>
+          <div class="trigger">
+            <span />
+          </div>
         </template>
         <template #first>
           <VideoModule />
@@ -29,7 +31,6 @@
 
   const size = ref(0.6);
   provide(LayoutSplitSize, size);
-
 </script>
 
 <style scoped lang="scss">
@@ -49,11 +50,20 @@
         width: 100%;
 
         .trigger {
-          height: 3rem;
-          background: #999;
-          border-radius: 0.1rem;
-          width: 0.15rem;
-          margin: 2px;
+          background: #999999;
+          width: 98%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 10px;
+          span {
+            height: 3rem;
+            background: #ffffff;
+            border-radius: 0.1rem;
+            width: 0.15rem;
+            margin: 2px;
+          }
         }
       }
     }

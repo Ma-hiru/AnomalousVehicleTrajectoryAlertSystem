@@ -18,7 +18,7 @@ const (
 	// TokenPrefix Token前缀
 	TokenPrefix = "Bearer "
 	// TimeFormat 时间格式
-	TimeFormat = "%4d-%02d-%02d %02d:%02d:%02d"
+	TimeFormat = "2006-01-02 15:04:05"
 	// Go2rtcBaseUrl go2rtc port
 	Go2rtcBaseUrl = "http://localhost:3001"
 )

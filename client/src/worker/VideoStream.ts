@@ -33,34 +33,40 @@ export class VideoStream {
       stream: this.url.stream,
       frame: this.url.frame
     } satisfies WebSocketMSE);
-    this.worker.addEventListener("message", (ev: WebSocketMSEWorkerEV) => {
-      switch (ev.data.type) {
-        case "sdp":
-          // 创建SourceBuffer，添加到MediaSource
-          this.sourceBuffer = this.mediaSource.addSourceBuffer(ev.data.sdp.value);
-          // 设置为片段模式
-          this.sourceBuffer.mode = "segments";
-          // 修复：使用bind绑定this上下文
-          this.sourceBuffer.addEventListener("updateend", this.pushPacket.bind(this), { passive: true });
-          break;
-        case "new-packet":
-          // 接收到二进制数据，添加到媒体源
-          this.readPacket(ev.data.packet);
-          break;
-        case "frame":
-          if (ev.data.data.streamName === this.streamName) {
-            /*empty*/
-          }
-          break;
-        case "error":
-          console.error(ev.data.error);
-          this.stop();
-          break;
-        case "close":
-          console.error(ev.data.reason);
-          this.stop();
-      }
-    }, { passive: true });
+    this.worker.addEventListener(
+      "message",
+      (ev: WebSocketMSEWorkerEV) => {
+        switch (ev.data.type) {
+          case "sdp":
+            // 创建SourceBuffer，添加到MediaSource
+            this.sourceBuffer = this.mediaSource.addSourceBuffer(ev.data.sdp.value);
+            // 设置为片段模式
+            this.sourceBuffer.mode = "segments";
+            // 修复：使用bind绑定this上下文
+            this.sourceBuffer.addEventListener("updateend", this.pushPacket.bind(this), {
+              passive: true
+            });
+            break;
+          case "new-packet":
+            // 接收到二进制数据，添加到媒体源
+            this.readPacket(ev.data.packet);
+            break;
+          case "frame":
+            if (ev.data.data.streamName === this.streamName) {
+              /*empty*/
+            }
+            break;
+          case "error":
+            console.error(ev.data.error);
+            this.stop();
+            break;
+          case "close":
+            console.error(ev.data.reason);
+            this.stop();
+        }
+      },
+      { passive: true }
+    );
     this.timer = window.setInterval(this.clearBuffer.bind(this), 10000);
   }
 

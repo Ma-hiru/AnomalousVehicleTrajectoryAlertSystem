@@ -1,22 +1,16 @@
-type BaseEvType =
-  | "connect"
-  | "disconnect"
-  | "connect_error"
+type BaseEvType = "connect" | "disconnect" | "connect_error";
 
-export type EventType =
-  | BaseEvType
-  | "join"
-  | "frame"
+export type EventType = BaseEvType | "join" | "frame";
 
 export type Socket = {
   on: (ev: EventType, listener: (data?: any) => any) => void;
   emit: (ev: EventType, data?: any) => void;
   disconnect: () => void;
-}
+};
 export type Message = {
   event: EventType;
   data: string | object;
-}
+};
 export const io = (uri: string): Socket => {
   let instance: WebSocket | null = null;
   let retry = 0;
@@ -32,10 +26,8 @@ export const io = (uri: string): Socket => {
     if (handler.has(event)) {
       const fn = handler.get(event);
       if (!fn) return;
-      if (fn.constructor && fn.constructor.name === "AsyncFunction")
-        await fn(data);
-      else
-        fn(data);
+      if (fn.constructor && fn.constructor.name === "AsyncFunction") await fn(data);
+      else fn(data);
     }
   }
 
@@ -92,7 +84,6 @@ export const io = (uri: string): Socket => {
     }
   }
 
-
   function connect() {
     try {
       instance = new WebSocket(uri);
@@ -104,7 +95,6 @@ export const io = (uri: string): Socket => {
       return;
     }
   }
-
 
   function reconnect() {
     retry++;
@@ -121,12 +111,13 @@ export const io = (uri: string): Socket => {
       handler.set(ev, listener);
     },
     emit: (ev: EventType, data?: any) => {
-      instance && instance.send(JSON.stringify(
-        {
-          event: ev,
-          data: JSON.stringify(data) || ""
-        }
-      ));
+      instance &&
+        instance.send(
+          JSON.stringify({
+            event: ev,
+            data: JSON.stringify(data) || ""
+          })
+        );
     },
     disconnect: () => {
       if (handler.has("disconnect")) {

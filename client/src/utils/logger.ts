@@ -13,29 +13,32 @@ const Echo = (data: object) => {
 };
 const Info = (data: string | MessageParams) => {
   if (typeof data === "string") ElMessage.info(data);
-  else ElMessage({
-    grouping: true,
-    type: "info",
-    ...data
-  } as MessageParams);
+  else
+    ElMessage({
+      grouping: true,
+      type: "info",
+      ...data
+    } as MessageParams);
 };
 const Success = (data: string | MessageParams) => {
   if (typeof data === "string") ElMessage.success(data);
-  else ElMessage({
-    grouping: true,
-    type: "success",
-    ...data
-  } as MessageParams);
+  else
+    ElMessage({
+      grouping: true,
+      type: "success",
+      ...data
+    } as MessageParams);
 };
 const Error = (data: string | MessageParams) => {
   if (typeof data === "string") ElMessage.error(data);
-  else ElMessage({
-    grouping: true,
-    type: "error",
-    ...data
-  } as MessageParams);
+  else
+    ElMessage({
+      grouping: true,
+      type: "error",
+      ...data
+    } as MessageParams);
 };
-const Loading = (options: Parameters<typeof ElLoading["service"]>[0]) => {
+const Loading = (options: Parameters<(typeof ElLoading)["service"]>[0]) => {
   return ElLoading.service(options);
 };
 const Logger = {

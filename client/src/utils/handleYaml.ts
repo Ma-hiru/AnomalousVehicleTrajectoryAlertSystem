@@ -5,7 +5,7 @@ import Logger from "@/utils/logger.ts";
 export const JsonToYaml = (json: Record<string, any>) => {
   try {
     console.log(json);
-    const newJson = omitBy(json, v => v === "" || v === null || v === undefined);
+    const newJson = omitBy(json, (v) => v === "" || v === null || v === undefined);
     console.log(newJson);
     return jsyaml.dump(newJson, {
       replacer: (_, value) => (value === "" ? null : value),

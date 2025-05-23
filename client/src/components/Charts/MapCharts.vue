@@ -1,16 +1,7 @@
 <template>
-  <div>
-    CHARTS:
-    1.Anomalous form
-    2.Video form
-    3.Track  form
-  </div>
+  <div>CHARTS: 1.Anomalous form 2.Video form 3.Track form</div>
 </template>
 
-<script setup lang="ts" name="Charts">
+<script setup lang="ts" name="Charts"></script>
 
-</script>
-
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

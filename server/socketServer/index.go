@@ -31,13 +31,17 @@ import (
 //	}
 //}
 
-var FramesSocketIO *my_socketio.Server = nil
+var framesSocketIO *my_socketio.Server = nil
 
 func FramesSocketInit() {
 	gin_server.WithUse(func(app *gin.Engine) {
-		FramesSocketIO = my_socketio.NewServer("/api/frames", app)
-		FramesSocketIO.OnConnection = func(socket *my_socketio.Client) {
+		framesSocketIO = my_socketio.NewServer("/api/frames", app)
+		framesSocketIO.OnConnection = func(socket *my_socketio.Client) {
 			socket.Join(socket.Name)
 		}
 	})
+}
+
+func GetFramesSocketIO() (io *my_socketio.Server, ok bool) {
+	return framesSocketIO, framesSocketIO != nil
 }

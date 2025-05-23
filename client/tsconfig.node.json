@@ -20,5 +20,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.*","plugins/*","vitest.config.*","eslint.config.*"]
+  "include": [
+    "vite.config.*",
+    "plugins/*",
+    "vitest.config.*",
+    "eslint.config.*"
+  ]
 }

@@ -1,26 +1,44 @@
 package main
 
 import (
+	"os"
+	"os/signal"
 	"server/apiServer"
+	"server/control"
 	"server/go2rtc"
-	"server/socketServer"
 	"server/streamServer"
 	"server/utils"
+	"syscall"
 )
 
+var errMsg = make(chan error)
+
+func stream() {
+	go2rtcRoutine := control.NewRoutine("go2rtc", go2rtc.Run)
+	go2rtcControl, _ := control.NewControl(
+		"go2rtc_control",
+		[]*control.Routine{go2rtcRoutine},
+		&control.Config{RestartOnErr: false},
+	)
+	go go2rtcControl.Go()
+}
 func main() {
-	errMsg := make(chan error)
-	go socketServer.FramesSocketInit()
-	go apiServer.Init(errMsg)
 	go streamServer.SimulateStream(errMsg)
-	go go2rtc.Run(errMsg)
+	go stream()
+	go apiServer.Init(errMsg)
+	go func() {
+		for {
+			sigs := make(chan os.Signal, 1)
+			signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+			println("exit with signal:", (<-sigs).String())
+			os.Exit(0)
+		}
+	}()
 	for {
 		select {
-		case err, ok := <-errMsg:
-			if !ok {
-				return
-			}
+		case err, _ := <-errMsg:
 			utils.Logger().Println(err)
+			return
 		}
 	}
 

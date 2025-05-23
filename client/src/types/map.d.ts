@@ -4,70 +4,78 @@ type StreamPosition = {
   latitude: number;
   /** 经度 */
   longitude: number;
-}
+};
 declare namespace AMap {
   export class ToolBar {
-    constructor(options?: any)
+    constructor(options?: any);
   }
 
   export class Scale {
-    constructor(options?: any)
+    constructor(options?: any);
   }
 
   export class Geolocation {
-    constructor(options?: any)
+    constructor(options?: any);
   }
 
   export class AutoComplete {
-    constructor(options?: any)
+    constructor(options?: any);
 
-    on: (eventType: string, callback: (event: {
-      type: string, poi: {
-        adcode: string;
-        address: string;
-        city: unknown[];
-        //所属区域
-        district: string;
-        //POI唯一标识
-        id: string;
-        //名称
-        name: string;
-        typecode: string;
-        //位置
-        location: {
-          KL: number;
-          className: string;
-          KT: number;
-          lat: number;
-          lng: number;
-          pos: [number, number];
-        }
-      }
-    }) => any) => void;
-    off: (eventType: string, callback: (event: {
-      type: string, poi: {
-        adcode: string;
-        address: string;
-        city: unknown[];
-        //区
-        district: string;
-        id: string;
-        name: string;
-        typecode: string;
-        location: {
-          KL: number;
-          className: string;
-          KT: number;
-          lat: number;
-          lng: number;
-          pos: [number, number];
-        }
-      }
-    }) => any) => void;
+    on: (
+      eventType: string,
+      callback: (event: {
+        type: string;
+        poi: {
+          adcode: string;
+          address: string;
+          city: unknown[];
+          //所属区域
+          district: string;
+          //POI唯一标识
+          id: string;
+          //名称
+          name: string;
+          typecode: string;
+          //位置
+          location: {
+            KL: number;
+            className: string;
+            KT: number;
+            lat: number;
+            lng: number;
+            pos: [number, number];
+          };
+        };
+      }) => any
+    ) => void;
+    off: (
+      eventType: string,
+      callback: (event: {
+        type: string;
+        poi: {
+          adcode: string;
+          address: string;
+          city: unknown[];
+          //区
+          district: string;
+          id: string;
+          name: string;
+          typecode: string;
+          location: {
+            KL: number;
+            className: string;
+            KT: number;
+            lat: number;
+            lng: number;
+            pos: [number, number];
+          };
+        };
+      }) => any
+    ) => void;
   }
 
   export class PlaceSearch {
-    constructor(options?: any)
+    constructor(options?: any);
 
     search: (data: string) => any;
   }
@@ -84,7 +92,7 @@ declare namespace AMap {
       lat: number;
       pos: [number, number];
       KL: number;
-      kT: number
+      kT: number;
     };
 
     /** 发生事件时光标所在处的像素坐标 **/
@@ -105,79 +113,79 @@ declare namespace AMap {
   /** 像素坐标, 确定地图上的一个像素点。 **/
   export class Pixel {
     /**构造一个像素坐标对象。**/
-    constructor(x: number, y: number)
+    constructor(x: number, y: number);
 
     /**获得X方向像素坐标**/
-    public getX(): number
+    public getX(): number;
 
     /**获得Y方向像素坐标**/
-    public getY(): number
+    public getY(): number;
 
     /**当前像素坐标与传入像素坐标是否相等**/
-    public equals(point: Pixel): boolean
+    public equals(point: Pixel): boolean;
 
     /**以字符串形式返回像素坐标对象**/
-    public toString(): string
+    public toString(): string;
   }
 
   /** 地物对象的像素尺寸 **/
   export class Size {
     /**构造尺寸对象。参数width: 宽度, height: 长度, 单位: 像素；**/
-    constructor(width: number, height: number)
+    constructor(width: number, height: number);
 
     /**获得宽度。**/
-    public getWidth(): number
+    public getWidth(): number;
 
     /**获得高度。**/
-    public getHeight(): number
+    public getHeight(): number;
 
     /**以字符串形式返回尺寸大小对象(自v1.2 新增)**/
-    public toString(): string
+    public toString(): string;
   }
 
   /** 经纬度坐标, 确定地图上的一个点。 **/
   export class LngLat {
     /**构造一个地理坐标对象, lng、lat分别代表经度、纬度值**/
-    constructor(lng: number, lat: number)
+    constructor(lng: number, lat: number);
 
     /**当前经纬度坐标值经度移动w, 纬度移动s, 得到新的坐标。经度向右移为正值, 纬度向上移为正值, 单位为米。(自v1.2 新增)**/
-    public offset(w: number, s: number): LngLat
+    public offset(w: number, s: number): LngLat;
 
     /**当前经纬度和传入经纬度或者经纬度数组连线之间的地面距离, 单位为米 相关示例**/
-    public distance(lnglat: LngLat | Array<LngLat>): number
+    public distance(lnglat: LngLat | Array<LngLat>): number;
 
     /**获取经度值。(自v1.2 新增)**/
-    public getLng(): number
+    public getLng(): number;
 
     /**获取纬度值。(自v1.2 新增)**/
-    public getLat(): number
+    public getLat(): number;
 
     /**判断当前坐标对象与传入坐标对象是否相等**/
-    public equals(lnglat: LngLat): boolean
+    public equals(lnglat: LngLat): boolean;
 
     /**LngLat对象以字符串的形式返回。**/
-    public toString(): string
+    public toString(): string;
   }
 
   /** 地物对象的经纬度矩形范围。 **/
   export class Bounds {
     /**矩形范围的构造函数.参数southWest、northEast分别代表地物对象西南角经纬度和东北角经纬度值。**/
-    constructor(southWest: LngLat, northEast: LngLat)
+    constructor(southWest: LngLat, northEast: LngLat);
 
     /**指定点坐标是否在矩形范围内 相关示例**/
-    public contains(point: LngLat): boolean
+    public contains(point: LngLat): boolean;
 
     /**获取当前Bounds的中心点经纬度坐标。**/
-    public getCenter(): LngLat
+    public getCenter(): LngLat;
 
     /**获取西南角坐标。**/
-    public getSouthWest(): LngLat
+    public getSouthWest(): LngLat;
 
     /**获取东北角坐标**/
-    public getNorthEast(): LngLat
+    public getNorthEast(): LngLat;
 
     /**以字符串形式返回地物对象的矩形范围**/
-    public toString(): string
+    public toString(): string;
   }
 
   /** MapOptions **/
@@ -291,185 +299,180 @@ declare namespace AMap {
   /** 地图对象类, 封装了地图的属性设置、图层变更、事件交互等接口的类。相关示例 **/
   export class Map {
     /**构造一个地图对象, 参数container中传入地图容器DIV的ID值或者DIV对象, opts地图初始化参数对象, 参数详情参看MapOptions列表。**/
-    constructor(container: string | HTMLDivElement, opts: MapOptions)
+    constructor(container: string | HTMLDivElement, opts: MapOptions);
 
     /**唤起高德地图客户端marker页其中Object里面包含有{ id: "B000A7BD6C", POIIDname: String, 必要参数location: LngLat|position属性 必须参数}**/
-    public poiOnAMAP(obj: any): void
+    public poiOnAMAP(obj: any): void;
 
     /**唤起高德地图客户端marker详情页其中Object里面包含有{ id: "B000A7BD6C", POIIDname: String, 必要参数location: LngLat|position属性 必须参数}**/
-    public detailOnAMAP(obj: any): void
+    public detailOnAMAP(obj: any): void;
 
     /**获取当前地图缩放级别, 在PC上, 默认取值范围为[3, 18]；在移动设备上, 默认取值范围为[3-19]3D地图会返回浮点数, 2D视图为整数。(3D地图自V1.4.0开始支持)**/
-    public getZoom(): number
+    public getZoom(): number;
 
     /**获取地图图层数组, 数组为一个或多个图层(自v1.3 新增)**/
-    public getLayers(): Array<any>
+    public getLayers(): Array<any>;
 
     /**获取地图中心点经纬度坐标值。**/
-    public getCenter(): LngLat
+    public getCenter(): LngLat;
 
     /**返回地图对象的容器**/
-    public getContainer(): HTMLDivElement
+    public getContainer(): HTMLDivElement;
 
     /**获取地图中心点所在区域, 回调函数返回对象属性分别对应为{省, 市, 区/县}**/
     public getCity(
-      callback: (
-        province: string,
-        city: string,
-        citycode: string,
-        district: string
-      ) => void
-    ): void
+      callback: (province: string, city: string, citycode: string, district: string) => void
+    ): void;
 
     /**获取当前地图视图范围, 获取当前可视区域。3D地图下返回类型为ArrayBounds, 2D地图下仍返回Bounds 。(3D自V1.4.0开始支持)**/
-    public getBounds(): Bounds
+    public getBounds(): Bounds;
 
     /**获取当前地图标注的显示顺序**/
-    public getLabelzIndex(): number
+    public getLabelzIndex(): number;
 
     /**获取Map的限制区域**/
-    public getLimitBounds(): Bounds
+    public getLimitBounds(): Bounds;
 
     /**获取底图语言类型(自v1.3 新增)**/
-    public getLang(): string
+    public getLang(): string;
 
     /**获取地图容器像素大小**/
-    public getSize(): Size
+    public getSize(): Size;
 
     /**获取地图顺时针旋转角度(自v1.3 新增)**/
-    public getRotation(): number
+    public getRotation(): number;
 
     /**获取当前地图状态信息, 包括是否可鼠标拖拽移动地图、地图是否可缩放、地图是否可旋转(rotateEnable)、是否可双击放大地图、是否可以通过键盘控制地图旋转(keyboardEnable)等**/
-    public getStatus(): any
+    public getStatus(): any;
 
     /**获取地图默认鼠标指针样式**/
-    public getDefaultCursor(): string
+    public getDefaultCursor(): string;
 
     /**获取指定位置的地图分辨率, 单位: 米/像素。 参数point有指定值时, 返回指定点地图分辨率, point缺省时, 默认返回当前地图中心点位置的分辨率**/
-    public getResolution(point: LngLat): number
+    public getResolution(point: LngLat): number;
 
     /**获取当前地图比例尺。其值为当前地图中心点处比例尺值的倒数**/
-    public getScale(dpi: number): number
+    public getScale(dpi: number): number;
 
     /**设置地图显示的缩放级别, 在PC上, 参数zoom可设范围: [3, 18]；在移动端: 参数zoom可设范围: [3, 19]3D地图下, 可将zoom设置为浮点数。(3D自V1.4.0开始支持)**/
-    public setZoom(level: number): void
+    public setZoom(level: number): void;
 
     /**设置地图标注显示的顺序**/
-    public setlabelzIndex(index: number): void
+    public setlabelzIndex(index: number): void;
 
     /**设置地图图层数组, 数组为一个或多个图层。当叠加多个图层时, 普通二维地图需通过实例化一个TileLayer类实现(自v1.3 新增)**/
-    public setLayers(layers: Array<any>): void
+    public setLayers(layers: Array<any>): void;
 
     /**添加地图覆盖物数组, 数组为一个或多个覆盖物。**/
-    public add(overlayers: Array<any>): void
+    public add(overlayers: Array<any>): void;
 
     /**删除地图覆盖物数组, 数组为一个或多个覆盖物。**/
-    public remove(overlayers: Array<any>): void
+    public remove(overlayers: Array<any>): void;
 
     /**返回添加的覆盖物对象, 可选类型包括marker、circle、polyline、polygon； Type可缺省, 缺省时返回所有覆盖物(marker、circle、polyline、polygon)。 返回结果不包含官方覆盖物等, 比如定位marker, 周边搜索圆等**/
-    public getAllOverlays(type: any): any
+    public getAllOverlays(type: any): any;
 
     /**设置地图显示的中心点**/
-    public setCenter(position: LngLat | number[]): void
+    public setCenter(position: LngLat | number[]): void;
 
     /**地图缩放至指定级别并以指定点为地图显示中心点**/
-    public setZoomAndCenter(zoomLevel: number, center: LngLat | number[]): void
+    public setZoomAndCenter(zoomLevel: number, center: LngLat | number[]): void;
 
     /**按照行政区名称或adcode来设置地图显示的中心点。行政区名称支持中国、省、市、区/县名称, 如遇重名的情况, 会按城市编码表顺序返回第一个。adcode请在城市编码表中查询。建议不要同时使用center/setCenter()和setCity(), 如一起使用程序将以setCity()作为最后结果。 相关示例**/
-    public setCity(city: string, callback: Function): void
+    public setCity(city: string, callback: Function): void;
 
     /**指定当前地图显示范围, 参数bounds为指定的范围**/
-    public setBounds(bound: Bounds): void
+    public setBounds(bound: Bounds): void;
 
     /**设置Map的限制区域, 设定区域限制后, 传入参数为限制的Bounds。地图仅在区域内可拖拽 相关示例**/
-    public setLimitBounds(bound: Bounds): void
+    public setLimitBounds(bound: Bounds): void;
 
     /**清除限制区域**/
-    public clearLimitBounds(): void
+    public clearLimitBounds(): void;
 
     /**设置地图语言类型, 设置后底图重新加载(自v1.3 新增)**/
-    public setLang(lang: string): string
+    public setLang(lang: string): string;
 
     /**设置地图顺时针旋转角度, 旋转原点为地图容器中心点, 取值范围 [0-360](自v1.3 新增)**/
-    public setRotation(rotation: number): number
+    public setRotation(rotation: number): number;
 
     /**设置当前地图显示状态, 包括是否可鼠标拖拽移动地图、地图是否可缩放、地图是否可旋转(rotateEnable)、是否可双击放大地图、是否可以通过键盘控制地图旋转(keyboardEnable)等 相关示例**/
-    public setStatus(status: any): void
+    public setStatus(status: any): void;
 
     /**设置鼠标指针默认样式, 参数cursor应符合CSS的cursor属性规范。可为CSS标注中的光标样式, 如: setCursor(“pointer”)等；或者自定义的光标样式, 如: setCursor("url('http: //http://lbs.amap.com/webapi/static/Images//0.png'), pointer")**/
-    public setDefaultCursor(cursor: string): void
+    public setDefaultCursor(cursor: string): void;
 
     /**地图放大一级显示**/
-    public zoomIn(): void
+    public zoomIn(): void;
 
     /**地图缩小一级显示**/
-    public zoomOut(): void
+    public zoomOut(): void;
 
     /**地图中心点平移至指定点位置**/
-    public panTo(positon: LngLat): void
+    public panTo(positon: LngLat): void;
 
     /**以像素为单位, 沿x方向和y方向移动地图, x向右为正, y向下为正**/
-    public panBy(x: number, y: number): void
+    public panBy(x: number, y: number): void;
 
     /**根据地图上添加的覆盖物分布情况, 自动缩放地图到合适的视野级别, 参数overlayList默认为当前地图上添加的所有覆盖物图层**/
-    public setFitView(overlayList: Array<any>): void
+    public setFitView(overlayList: Array<any>): void;
 
     /**删除地图上所有的覆盖物**/
-    public clearMap(): void
+    public clearMap(): void;
 
     /**注销地图对象, 并清空地图容器**/
-    public destroy(): void
+    public destroy(): void;
 
     /**插件加载方法。参数name中指定需要加载的插件类型, 同时加载多个插件时, 以字符串数组的形式添加。在Callback回调函数中进行地图插件的创建、插件事件的绑定等操作；插件为地图功能的扩展, 按需加载；插件写作方法, 请参考相关示例。**/
-    public plugin(name: string | Array<any>, callback: Function): void
+    public plugin(name: string | Array<any>, callback: Function): void;
 
     /**添加控件。参数可以是插件列表中的任何插件对象, 如: ToolBar、OverView、Scale等**/
-    public addControl(obj: any): void
+    public addControl(obj: any): void;
 
     /**移除地图上的指定控件**/
-    public removeControl(obj: any): void
+    public removeControl(obj: any): void;
 
     /**清除地图上的信息窗体。**/
-    public clearInfoWindow(): void
+    public clearInfoWindow(): void;
 
     /**平面地图像素坐标转换为地图经纬度坐标 相关示例**/
-    public pixelToLngLat(pixel: Pixel, level: number): LngLat
+    public pixelToLngLat(pixel: Pixel, level: number): LngLat;
 
     /**地图经纬度坐标转换为平面地图像素坐标**/
-    public lnglatToPixel(lngLat: LngLat, level: number): Pixel
+    public lnglatToPixel(lngLat: LngLat, level: number): Pixel;
 
     /**地图容器像素坐标转为地图经纬度坐标 相关示例**/
-    public containerToLngLat(pixel: Pixel): LngLat
+    public containerToLngLat(pixel: Pixel): LngLat;
 
     /**地图经纬度坐标转为地图容器像素坐标**/
-    public lngLatToContainer(lnglat: LngLat): Pixel
+    public lngLatToContainer(lnglat: LngLat): Pixel;
 
     /**设置地图的显示样式, 目前支持两种地图样式: 第一种: 自定义地图样式, 如"amap: //styles/d6bf8c1d69cea9f5c696185ad4ac4c86"可前往地图自定义平台定制自己的个性地图样式；第二种: 官方样式模版, 如"amap: //styles/grey"。其他模版样式及自定义地图的使用说明见开发指南**/
-    public setMapStyle(style: string): void
+    public setMapStyle(style: string): void;
 
     /**获取地图显示样式**/
-    public getMapStyle(): string
+    public getMapStyle(): string;
 
     /**设置地图上显示的元素种类, 支持bg(地图背景)、point(兴趣点)、road(道路)、building(建筑物)**/
-    public setFeatures(feature: Array<any>): void
+    public setFeatures(feature: Array<any>): void;
 
     /**获取地图显示元素种类**/
-    public getFeatures(): Array<any>
+    public getFeatures(): Array<any>;
 
     /**修改底图图层(自v1.3 废弃)**/
 
     // setDefaultLayer (layer: TileLayer): void;
 
     /**设置俯仰角, 3D视图有效(自V1.4.0开始支持)**/
-    public setPitch(Number: any): void
+    public setPitch(Number: any): void;
 
     /**获取俯仰角(自V1.4.0开始支持)**/
-    public getPitch(): number
+    public getPitch(): number;
 
     /**
      * 绑定事件声明
      */
-    public on(event: string, callback: Function): void
+    public on(event: string, callback: Function): void;
   }
 
   /** View2DOptions **/
@@ -490,7 +493,7 @@ declare namespace AMap {
   /** 二维地图显示视口, 用于定义二维地图静态显示属性, 如地图缩放级别“zoom”、地图中心点“center”等。 **/
   export class View2D {
     /**构造一个二维地图显示视口对象, opts二维地图视口对象初始化属性, 详见View2Doptions**/
-    constructor(opt: View2DOptions)
+    constructor(opt: View2DOptions);
   }
 
   /** MarkerOptions **/
@@ -568,146 +571,141 @@ declare namespace AMap {
   /** Marker类 **/
   export class Marker {
     /**构造一个点标记对象, 通过MarkerOptions设置点标记对象的属性**/
-    constructor(opt: MarkerOptions)
+    constructor(opt: MarkerOptions);
 
     /**唤起高德地图客户端标注页其中Object里面包含有{ name: String, name属性 必要参数 position:
      * LngLat 坐标点 }**/
-    public markOnAMAP(obj: any): void
+    public markOnAMAP(obj: any): void;
 
     /**获取Marker偏移量
      * (自v1.3 新增)**/
-    public getOffset(): Pixel
+    public getOffset(): Pixel;
 
     /**设置Marker偏移量
      * (自v1.3 新增)**/
-    public setOffset(offset: Pixel): void
+    public setOffset(offset: Pixel): void;
 
     /**设置点标记的动画效果, 默认值: “AMAP_ANIMATION_NONE”
      * 可选值:
      * “AMAP_ANIMATION_NONE”, 无动画效果
      * “AMAP_ANIMATION_DROP”, 点标掉落效果
      * “AMAP_ANIMATION_BOUNCE”, 点标弹跳效果**/
-    public setAnimation(animate: string): void
+    public setAnimation(animate: string): void;
 
     /**获取点标记的动画效果类型**/
-    public getAnimation(): string
+    public getAnimation(): string;
 
     /**设置点标记是支持鼠标单击事件**/
-    public setClickable(clickable: boolean): void
+    public setClickable(clickable: boolean): void;
 
     /**获取点标记是否支持鼠标单击事件**/
-    public getClickable(): boolean
+    public getClickable(): boolean;
 
     /**获取点标记的位置**/
-    public getPosition(): LngLat
+    public getPosition(): LngLat;
 
     /**设置点标记位置**/
-    public setPosition(lnglat: LngLat): void
+    public setPosition(lnglat: LngLat): void;
 
     /**设置点标记的旋转角度**/
-    public setAngle(angle: number): void
+    public setAngle(angle: number): void;
 
     /**设置点标记文本标签内容相关示例**/
-    public setLabel(label: any): void
+    public setLabel(label: any): void;
 
     /**获取点标记文本标签内容**/
-    public getLabel(): any
+    public getLabel(): any;
 
     /**获取点标记的旋转角度**/
-    public getAngle(): number
+    public getAngle(): number;
 
     /**设置点标记的叠加顺序, 默认最先添加的点标记在最底层**/
-    public setzIndex(index: number): void
+    public setzIndex(index: number): void;
 
     /**获取点标记的叠加顺序**/
-    public getzIndex(): number
+    public getzIndex(): number;
 
     /**设置点标记的显示图标。 参数image可传入String、Icon两种类型的值。
      * 若为String(图片url), 表示点标记以指定图片形式显示；若为Icon, 表示点标记以Icon对象形式显示**/
-    public setIcon(content: string | Icon): void
+    public setIcon(content: string | Icon): void;
 
     /**当点标记未自定义图标时, 获取Icon内容**/
-    public getIcon(): string | Icon
+    public getIcon(): string | Icon;
 
     /**设置点标记对象是否可拖拽移动**/
-    public setDraggable(draggable: boolean): void
+    public setDraggable(draggable: boolean): void;
 
     /**获取点标记对象是否可拖拽移动**/
-    public getDraggable(): boolean
+    public getDraggable(): boolean;
 
     /**点标记隐藏**/
-    public hide(): void
+    public hide(): void;
 
     /**点标记显示**/
-    public show(): void
+    public show(): void;
 
     /**设置鼠标悬停时的光标。 参数cur可为CSS标注中的光标样式, 如:
      * setCursor(“pointer”)等；或者自定义的光标样式, 如:
      * setCursor("url('http: //http://webapi.amap.com/images/0.png') , pointer")
      * 注: 当浏览器不支持css2, url值不起作用, 鼠标样式就按pointer来设置**/
-    public setCursor(Cursor: any): string
+    public setCursor(Cursor: any): string;
 
     /**设置点标记显示内容, 可以是HTML要素字符串或者HTML DOM对象**/
-    public setContent(html: string | HTMLDivElement): void
+    public setContent(html: string | HTMLDivElement): void;
 
     /**获取点标记内容**/
-    public getContent(): string
+    public getContent(): string;
 
     /**以指定的速度, 点标记沿指定的路径移动。参数path为路径坐标串；speed为指定速度, 单位: 千米/小时； 回调函数f为变化曲线函数, 缺省为function(k){return k}；参数circlable表明是否循环执行动画, 默认为false**/
-    public moveAlong(
-      path: Array<any>,
-      speed: number,
-      f: Function,
-      circlable: boolean
-    ): void
+    public moveAlong(path: Array<any>, speed: number, f: Function, circlable: boolean): void;
 
     /**以给定速度移动点标记到指定位置。参数lnglat为指定位置, 必设；speed为指定速度, 单位: 千米/小时；回调函数f为变化曲线函数, 缺省为function(k){return k}。**/
-    public moveTo(lnglat: LngLat, speed: number, f: Function): void
+    public moveTo(lnglat: LngLat, speed: number, f: Function): void;
 
     /**点标记停止动画**/
-    public stopMove(): void
+    public stopMove(): void;
 
     /**暂定点标记的动画效果**/
-    public pauseMove(): void
+    public pauseMove(): void;
 
     /**重新开始点标记的动画效果**/
-    public resumeMove(): void
+    public resumeMove(): void;
 
     /**为Marker指定目标显示地图。当参数值取null时, 地图上移除当前Marker: setMap(null)**/
-    public setMap(map?: Map | null): void
+    public setMap(map?: Map | null): void;
 
     /**获取Marker所在地图对象**/
-    public getMap(): Map
+    public getMap(): Map;
 
     /**鼠标滑过点标时的文字提示**/
-    public setTitle(title: string): void
+    public setTitle(title: string): void;
 
     /**获取点标记的文字提示**/
-    public getTitle(): string
+    public getTitle(): string;
 
     /**地图上有多个marker时, 当isTop为true时, marker将显示在最前面；当为false时, marker取消置顶**/
-    public setTop(isTop: boolean): void
+    public setTop(isTop: boolean): void;
 
     /****/
-    public getTop(): boolean
+    public getTop(): boolean;
 
     /**为marker设置阴影效果**/
-    public setShadow(icon: Icon): void
+    public setShadow(icon: Icon): void;
 
     /**获取marker的阴影图标**/
-    public getShadow(): Icon
+    public getShadow(): Icon;
 
     /**设置marker的可点击区域**/
-    public setShape(shape: MarkerShape): void
+    public setShape(shape: MarkerShape): void;
 
     /**获取marker的可点击区域**/
-    public getShape(): MarkerShape
+    public getShape(): MarkerShape;
 
     /**设置用户自定义属性, 支持JavaScript API任意数据类型, 如Marker的id等**/
-    public setExtData(ext: any): void
+    public setExtData(ext: any): void;
 
     /**获取用户自定义属性**/
-    public getExtData(): any
+    public getExtData(): any;
   }
 
   /** MarkerShapeOptions **/
@@ -722,7 +720,7 @@ declare namespace AMap {
   /** MarkerShape **/
   export class MarkerShape {
     /**构造一个Marker可点击区域对象, 通过MarkerShapeOptions设置可点击区域属性**/
-    constructor(opt: MarkerShapeOptions)
+    constructor(opt: MarkerShapeOptions);
   }
 
   /** IconOptions **/
@@ -743,13 +741,13 @@ declare namespace AMap {
   /** MarkerShape **/
   export class Icon {
     /**构造点覆盖物图标, 通过IconOptions设置图标属性**/
-    constructor(opt: IconOptions)
+    constructor(opt: IconOptions);
 
     /**获取图标图片大小**/
-    public getImageSize(): Size
+    public getImageSize(): Size;
 
     /**设置图标图片大小**/
-    public setImageSize(size: Size): void
+    public setImageSize(size: Size): void;
   }
 
   /** ElasticMarkerOptions **/
@@ -828,71 +826,71 @@ declare namespace AMap {
   /** 灵活点标记, 一种可以随着地图级别变化而改变图标和大小的点标记, 插件类。查看示例 **/
   export class ElasticMarker {
     /**构造一个灵活点标记对象, 通过ElasticMarkerOptions设置点标记对象的属性**/
-    constructor(opt: ElasticMarkerOptions)
+    constructor(opt: ElasticMarkerOptions);
 
     /**唤起高德地图客户端标注页其中Object里面包含有{ name: String, name属性 必要参数 position:
      * LngLat 坐标点 }**/
-    public markOnAMAP(obj: any): void
+    public markOnAMAP(obj: any): void;
 
     /**设置点标记是支持鼠标单击事件**/
-    public setClickable(clickable: boolean): void
+    public setClickable(clickable: boolean): void;
 
     /**获取点标记是否支持鼠标单击事件**/
-    public getClickable(): boolean
+    public getClickable(): boolean;
 
     /**获取点标记的位置**/
-    public getPosition(): LngLat
+    public getPosition(): LngLat;
 
     /**设置点标记位置**/
-    public setPosition(lnglat: LngLat): void
+    public setPosition(lnglat: LngLat): void;
 
     /**设置点标记的叠加顺序, 默认最先添加的点标记在最底层**/
-    public setzIndex(index: number): void
+    public setzIndex(index: number): void;
 
     /**获取点标记的叠加顺序**/
-    public getzIndex(): number
+    public getzIndex(): number;
 
     /**设置点标记对象是否可拖拽移动**/
-    public setDraggable(draggable: boolean): void
+    public setDraggable(draggable: boolean): void;
 
     /**获取点标记对象是否可拖拽移动**/
-    public getDraggable(): boolean
+    public getDraggable(): boolean;
 
     /**点标记隐藏**/
-    public hide(): void
+    public hide(): void;
 
     /**点标记显示**/
-    public show(): void
+    public show(): void;
 
     /**设置鼠标悬停时的光标。 参数cur可为CSS标注中的光标样式, 如:
      * setCursor(“pointer”)等；或者自定义的光标样式, 如:
      * setCursor("url('http: //http://webapi.amap.com/images/0.png') , pointer")
      * 注: 当浏览器不支持css2, url值不起作用, 鼠标样式就按pointer来设置**/
-    public setCursor(Cursor: any): string
+    public setCursor(Cursor: any): string;
 
     /**为Marker指定目标显示地图。当参数值取null时, 地图上移除当前Marker: setMap(null)**/
-    public setMap(map: Map): void
+    public setMap(map: Map): void;
 
     /**获取Marker所在地图对象**/
-    public getMap(): Map
+    public getMap(): Map;
 
     /**鼠标滑过点标时的文字提示**/
-    public setTitle(title: string): void
+    public setTitle(title: string): void;
 
     /**获取点标记的文字提示**/
-    public getTitle(): string
+    public getTitle(): string;
 
     /**地图上有多个marker时, 当isTop为true时, marker将显示在最前面；当为false时, marker取消置顶**/
-    public setTop(isTop: boolean): void
+    public setTop(isTop: boolean): void;
 
     /****/
-    public getTop(): boolean
+    public getTop(): boolean;
 
     /**设置用户自定义属性, 支持JavaScript API任意数据类型, 如Marker的id等**/
-    public setExtData(ext: any): void
+    public setExtData(ext: any): void;
 
     /**获取用户自定义属性**/
-    public getExtData(): any
+    public getExtData(): any;
   }
 
   /** TextOptions **/
@@ -966,128 +964,123 @@ declare namespace AMap {
   /** 纯文本标记, 继承自Marker, 具有Marker的大部分属性、方法和事件(v1.4.2新增) **/
   export class Text {
     /**构造一个点标记对象, 通过TextOptions设置点标记对象的属性**/
-    constructor(opt: TextOptions)
+    constructor(opt: TextOptions);
 
     /**获取文本内容**/
-    public getText(): string
+    public getText(): string;
 
     /**修改文本内容**/
-    public setText(String: any): void
+    public setText(String: any): void;
 
     /**设置文本样式, Object同css样式表, 如: {'background-color': 'red'}**/
-    public setStyle(Object: any): void
+    public setStyle(Object: any): void;
 
     /**唤起高德地图客户端标注页其中Object里面包含有{ name: String, name属性 必要参数 position:
      * LngLat 坐标点 }**/
-    public markOnAMAP(obj: any): void
+    public markOnAMAP(obj: any): void;
 
     /**获取偏移量**/
-    public getOffset(): Pixel
+    public getOffset(): Pixel;
 
     /**设置偏移量**/
-    public setOffset(offset: Pixel): void
+    public setOffset(offset: Pixel): void;
 
     /**设置点标记的动画效果, 默认值: “AMAP_ANIMATION_NONE”
      * 可选值:
      * “AMAP_ANIMATION_NONE”, 无动画效果
      * “AMAP_ANIMATION_DROP”, 点标掉落效果
      * “AMAP_ANIMATION_BOUNCE”, 点标弹跳效果**/
-    public setAnimation(animate: string): void
+    public setAnimation(animate: string): void;
 
     /**获取点标记的动画效果类型**/
-    public getAnimation(): string
+    public getAnimation(): string;
 
     /**设置点标记是支持鼠标单击事件**/
-    public setClickable(clickable: boolean): void
+    public setClickable(clickable: boolean): void;
 
     /**获取点标记是否支持鼠标单击事件**/
-    public getClickable(): boolean
+    public getClickable(): boolean;
 
     /**获取点标记的位置**/
-    public getPosition(): LngLat
+    public getPosition(): LngLat;
 
     /**设置点标记位置**/
-    public setPosition(lnglat: LngLat): void
+    public setPosition(lnglat: LngLat): void;
 
     /**设置点标记的旋转角度**/
-    public setAngle(angle: number): void
+    public setAngle(angle: number): void;
 
     /**获取点标记的旋转角度**/
-    public getAngle(): number
+    public getAngle(): number;
 
     /**设置点标记的叠加顺序, 默认最先添加的点标记在最底层**/
-    public setzIndex(index: number): void
+    public setzIndex(index: number): void;
 
     /**获取点标记的叠加顺序**/
-    public getzIndex(): number
+    public getzIndex(): number;
 
     /**设置点标记对象是否可拖拽移动**/
-    public setDraggable(draggable: boolean): void
+    public setDraggable(draggable: boolean): void;
 
     /**获取点标记对象是否可拖拽移动**/
-    public getDraggable(): boolean
+    public getDraggable(): boolean;
 
     /**点标记隐藏**/
-    public hide(): void
+    public hide(): void;
 
     /**点标记显示**/
-    public show(): void
+    public show(): void;
 
     /**设置鼠标悬停时的光标。 参数cur可为CSS标注中的光标样式, 如:
      * setCursor(“pointer”)等；或者自定义的光标样式, 如:
      * setCursor("url('http: //http://webapi.amap.com/images/0.png') , pointer")
      * 注: 当浏览器不支持css2, url值不起作用, 鼠标样式就按pointer来设置**/
-    public setCursor(Cursor: any): string
+    public setCursor(Cursor: any): string;
 
     /**以指定的速度, 点标记沿指定的路径移动。参数path为路径坐标串；speed为指定速度, 单位: 千米/小时； 回调函数f为变化曲线函数, 缺省为function(k){return k}；参数circlable表明是否循环执行动画, 默认为false**/
-    public moveAlong(
-      path: Array<any>,
-      speed: number,
-      f: Function,
-      circlable: boolean
-    ): void
+    public moveAlong(path: Array<any>, speed: number, f: Function, circlable: boolean): void;
 
     /**以给定速度移动点标记到指定位置。参数lnglat为指定位置, 必设；speed为指定速度, 单位: 千米/小时；回调函数f为变化曲线函数, 缺省为function(k){return k}。**/
-    public moveTo(lnglat: LngLat, speed: number, f: Function): void
+    public moveTo(lnglat: LngLat, speed: number, f: Function): void;
 
     /**点标记停止动画**/
-    public stopMove(): void
+    public stopMove(): void;
 
     /**暂定点标记的动画效果**/
-    public pauseMove(): void
+    public pauseMove(): void;
 
     /**重新开始点标记的动画效果**/
-    public resumeMove(): void
+    public resumeMove(): void;
 
     /**为Marker指定目标显示地图。当参数值取null时, 地图上移除当前Marker: setMap(null)**/
-    public setMap(map: Map): void
+    public setMap(map: Map): void;
 
     /**获取Marker所在地图对象**/
-    public getMap(): Map
+    public getMap(): Map;
 
     /**鼠标滑过点标时的文字提示**/
-    public setTitle(title: string): void
+    public setTitle(title: string): void;
 
     /**获取点标记的文字提示**/
-    public getTitle(): string
+    public getTitle(): string;
 
     /**地图上有多个marker时, 当isTop为true时, marker将显示在最前面；当为false时, marker取消置顶**/
-    public setTop(isTop: boolean): void
+    public setTop(isTop: boolean): void;
 
     /****/
-    public getTop(): boolean
+    public getTop(): boolean;
 
     /**设置阴影效果**/
-    public setShadow(icon: Icon): void
+    public setShadow(icon: Icon): void;
 
     /**获取阴影图标**/
-    public getShadow(): Icon
+    public getShadow(): Icon;
 
     /**设置用户自定义属性, 支持JavaScript API任意数据类型, 如Marker的id等**/
-    public setExtData(ext: any): void
+    public setExtData(ext: any): void;
 
     /**获取用户自定义属性**/
-    public getExtData(): any
+    public getExtData(): any;
   }
 
   /** PolylineOptions **/
@@ -1155,40 +1148,40 @@ declare namespace AMap {
   /** Polyline类 **/
   export class Polyline {
     /**构造折线对象, 通过PolylineOptions指定折线样式**/
-    constructor(opt: PolylineOptions)
+    constructor(opt: PolylineOptions);
 
     /**设置组成该折线的节点数组**/
-    public setPath(path: Array<any>): void
+    public setPath(path: Array<any>): void;
 
     /**获取折线路径的节点数组。其中lat和lng是经纬度参数。**/
-    public getPath(): Array<any>
+    public getPath(): Array<any>;
 
     /**修改折线属性(包括路径的节点、线样式、是否绘制大地线等。属性详情参看PolylineOptions列表)**/
-    public setOptions(opt: PolylineOptions): void
+    public setOptions(opt: PolylineOptions): void;
 
     /**获取线的属性**/
-    public getOptions(): any
+    public getOptions(): any;
 
     /**获取折线的总长度(单位: 米)**/
-    public getLength(): number
+    public getLength(): number;
 
     /**获取当前折线的矩形范围对象**/
-    public getBounds(): Bounds
+    public getBounds(): Bounds;
 
     /**地图上隐藏指定折线**/
-    public hide(): void
+    public hide(): void;
 
     /**地图上显示指定折线**/
-    public show(): void
+    public show(): void;
 
     /**设置折线所在的地图。参数map即为目标地图, 参数为null时, 在地图上移除当前折线**/
-    public setMap(map: Map): void
+    public setMap(map: Map): void;
 
     /**设置用户自定义属性, 支持JavaScript API任意数据类型, 如Polyline的id等**/
-    public setExtData(ext: any): void
+    public setExtData(ext: any): void;
 
     /**获取用户自定义属性**/
-    public getExtData(): any
+    public getExtData(): any;
   }
 
   /**
@@ -1252,43 +1245,43 @@ declare namespace AMap {
    */
   export class Polygon {
     /** 以PolygonOption作为构建函数的配置项  */
-    constructor(opt: PolygonOption)
+    constructor(opt: PolygonOption);
 
     /** 设置多边形轮廓线节点数组，当为“环”多边形时，path为二维数组，数组元素为多边形轮廓线的节点坐标数组  */
-    public setPath(path: Array<number[] | LngLat>): void
+    public setPath(path: Array<number[] | LngLat>): void;
 
     /** 获取多边形轮廓线节点数组。其中lat和lng是经纬度参数 */
-    public getPath(): Array<any>
+    public getPath(): Array<any>;
 
     /** 修改多边形属性（样式风格，包括组成多边形轮廓线的节点、轮廓线样式等。属性详情参看PolygonOptions列表） */
-    public setOptions(opt: PolygonOption): void
+    public setOptions(opt: PolygonOption): void;
 
     /** 获取多边形的属性 */
-    public getOptions(): any
+    public getOptions(): any;
 
     /** 获取当前多边形的矩形范围对象 */
-    public getBounds(): Bounds
+    public getBounds(): Bounds;
 
     /** 获取多边形的面积（单位：平方米） */
-    public getArea(): number
+    public getArea(): number;
 
     /** 隐藏多边形 */
-    public hide(): void
+    public hide(): void;
 
     /** 显示多边形 */
-    public show(): void
+    public show(): void;
 
     /** 在指定地图上显示当前的多边形。参数取值为null时，在地图上移除当前多边形  */
-    public setMap(map: Map): void
+    public setMap(map: Map): void;
 
     /** 设置用户自定义属性，支持JavaScript API任意数据类型，如Polygon的id等 */
-    public setExtData(ext: any): any
+    public setExtData(ext: any): any;
 
     /** 获取用户自定义属性 */
-    public getExtData(): any
+    public getExtData(): any;
 
     /** 判断指定点坐标是否在多边形范围内 */
-    public contains(point: LngLat | number[]): boolean
+    public contains(point: LngLat | number[]): boolean;
   }
 
   /**
@@ -1331,43 +1324,43 @@ declare namespace AMap {
    */
   export class InfoWindow {
     /** 构建信息窗体对象，使用InfoWindowOption的配置项 */
-    constructor(opt: InfoWindowOption)
+    constructor(opt: InfoWindowOption);
 
     /** 在地图的指定位置打开信息窗体  */
-    public open(map: Map, pos: AMap.LngLat | number[]): void
+    public open(map: Map, pos: AMap.LngLat | number[]): void;
 
     /** 关闭信息窗体 */
-    public close(): void
+    public close(): void;
 
     /** 获取信息窗体是否打开 */
-    public getIsOpen(): boolean
+    public getIsOpen(): boolean;
 
     /** 设置信息窗体内容，可通过该函数动态更新信息窗体中的信息 */
-    public setContent(content: string | HTMLElement): void
+    public setContent(content: string | HTMLElement): void;
 
     /** 获取信息窗体内容 ，结果以字符串方式返回 */
-    public getContent(): string
+    public getContent(): string;
 
     /** 设置信息窗体显示基点位置 */
-    public setPosition(lnglat: LngLat): void
+    public setPosition(lnglat: LngLat): void;
 
     /** 获取信息窗体显示基点位置 */
-    public getPosition(): LngLat | number[]
+    public getPosition(): LngLat | number[];
 
     /** 获取信息窗体锚点 */
-    public getAnchor(): string
+    public getAnchor(): string;
 
     /** 设置信息窗体锚点
      可选值：'top-left'|'top-center'|'top-right'|'middle-left'|
      'center'|'middle-right'|'bottom-left'|'bottom-center'|'bottom-right'
      */
-    public setAnchor(anchor: string): void
+    public setAnchor(anchor: string): void;
 
     /** 设置信息窗体大小（isCustom为false时有效） */
-    public setSize(size: Size): void
+    public setSize(size: Size): void;
 
     /** 获取信息窗体大小 */
-    public getSize(): Size
+    public getSize(): Size;
   }
 }
 

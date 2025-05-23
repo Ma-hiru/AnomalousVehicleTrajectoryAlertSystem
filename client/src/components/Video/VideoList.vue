@@ -3,18 +3,19 @@
     <VideoForWS
       class="w-[250px]"
       :url="urlList[0]"
-      :meta="{id:i,name:'ffmpeg'}"
-      v-for="i in 10"
-      :active="activeId===i"
+      :meta="{ id: i, name: 'ffmpeg' }"
+      v-for="i in 2"
+      :active="activeId === i"
       :key="i"
-      :set-active="(id)=>{
-        activeId=id as number;
-      }"
-    />
+      :set-active="
+        (id) => {
+          activeId = id as number;
+        }
+      " />
   </div>
 </template>
 
-<script setup lang="ts" name='VideoList'>
+<script setup lang="ts" name="VideoList">
   import { ref } from "vue";
   import VideoForWS from "@/components/Video/VideoForWS.vue";
   import AppSettings from "@/settings";

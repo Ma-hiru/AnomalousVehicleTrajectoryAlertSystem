@@ -15,8 +15,8 @@ declare module 'vue' {
     VideoCharts: typeof import('./src/components/Charts/VideoCharts.vue')['default']
     VideoForm: typeof import('./src/components/Table/VideoForm.vue')['default']
     VideoForWebRTC: typeof import('./src/components/Video/VideoForWebRTC.vue')['default']
-    VideoForWS: typeof import('./src/components/Video/VideoForWS.vue')['default']
-    VideoList: typeof import('./src/components/Video/VideoList.vue')['default']
+    VideoForWS: typeof import('./src/components/Analysis/VideoForWS.vue')['default']
+    VideoList: typeof import('./src/components/Analysis/VideoList.vue')['default']
     VideoModule: typeof import('./src/components/Video/VideoModule.vue')['default']
   }
 }

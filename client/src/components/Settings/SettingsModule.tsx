@@ -3,9 +3,6 @@ import { FC, memo } from "react";
 type props = object;
 
 const SettingsModule: FC<props> = () => {
-  return (
-    <>
-    </>
-  );
+  return <></>;
 };
 export default memo(SettingsModule);

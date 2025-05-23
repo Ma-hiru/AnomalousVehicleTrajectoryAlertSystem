@@ -3,8 +3,6 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
-import prettier from "eslint-plugin-prettier";
-import prettierRules from "eslint-config-prettier";
 import pluginVitest from "@vitest/eslint-plugin";
 
 export default tseslint.config(
@@ -25,10 +23,7 @@ export default tseslint.config(
     }
   },
   {
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended
-    ],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",
@@ -36,11 +31,9 @@ export default tseslint.config(
     },
     plugins: {
       "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
-      "prettier": prettier
+      "react-refresh": reactRefresh
     },
     rules: {
-      ...prettierRules.rules,
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": [
         "warn",

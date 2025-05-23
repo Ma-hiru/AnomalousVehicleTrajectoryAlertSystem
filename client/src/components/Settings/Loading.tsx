@@ -20,11 +20,7 @@ const Loading: FC<props> = ({ loading, result }) => {
   };
   return (
     <>
-      <div className="flex justify-center items-center w-full h-full">
-        {
-          render()
-        }
-      </div>
+      <div className="flex justify-center items-center w-full h-full">{render()}</div>
     </>
   );
 };

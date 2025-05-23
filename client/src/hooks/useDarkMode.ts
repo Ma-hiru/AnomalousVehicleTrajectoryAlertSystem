@@ -10,17 +10,12 @@ const darkAnimate = (x: number, y: number, isDark: boolean) => {
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
     );
-    const clipPath = [
-      `circle(0px at ${x}px ${y}px)`,
-      `circle(${radius}px at ${x}px ${y}px)`
-    ];
+    const clipPath = [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
     document.documentElement.animate(
       { clipPath: isDark ? clipPath.reverse() : clipPath },
       {
         duration: 600,
-        pseudoElement: isDark
-          ? "::view-transition-old(root)"
-          : "::view-transition-new(root)"
+        pseudoElement: isDark ? "::view-transition-old(root)" : "::view-transition-new(root)"
       }
     );
   };
@@ -29,9 +24,9 @@ const darkAnimate = (x: number, y: number, isDark: boolean) => {
     : changeMode();
 };
 export const useDarkModeReact = (): {
-  isDark: boolean,
-  changeMode: () => boolean,
-  darkAnimate: (x: number, y: number, isDark: boolean) => void
+  isDark: boolean;
+  changeMode: () => boolean;
+  darkAnimate: (x: number, y: number, isDark: boolean) => void;
 } => {
   const isDark = useSyncExternalStore(
     (listener) => {
@@ -44,11 +39,14 @@ export const useDarkModeReact = (): {
     },
     () => document.documentElement.className.includes("darkMode")
   );
-  return useMemo(() => ({
-    isDark,
-    changeMode,
-    darkAnimate
-  }), [isDark]);
+  return useMemo(
+    () => ({
+      isDark,
+      changeMode,
+      darkAnimate
+    }),
+    [isDark]
+  );
 };
 export const useDarkModeVue = (): [isDark: Ref<boolean>, change: () => boolean] => {
   const isDark = ref(document.documentElement.className.includes("darkMode"));

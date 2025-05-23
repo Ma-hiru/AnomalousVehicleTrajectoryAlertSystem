@@ -1,6 +1,11 @@
 import Logger from "@/utils/logger.ts";
 
-export const getSafeValue = <T>(value: any, defaultValue: T, deep?: boolean, nullVal?: any[]): T => {
+export const getSafeValue = <T>(
+  value: any,
+  defaultValue: T,
+  deep?: boolean,
+  nullVal?: any[]
+): T => {
   try {
     if (value === defaultValue) return value;
     //  浅层检查类型和null
@@ -10,7 +15,11 @@ export const getSafeValue = <T>(value: any, defaultValue: T, deep?: boolean, nul
         if (typeof defaultValue === "number" && !Number.isNaN(Number(value))) {
           return Number(value) as T;
         }
-        if (typeof defaultValue === "string" && !Number.isNaN(Number(defaultValue)) && typeof value === "number") {
+        if (
+          typeof defaultValue === "string" &&
+          !Number.isNaN(Number(defaultValue)) &&
+          typeof value === "number"
+        ) {
           return String(value) as T;
         }
         if (typeof defaultValue === "boolean" && (value === "true" || value === "false")) {
@@ -25,8 +34,7 @@ export const getSafeValue = <T>(value: any, defaultValue: T, deep?: boolean, nul
       if (Array.isArray(value) !== Array.isArray(defaultValue)) return defaultValue;
       //类型匹配，但是为预设的null值，返回默认值
       if (nullVal) {
-        for (const nVal of nullVal)
-          if (value === nVal) return defaultValue;
+        for (const nVal of nullVal) if (value === nVal) return defaultValue;
       }
       //类型匹配，且不为预设的null值，返回原始值
       return value;
@@ -42,7 +50,9 @@ export const getSafeValue = <T>(value: any, defaultValue: T, deep?: boolean, nul
         }
       }
       if (typeof defaultValue === "object" && Array.isArray(checkedVal)) {
-        (checkedVal as T[]) = checkedVal.map(item => getSafeValue(item, (defaultValue as T[])![0], true, nullVal));
+        (checkedVal as T[]) = checkedVal.map((item) =>
+          getSafeValue(item, (defaultValue as T[])![0], true, nullVal)
+        );
       }
       return checkedVal;
     }

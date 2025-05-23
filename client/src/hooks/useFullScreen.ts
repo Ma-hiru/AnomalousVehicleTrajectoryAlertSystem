@@ -13,14 +13,13 @@ export const useFullScreenReact = (): [isfull: boolean, change: () => Promise<vo
       () => !!document.fullscreenElement,
       () => false
     ),
-    useCallback(
-      async () => {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        } else {
-          await document.documentElement.requestFullscreen();
-        }
-      }, [])
+    useCallback(async () => {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await document.documentElement.requestFullscreen();
+      }
+    }, [])
   ];
 };
 export const useFullScreenVue = (): [isfull: Ref<boolean>, change: () => Promise<void>] => {

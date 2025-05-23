@@ -20,6 +20,7 @@ export const tokenPrefix = tokenTypePrefix.Bearer;
 export enum API {
   Go2rtcConfig = "/api/go2rtc/config",
   Go2rtcStreams = "/api/go2rtc/streams",
+  GinRestart = "/api/gin/restart",
 }
 
 export const GetStreamURL = (name: string) => {

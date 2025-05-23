@@ -3,26 +3,27 @@
     class="video-container"
     @click="props.setActive(props.meta.id)"
     :whileHover="{
-      scale:1.05
-    }"
-  >
+      scale: 1.05
+    }">
     <video
       class="w-full video-js vjs-theme-city"
-      :class="{active: props.active}"
+      :class="{ active: props.active }"
       ref="videoMse"
-      autoplay muted
-      controls
-    />
+      autoplay
+      muted
+      controls />
     <div class="meta">
       <div>ID: {{ props.meta.id }}</div>
       <div>Name: {{ props.meta.name }}</div>
-      <el-button v-show="props.active" size="small" link type="primary" @click="refresh">刷新</el-button>
+      <el-button v-show="props.active" size="small" link type="primary" @click="refresh"
+        >刷新</el-button
+      >
     </div>
   </motion.div>
 </template>
 
 <!--suppress ES6UnusedImports -->
-<script setup lang="ts" name='Video'>
+<script setup lang="ts" name="Video">
   import { onMounted, onUnmounted, ref, useTemplateRef } from "vue";
   import { VideoStream } from "@/worker/VideoStream.ts";
   import { motion } from "motion-v";
@@ -34,7 +35,7 @@
     meta: {
       id: string | number;
       name: string;
-    }
+    };
   }>();
 
   const videoMse = useTemplateRef("videoMse");
@@ -71,7 +72,6 @@
 
       &.active {
         border: 5px solid palevioletred;
-
       }
     }
 

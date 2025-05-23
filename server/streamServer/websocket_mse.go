@@ -27,12 +27,15 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 			//	strconv.Itoa(index)+strconv.FormatInt(img.Index, 10)+
 			//		"-"+strconv.FormatFloat(img.Timestamp, 'f', 6, 64)+".jpg"))
 			//_, _ = file.Write(img.Data)
+			//TODO yolo
 			if msg, err := json.Marshal(socketServer.FrameMsg{
 				StreamName: query.Get("src"),
 				Timestamp:  img.Timestamp,
 				Data:       img.Index,
 			}); err == nil {
-				socketServer.FramesSocketIO.To(query.Get("src")).Emit(socketServer.FrameEvent, string(msg))
+				if IO, ok := socketServer.GetFramesSocketIO(); ok {
+					IO.To(query.Get("src")).Emit(socketServer.FrameEvent, string(msg))
+				}
 			} else {
 				utils.Logger().Printf("FrameMsg转换json string错误%v\n", err)
 			}

@@ -6,21 +6,25 @@ const WebSocketInstance = {
   url: { stream: "", frame: "" }
 };
 
-self.addEventListener("message", (workerEvent: WebSocketMSEWorkerEV) => {
-  if (workerEvent.data.type === "init") {
-    WebSocketInstance.url.stream = workerEvent.data.stream;
-    WebSocketInstance.url.frame = workerEvent.data.frame;
-    try {
-      init();
-    } catch (e) {
-      self.postMessage({
-        type: "error",
-        error: e
-      } as WebSocketMSE);
-      terminate();
-    }
-  } else if (workerEvent.data.type === "terminate") terminate();
-}, { passive: true });
+self.addEventListener(
+  "message",
+  (workerEvent: WebSocketMSEWorkerEV) => {
+    if (workerEvent.data.type === "init") {
+      WebSocketInstance.url.stream = workerEvent.data.stream;
+      WebSocketInstance.url.frame = workerEvent.data.frame;
+      try {
+        init();
+      } catch (e) {
+        self.postMessage({
+          type: "error",
+          error: e
+        } as WebSocketMSE);
+        terminate();
+      }
+    } else if (workerEvent.data.type === "terminate") terminate();
+  },
+  { passive: true }
+);
 
 const init = () => {
   WebSocketInstance.stream = new WebSocket(WebSocketInstance.url.stream);
@@ -51,10 +55,13 @@ const init = () => {
     } else {
       // 接收到二进制数据，添加到媒体源
       // 使用transferable对象加速二进制数据传输
-      self.postMessage({
-        type: "new-packet",
-        packet: ev.data
-      }, [ev.data]);  // 使用transferable对象
+      self.postMessage(
+        {
+          type: "new-packet",
+          packet: ev.data
+        },
+        [ev.data]
+      ); // 使用transferable对象
     }
   };
   WebSocketInstance.stream.onopen = () => {
@@ -96,4 +103,3 @@ const terminate = () => {
   WebSocketInstance.info?.disconnect();
   WebSocketInstance.info = null;
 };
-

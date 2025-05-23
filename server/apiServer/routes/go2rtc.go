@@ -8,7 +8,7 @@ import (
 
 func go2rtcRoutes(app *gin.RouterGroup) {
 	//, middleware.Validate(settings.TokenPrefix, utils.TokenCheckFn)
-	root := app.Group("/")
+	root := app.Group("/proxy")
 	{
 		root.GET("/config", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
 			return settings.Go2rtcBaseUrl + "/api/config"
@@ -27,6 +27,9 @@ func go2rtcRoutes(app *gin.RouterGroup) {
 		}, nil, nil))
 		root.DELETE("/streams", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
 			return settings.Go2rtcBaseUrl + "/api/streams?src=" + ctx.Query("src")
+		}, nil, nil))
+		root.POST("/restart", middleware.ProxyToGo2RTC(func(ctx *gin.Context) string {
+			return settings.Go2rtcBaseUrl + "/api/restart"
 		}, nil, nil))
 	}
 }

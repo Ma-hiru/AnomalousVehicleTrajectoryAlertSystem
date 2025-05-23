@@ -5,9 +5,7 @@
     /*协同配置*/
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     /*React*/
     //    "target": "ES2020",
@@ -23,12 +21,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     /* Vue/React */
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable",
-      "webworker"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "webworker"],
     "module": "ESNext",
     "useDefineForClassFields": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
@@ -45,9 +38,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "exclude": [
     "node_modules",
     "plugins/**/*",

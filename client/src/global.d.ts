@@ -1,4 +1,4 @@
-export {}
+export {};
 
 declare global {
   declare module "*.png" {
@@ -8,7 +8,7 @@ declare global {
 
   interface Window {
     _AMapSecurityConfig: {
-      securityJsCode: string
+      securityJsCode: string;
     };
   }
 }

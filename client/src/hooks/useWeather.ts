@@ -15,23 +15,23 @@ export const useWeather = () => {
     err: null
   });
   useEffect(() => {
-    status.set(draft => {
+    status.set((draft) => {
       draft.loading = true;
     });
     getWeather()
       .then((weather) => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.weather = weather;
         });
       })
       .catch((error) => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.err = error;
         });
         logger.Message.Error("获取天气失败！");
       })
       .finally(() => {
-        status.set(draft => {
+        status.set((draft) => {
           draft.loading = false;
         });
       });

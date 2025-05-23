@@ -4,7 +4,7 @@ const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "layout",
-    component: () => import("@/pages/Layout.vue"),
+    component: () => import("@/pages/Layout.vue")
   }
 ];
 export default constantRoutes;

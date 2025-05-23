@@ -27,7 +27,7 @@ func HandleUserLogin(ctx *gin.Context) {
 		return
 	} else {
 		user.Status = sql.Null[int8]{V: 1, Valid: true}
-		user.UpdateTime = utils.GetTime(settings.TimeFormat)
+		user.UpdateTime = utils.GetFormatTime()
 		user, ok = service.UpdateUser(*user, *user)
 		if !ok {
 			log.Println("更新用户状态失败！")

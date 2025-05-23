@@ -11,17 +11,11 @@ type props = {
   containerStyle?: CSSProperties;
   map: MyState<AMap.Map | null>;
   amap: MyState<typeof window.AMap | null>;
-  id:string;
+  id: string;
 };
 
-const Map: FC<props> = (
-  {
-    containerStyle,
-    map,
-    amap,
-    id
-  }) => {
-  const {isDark} = useDarkModeReact();
+const Map: FC<props> = ({ containerStyle, map, amap, id }) => {
+  const { isDark } = useDarkModeReact();
   useEffect(() => {
     if (map.get() === null) {
       window._AMapSecurityConfig = {
@@ -30,19 +24,32 @@ const Map: FC<props> = (
       AMapLoader.load({
         key: AppSettings.MAP_KEY,
         version: "2.0",
-        plugins: ["AMap.ToolBar", "AMap.PlaceSearch", "AMap.Scale", "AMap.Geolocation", "AMap.Geocoder", "AMap.MouseTool", "AMap.ControlBar", "AMap.AutoComplete"]
-      }).then((AMap: typeof window.AMap) => {
-        amap.set(AMap);
-        map.set(new AMap.Map(id, {
-          viewMode: "3D",
-          resizeEnable: true,
-          zoom: 16,
-          mapStyle: isDark ? AppSettings.MAP_THEME_DARK : AppSettings.MAP_THEME_Light
-        }));
-      }).catch((err) => {
-        logger.Message.Error("地图加载失败！");
-        logger.Echo({ err });
-      });
+        plugins: [
+          "AMap.ToolBar",
+          "AMap.PlaceSearch",
+          "AMap.Scale",
+          "AMap.Geolocation",
+          "AMap.Geocoder",
+          "AMap.MouseTool",
+          "AMap.ControlBar",
+          "AMap.AutoComplete"
+        ]
+      })
+        .then((AMap: typeof window.AMap) => {
+          amap.set(AMap);
+          map.set(
+            new AMap.Map(id, {
+              viewMode: "3D",
+              resizeEnable: true,
+              zoom: 16,
+              mapStyle: isDark ? AppSettings.MAP_THEME_DARK : AppSettings.MAP_THEME_Light
+            })
+          );
+        })
+        .catch((err) => {
+          logger.Message.Error("地图加载失败！");
+          logger.Echo({ err });
+        });
       return () => {
         map.get()?.destroy();
       };
