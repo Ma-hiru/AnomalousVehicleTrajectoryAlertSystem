@@ -1,26 +1,30 @@
 syntax = "proto3";
 option go_package = ".;yolov8";
 service YoloService {
-  //TODO waiting for yolo service
   rpc DetectSingle (ImageRequest) returns (DetectionResult) {}
-  rpc DetectStream (stream ImageRequest) returns (stream DetectionResult) {}
 }
-message ImageRequest{
-  bytes imageData = 1;
-  optional int32 width = 2;
-  optional int32 height = 3;
-  float confidenceThreshold = 4;
+// 图像（jpeg）请求
+message ImageRequest {
+  string id = 4;            // 视频流ID
+  bytes data = 1;           // 图像字节数据
+  float timestamp = 2;      // 时间戳
+  int64 index = 3;          // 单个视频请求开始的第几帧
 }
-message DetectionResult{
-  repeated BoundingBox boxes = 1;
-  int64 processTimeMs = 2;
+// 检测响应
+message DetectionResult {
+  repeated Detection detections = 1; // 检测对象列表
 }
-message BoundingBox{
-  float xMin = 1;
-  float yMin = 2;
-  float xMax = 3;
-  float yMax = 4;
-  string label = 5;
-  float confidence = 6;
-  optional bytes mask = 7;
+// 单个检测对象
+message Detection {
+  string car_id = 1;        // 对象唯一ID (跟踪ID)
+  BoundingBox bbox = 2;     // 边界框 (归一化坐标)
+  float confidence = 4;     // 置信度 (0-1)
+  int32 behavior = 3;       // 行为类别(数字，枚举映射需要讨论)
+}
+// 边界框 (归一化坐标)
+message BoundingBox {
+  float x_center = 1;     // 中心点x坐标 (0-1)
+  float y_center = 2;     // 中心点y坐标 (0-1)
+  float width = 3;        // 框宽 (0-1)
+  float height = 4;       // 框高 (0-1)
 }

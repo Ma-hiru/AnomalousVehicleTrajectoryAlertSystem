@@ -20,13 +20,5 @@ export const tokenPrefix = tokenTypePrefix.Bearer;
 export enum API {
   Go2rtcConfig = "/api/go2rtc/config",
   Go2rtcStreams = "/api/go2rtc/streams",
-  GinRestart = "/api/gin/restart",
+  GinRestart = "/api/gin/restart"
 }
-
-export const GetStreamURL = (name: string) => {
-  const url = baseUrl.replace("http", "ws").replace("https", "wss");
-  return {
-    stream: `${url}/api/go2rtc/ws?src=${name}`,
-    frame: `${url}/api/gin/frames?name=${name}`
-  } as const;
-};

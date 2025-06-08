@@ -11,6 +11,7 @@
   import TrackMap from "@/components/Map/TrackMap.tsx";
   import { LayoutSplitSize } from "@/ctx/vueKey.ts";
   import { applyReactInVue } from "veaury";
+  import AppCard from "@/components/AppCard.vue";
 
   const layoutSplitSize = inject(LayoutSplitSize);
   const TrackMapReact = applyReactInVue(TrackMap);

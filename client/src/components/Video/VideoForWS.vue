@@ -1,32 +1,46 @@
 <template>
-  <motion.div
-    class="video-container"
-    @click="props.setActive(props.meta.id)"
-    :whileHover="{
-      scale: 1.05
-    }">
-    <video
-      class="w-full video-js vjs-theme-city"
-      :class="{ active: props.active }"
-      ref="videoMse"
-      autoplay
-      muted
-      controls />
-    <div class="meta">
-      <div>ID: {{ props.meta.id }}</div>
-      <div>Name: {{ props.meta.name }}</div>
-      <el-button v-show="props.active" size="small" link type="primary" @click="refresh"
-        >刷新</el-button
-      >
-    </div>
-  </motion.div>
+  <div>
+    <el-tooltip
+      :effect="isDark ? `dark` : `light`"
+      placement="top"
+      :content="`ID:${props.meta.id}-Name:${props.meta.name}`">
+      <motion.div
+        class="video-container"
+        @click="props.setActive(props.meta.id)"
+        :whileHover="{
+          scale: 1.05
+        }"
+        @mouseenter="showControls = true"
+        @mouseleave="showControls = false">
+        <video
+          class="w-full video-js vjs-theme-city"
+          ref="videoMse"
+          :class="{ active: props.active }"
+          :autoplay="true"
+          :muted="true"
+          :controls="showControls" />
+        <div class="meta">
+          <el-button
+            size="large"
+            circle
+            style="background: rgba(255,255,255,0.5);"
+            @click="refresh"
+            @mouseenter="showControls = false"
+            @mouseleave="showControls = true"
+            :icon="RefreshRight" />
+        </div>
+      </motion.div>
+    </el-tooltip>
+  </div>
 </template>
 
 <!--suppress ES6UnusedImports -->
 <script setup lang="ts" name="Video">
   import { onMounted, onUnmounted, ref, useTemplateRef } from "vue";
-  import { VideoStream } from "@/worker/VideoStream.ts";
+  import { VideoStreamWithWS } from "@/worker/VideoStream.ts";
   import { motion } from "motion-v";
+  import { useDarkModeVue } from "@/hooks/useDarkMode.ts";
+  import { RefreshRight } from "@element-plus/icons-vue";
   /* 组件属性定义 */
   const props = defineProps<{
     url: { stream: string; frame: string };
@@ -37,12 +51,13 @@
       name: string;
     };
   }>();
-
+  const [isDark] = useDarkModeVue();
+  const showControls = ref(false);
   const videoMse = useTemplateRef("videoMse");
-  const videoStream = ref<VideoStream>();
+  const videoStream = ref<VideoStreamWithWS>();
   onMounted(() => {
     if (videoMse.value) {
-      videoStream.value = new VideoStream(videoMse.value, props.url, props.meta.name);
+      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
       videoStream.value.play();
     }
   });
@@ -51,7 +66,8 @@
   });
   const refresh = () => {
     if (videoMse.value) {
-      videoStream.value = new VideoStream(videoMse.value, props.url, props.meta.name);
+      videoStream.value?.stop();
+      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
       videoStream.value.play();
     }
   };
@@ -66,12 +82,14 @@
 
     video {
       transition: all 0.3s ease-in-out;
-      border-radius: 1rem;
+      border-radius: 0.5rem;
       border: 5px solid #999;
       overflow: hidden;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
 
       &.active {
-        border: 5px solid palevioletred;
+        border: 5px solid #ffffff;
       }
     }
 

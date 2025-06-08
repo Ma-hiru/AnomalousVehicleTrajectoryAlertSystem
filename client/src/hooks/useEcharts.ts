@@ -1,9 +1,22 @@
 import * as echarts from "echarts/core";
-import { SunburstChart } from "echarts/charts";
+import { BarChart } from "echarts/charts";
 import { CanvasRenderer } from "echarts/renderers";
 import { onBeforeUnmount, onMounted, Reactive, ref, ShallowRef, watch } from "vue";
+import {
+  GridComponent,
+  PolarComponent,
+  TitleComponent,
+  TooltipComponent
+} from "echarts/components";
 
-echarts.use([SunburstChart, CanvasRenderer]);
+echarts.use([
+  TitleComponent,
+  PolarComponent,
+  TooltipComponent,
+  GridComponent,
+  BarChart,
+  CanvasRenderer
+]);
 
 export const useEcharts = <T extends echarts.EChartsCoreOption>(
   container: Readonly<ShallowRef<HTMLDivElement | null>>,

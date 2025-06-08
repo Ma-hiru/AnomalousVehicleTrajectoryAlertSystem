@@ -1,11 +1,9 @@
 package utils
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"server/apiServer/model"
-	"server/settings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func SuccessResponse(ctx *gin.Context, message string, data any) {
@@ -23,8 +21,8 @@ func FailResponse(ctx *gin.Context, code int, message string) {
 		Ok:      false,
 	})
 }
-func InternalErrorResponse(ctx *gin.Context) {
-	ctx.JSON(http.StatusInternalServerError, settings.ErrMsg)
+func InternalErrorResponse(ctx *gin.Context, ErrMsg gin.H) {
+	ctx.JSON(http.StatusInternalServerError, ErrMsg)
 }
 func UnauthorizedResponse(ctx *gin.Context) {
 	ctx.JSON(http.StatusUnauthorized, model.Response{

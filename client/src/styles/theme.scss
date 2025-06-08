@@ -121,13 +121,15 @@
 //}
 
 :root.lightMode {
-  --layout-bg-color: #fff;
-  --layout-bar-height: 3rem;
+  --layout-bg: url("/public/layout/pageBg.png") no-repeat center center;
+  --layout-bar-height: 5%;
   --settings-divider-ratio: minmax(0, 1fr) 5fr;
+  --layout-bar-color: #ffffff;
+  --layout-bar-bg: transparent;
 }
 
 :root.darkMode {
-  --layout-bg-color: #fff;
+  --layout-bg: #fff;
   --layout-bar-height: 3rem;
   --settings-divider-ratio: minmax(0, 1fr) 5fr;
 }

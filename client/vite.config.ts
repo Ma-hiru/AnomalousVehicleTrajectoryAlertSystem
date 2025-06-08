@@ -6,22 +6,23 @@ import autoprefixer from "autoprefixer";
 import { defineConfig, loadEnv } from "vite";
 import viteCompression from "vite-plugin-compression2";
 import VueDevTools from "vite-plugin-vue-devtools";
-import crypto from "node:crypto";
+// import crypto from "node:crypto";
 import MyViteAliases from "./plugins/MyViteAliases";
 import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
+import Logger from "./plugins/Logger";
 import { fileURLToPath } from "node:url";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import Components from "unplugin-vue-components/vite";
 import MotionResolver from "motion-v/resolver";
+import tailwindConfig from "./tailwind.config";
 
-export default defineConfig(({ command, mode }) => {
-  console.log("command", command);
-  console.log("mode", mode);
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
-  console.log("env", env);
   return {
+    envPrefix: "VITE_",
     base: env.VITE_BASE,
     plugins: [
+      Logger(),
       nodePolyfills({
         include: ["buffer"]
       }),
@@ -60,11 +61,11 @@ export default defineConfig(({ command, mode }) => {
       preprocessorOptions: {
         scss: {
           api: "modern-compiler",
-          additionalData: `@import "@/styles/variable.scss";`
+          additionalData: `@use "@/styles/variable.scss";`
         }
       },
       postcss: {
-        plugins: [tailwindcss, autoprefixer]
+        plugins: [tailwindcss(tailwindConfig), autoprefixer()]
       }
     },
     build: {
@@ -73,23 +74,23 @@ export default defineConfig(({ command, mode }) => {
           main: fileURLToPath(new URL("index.html", import.meta.url))
         },
         output: {
-          manualChunks: (id) => {
-            if (id.includes("node_modules"))
-              if (id.includes(".pnpm"))
-                return crypto
-                  .createHash("sha256")
-                  .update(id.split(".pnpm/")[1].split("/")[0].toString())
-                  .digest("hex");
-              else
-                return crypto
-                  .createHash("sha256")
-                  .update(id.split("node_modules/")[1].split("/")[0].toString())
-                  .digest("hex");
-          }
+          // manualChunks: (id) => {
+          //   if (id.includes("node_modules"))
+          //     if (id.includes(".pnpm"))
+          //       return crypto
+          //         .createHash("sha256")
+          //         .update(id.split(".pnpm/")[1].split("/")[0].toString())
+          //         .digest("hex");
+          //     else
+          //       return crypto
+          //         .createHash("sha256")
+          //         .update(id.split("node_modules/")[1].split("/")[0].toString())
+          //         .digest("hex");
+          // }
         }
       }
     },
     test: {},
-    isWatching: false
+    isWatching: true
   };
 });

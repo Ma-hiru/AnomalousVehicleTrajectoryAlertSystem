@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
+	"server/settings"
 	"server/utils"
 )
 
@@ -13,7 +14,7 @@ func ProxyToGo2RTC(constructURL func(ctx *gin.Context) string, extraHeaders map[
 		req.Header = ctx.Request.Header.Clone()
 		resp, err := (&http.Client{}).Do(req)
 		if err != nil {
-			utils.InternalErrorResponse(ctx)
+			utils.InternalErrorResponse(ctx, settings.ErrMsg)
 			return
 		}
 		defer func(Body io.ReadCloser) {

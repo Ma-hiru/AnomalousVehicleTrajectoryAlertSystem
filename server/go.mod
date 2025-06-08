@@ -4,25 +4,25 @@ go 1.24.0
 
 require (
 	github.com/gin-contrib/cors v1.7.5
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/websocket v1.5.3
 	gorm.io/driver/mysql v1.5.7
-	gorm.io/gorm v1.25.12
+	gorm.io/gorm v1.30.0
 )
 
 require (
-	github.com/expr-lang/expr v1.17.2
+	github.com/expr-lang/expr v1.17.4
 	github.com/fatih/color v1.18.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0
 	github.com/mattn/go-isatty v0.0.20
-	github.com/miekg/dns v1.1.65
+	github.com/miekg/dns v1.1.66
 	github.com/pion/ice/v2 v2.3.37
-	github.com/pion/interceptor v0.1.37
+	github.com/pion/interceptor v0.1.38
 	github.com/pion/rtcp v1.2.15
-	github.com/pion/rtp v1.8.13
-	github.com/pion/sdp/v3 v3.0.11
+	github.com/pion/rtp v1.8.16
+	github.com/pion/sdp/v3 v3.0.13
 	github.com/pion/srtp/v2 v2.0.20
 	github.com/pion/stun v0.6.1
 	github.com/pion/webrtc/v3 v3.3.5
@@ -33,8 +33,8 @@ require (
 	github.com/tadglines/go-pkgs v0.0.0-20210623144937-b983b20f54f9
 	github.com/u2takey/ffmpeg-go v0.5.0
 	gocv.io/x/gocv v0.41.0
-	golang.org/x/crypto v0.37.0
-	google.golang.org/grpc v1.72.0
+	golang.org/x/crypto v0.38.0
+	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -70,21 +70,21 @@ require (
 	github.com/pion/logging v0.2.3 // indirect
 	github.com/pion/mdns v0.0.12 // indirect
 	github.com/pion/randutil v0.1.0 // indirect
-	github.com/pion/sctp v1.8.38 // indirect
+	github.com/pion/sctp v1.8.39 // indirect
 	github.com/pion/transport/v2 v2.2.10 // indirect
 	github.com/pion/transport/v3 v3.0.7 // indirect
 	github.com/pion/turn/v2 v2.1.6 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
-	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/ugorji/go/codec v1.2.14 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
-	golang.org/x/arch v0.16.0 // indirect
+	golang.org/x/arch v0.17.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.32.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250422160041-2d3770c4ea7f // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/tools v0.33.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 )

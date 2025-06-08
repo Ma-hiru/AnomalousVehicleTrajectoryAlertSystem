@@ -1,8 +1,9 @@
+@use "reset";
+@use "theme";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "reset";
-@import "theme";
+
 * {
   margin: 0;
   padding: 0;

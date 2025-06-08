@@ -103,11 +103,12 @@ func ExtractVideoFrames(streams *io.PipeReader, options ffmpeg.ExtractFramesOpti
 }
 
 // ExtractVideoFramesWithStream 从视频流中提取帧并通过channel返回帧数据
-func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.ExtractFramesOptions) (chan ffmpeg.FrameData, error) {
+func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.ExtractFramesOptions) (chan *ffmpeg.FrameData, chan *ffmpeg.MetaData, error) {
 	var NewFFmpeg ffmpeg.FFmpeg
+	NewFFmpeg.Name = options.Name
 	var err error
 	if err = NewFFmpeg.AddSource(streams, options.InputPath); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// 输入参数
 	NewFFmpeg.AddInputMap(ffmpeg.ArgsMap{
@@ -151,11 +152,12 @@ func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.Extract
 		"fps_mode": options.OutputOpt.FpsMode,
 	})
 
-	frameChannel := make(chan ffmpeg.FrameData, 100)
+	frameChannel := make(chan *ffmpeg.FrameData, 1000)
+	metaChannel := make(chan *ffmpeg.MetaData, 100)
 	go func() {
-		if err := NewFFmpeg.BuildForStream().AddTimeStamp().RunForStream(frameChannel); err != nil {
+		if err := NewFFmpeg.BuildForStream().AddTimeStamp().RunForStream(frameChannel, metaChannel); err != nil {
 			fmt.Println(err)
 		}
 	}()
-	return frameChannel, nil
+	return frameChannel, metaChannel, nil
 }

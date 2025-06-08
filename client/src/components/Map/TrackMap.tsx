@@ -5,6 +5,7 @@ import "@amap/amap-jsapi-types";
 import { getLocation } from "@/utils/getLocation.ts";
 import Logger from "@/utils/logger.ts";
 import "./SelectMap.scss";
+import AppCard from "@/components/AppCard.tsx";
 
 type props = {
   layoutSpiltSize: number;
@@ -12,6 +13,7 @@ type props = {
 const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
   const map = useMyState<AMap.Map | null>(null);
   const amap = useMyState<typeof window.AMap | null>(null);
+
   //初始化当前位置作为中心点
   useEffect(() => {
     const currentMap = map.get();
@@ -56,7 +58,7 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
     }
   }, [amap, map]);
   return (
-    <>
+    <AppCard>
       <Map
         map={map}
         amap={amap}
@@ -66,7 +68,7 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
         }}
         id="TrackMap-container"
       />
-    </>
+    </AppCard>
   );
 };
 export default memo(TrackMap);

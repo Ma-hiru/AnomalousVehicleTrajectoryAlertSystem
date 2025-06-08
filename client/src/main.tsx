@@ -39,4 +39,9 @@ app.use(router);
 //scss
 import "./styles/index.scss";
 
+//DataV
+import DataVVue3 from "@kjgl77/datav-vue3";
+
+app.use(DataVVue3);
+
 app.mount("#app");

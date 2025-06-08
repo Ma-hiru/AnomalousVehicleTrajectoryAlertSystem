@@ -13,7 +13,7 @@ import (
 
 var errMsg = make(chan error)
 
-func stream() {
+func go2rtcServer() {
 	go2rtcRoutine := control.NewRoutine("go2rtc", go2rtc.Run)
 	go2rtcControl, _ := control.NewControl(
 		"go2rtc_control",
@@ -24,7 +24,7 @@ func stream() {
 }
 func main() {
 	go streamServer.SimulateStream(errMsg)
-	go stream()
+	go go2rtcServer()
 	go apiServer.Init(errMsg)
 	go func() {
 		for {

@@ -27,11 +27,11 @@ func HandleUserLogin(ctx *gin.Context) {
 		return
 	} else {
 		user.Status = sql.Null[int8]{V: 1, Valid: true}
-		user.UpdateTime = utils.GetFormatTime()
+		user.UpdateTime = utils.GetFormatTime(settings.TimeFormat)
 		user, ok = service.UpdateUser(*user, *user)
 		if !ok {
 			log.Println("更新用户状态失败！")
-			utils.InternalErrorResponse(ctx)
+			utils.InternalErrorResponse(ctx, settings.ErrMsg)
 			return
 		}
 		token, err := middleware.GenerateToken(utils.StructToJWTMap(
@@ -41,12 +41,12 @@ func HandleUserLogin(ctx *gin.Context) {
 			}), settings.TokenExpireDefault)
 		if err != nil {
 			log.Println("生成Token失败！")
-			utils.InternalErrorResponse(ctx)
+			utils.InternalErrorResponse(ctx, settings.ErrMsg)
 			return
 		}
 		err = redis.Set(context.Background(), token, user.Id, settings.TokenExpireDefault)
 		if err != nil {
-			utils.InternalErrorResponse(ctx)
+			utils.InternalErrorResponse(ctx, settings.ErrMsg)
 			log.Println(err)
 			return
 		}

@@ -27,6 +27,14 @@ type WebSocketMSE =
       };
     }
   | {
+      type: "meta";
+      data: {
+        streamName: string;
+        timestamp: number;
+        data: any;
+      };
+    }
+  | {
       type: "error";
       error: any;
     }
@@ -35,3 +43,24 @@ type WebSocketMSE =
       reason: CloseEvent;
     };
 type WebSocketMSEWorkerEV = MessageEvent<WebSocketMSE>;
+
+type CarAction = {
+  id: string;
+  stream: string;
+  carId: string;
+  timestamp: number;
+  box: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+};
+type CarRecord = {
+  id: number;
+  carId: string;
+  stream: string;
+  time: string;
+  types: number[];
+  status: boolean;
+};

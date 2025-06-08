@@ -13,7 +13,7 @@ type props = {
 const TopBar: FC<props> = () => {
   return (
     <>
-      <StyledContainer className="w-screen grid grid-rows-1 grid-cols-[1fr_1fr_1fr] items-center shadow-sm overflow-hidden">
+      <StyledContainer className="shadow-sm">
         <BarInfo />
         <BarTitle />
         <BarMenu />
@@ -23,7 +23,15 @@ const TopBar: FC<props> = () => {
 };
 export default memo(TopBar);
 const StyledContainer = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+  align-items: center;
   height: var(--layout-bar-height);
   padding-right: calc(var(--spacing) * 4);
   padding-left: calc(var(--spacing) * 4);
+  color: var(--layout-bar-color);
+  background: var(--layout-bar-bg);
 `;

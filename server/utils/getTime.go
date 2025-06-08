@@ -1,10 +1,9 @@
 package utils
 
 import (
-	"server/settings"
 	"time"
 )
 
-func GetFormatTime() string {
-	return time.Now().Format(settings.TimeFormat)
+func GetFormatTime(format string) string {
+	return time.Now().Format(format)
 }

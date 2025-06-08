@@ -1,0 +1,23 @@
+.map-table {
+  .table-row-warn {
+    td {
+      background-color: #ffccc7 !important;
+      color: black;
+    }
+
+    &:hover td {
+      background-color: rgba(255, 0, 0, 0.65) !important;
+      color: white;
+    }
+  }
+
+  .table-row-normal {
+    td {
+
+    }
+
+    &:hover td {
+
+    }
+  }
+}
