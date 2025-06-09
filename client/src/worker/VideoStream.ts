@@ -158,7 +158,7 @@ export class VideoStreamWithWS {
   public stop() {
     this.ready && this.pause();
 
-    this.ready && this.mediaSource.endOfStream();
+    if (this.ready && this.mediaSource.readyState === "open") this.mediaSource.endOfStream();
     this.sourceBuffer?.abort();
     this.sourceBuffer && this.mediaSource.removeSourceBuffer(this.sourceBuffer);
 

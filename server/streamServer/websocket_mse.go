@@ -5,23 +5,55 @@ import (
 	"github.com/rs/zerolog/log"
 	"io"
 	"net/url"
+	"server/core/ffmpeg"
 	"server/settings"
 	"server/socketServer"
 	"server/utils"
+	"sync"
+)
+
+const Suffix = "'"
+
+var (
+	ffmpegInstances = make(map[string]*ffmpeg.FFmpeg)
+	ffmpegMutex     sync.Mutex
 )
 
 func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 	defer pr.Close()
+	defer utils.Logger("StreamServer").Println("视频帧处理结束")
+	streamName := query.Get("src")
 	// 设置抽帧配置，确保ImageFormat为jpg
 	options := settings.ExtractOptions()
 	options.OutputOpt.ImageFormat = "jpg"
-	options.Name = query.Get("src")
+	options.Name = streamName
+
+	//var ffmpegInstance *ffmpeg.FFmpeg
 	imgFrame, metaData, err := ExtractVideoFramesWithStream(pr, options)
+	//// 保存FFmpeg实例以便后续关闭
+	//if ffmpegInstance != nil {
+	//	ffmpegMutex.Lock()
+	//	if _, ok := ffmpegInstances[streamName]; ok {
+	//		streamName += Suffix
+	//		ffmpegInstances[streamName] = ffmpegInstance
+	//		ffmpegInstance.Name = streamName
+	//	} else {
+	//		ffmpegInstances[streamName] = ffmpegInstance
+	//	}
+	//	ffmpegMutex.Unlock()
+	//}
+	//// 在函数结束时清理FFmpeg实例
+	//defer func() {
+	//	ffmpegMutex.Lock()
+	//	delete(ffmpegInstances, streamName)
+	//	ffmpegMutex.Unlock()
+	//}()
 	if err != nil {
 		log.Error().Err(err).Msg("抽帧失败")
 	} else {
 		utils.Logger("StreamServer").Println("开始处理视频帧")
 		go func() {
+			defer utils.Logger("StreamServer").Println("读取图片结束")
 			for img := range imgFrame {
 				utils.Logger("StreamServer").Println("FrameMsg=>", img.Index, img.Timestamp)
 				//file, _ := os.Create(filepath.Join("./frames",
@@ -56,6 +88,16 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 				utils.Logger().Printf("MetaMsg转换json string错误%v\n", err)
 			}
 		}
-		utils.Logger("StreamServer").Println("视频帧处理结束")
 	}
 }
+
+//// CloseStreamFFmpeg 添加一个函数用于关闭特定流的FFmpeg实例
+//func CloseStreamFFmpeg(streamName string) {
+//	ffmpegMutex.Lock()
+//	defer ffmpegMutex.Unlock()
+//	if instance, exists := ffmpegInstances[streamName]; exists {
+//		instance.Close()
+//		delete(ffmpegInstances, streamName)
+//		CloseStreamFFmpeg(streamName + Suffix)
+//	}
+//}

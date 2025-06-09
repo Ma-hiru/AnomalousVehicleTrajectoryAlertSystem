@@ -2,7 +2,6 @@ package mp4
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
@@ -14,8 +13,8 @@ import (
 
 func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	query := tr.Request.URL.Query()
-	fmt.Println("handlerWSMSE:", query)
 	stream := streams.GetOrPatch(query)
+	//streamName := query.Get("src")
 	if stream == nil {
 		return errors.New(api.StreamNotFound)
 	}
@@ -47,6 +46,7 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	tr.OnClose(func() {
 		stream.RemoveConsumer(cons)
 		_ = pw.Close()
+		//streamServer.CloseStreamFFmpeg(streamName)
 	})
 
 	return nil

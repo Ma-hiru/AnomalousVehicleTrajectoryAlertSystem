@@ -1,4 +1,4 @@
-import { baseUrl } from "@/settings/settings.api.ts";
+import { baseUrl } from "@/settings/settings.api";
 
 /** seconds */
 export const BUFFER_MAX_DURATION = 30;

@@ -121,7 +121,14 @@
 //}
 
 :root.lightMode {
+  --app-container-bg: #000000;
   --layout-bg: url("/public/layout/pageBg.png") no-repeat center center;
+
+  /**  TopPart */
+  --top_part-top_bar-height: 5%;
+  --top_part-top_bar-bg: #ffffff;
+
+
   --layout-bar-height: 5%;
   --settings-divider-ratio: minmax(0, 1fr) 5fr;
   --layout-bar-color: #ffffff;

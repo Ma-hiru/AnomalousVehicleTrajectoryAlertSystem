@@ -5,7 +5,9 @@
     /*协同配置*/
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     /*React*/
     //    "target": "ES2020",
@@ -21,25 +23,31 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     /* Vue/React */
-    "lib": ["ES2022", "DOM", "DOM.Iterable", "webworker"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable",
+      "webworker"
+    ],
     "module": "ESNext",
     "useDefineForClassFields": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "skipLibCheck": true,
     //Bundler mode
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "moduleDetection": "force",
     "noEmit": true,
     // Linting
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "types": ["vite/client"]
+    "noUncheckedSideEffectImports": false
   },
-  "include": ["src","src/**/*.d.ts"],
+  "include": [
+    "src"
+  ],
   "exclude": [
     "node_modules",
     "plugins/**/*",

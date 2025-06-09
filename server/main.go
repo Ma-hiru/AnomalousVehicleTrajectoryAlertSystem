@@ -1,6 +1,9 @@
 package main
 
 import (
+	"net/http"
+	"net/http/pprof"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"server/apiServer"
@@ -23,6 +26,15 @@ func go2rtcServer() {
 	go go2rtcControl.Go()
 }
 func main() {
+	go func() {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		_ = http.ListenAndServe(":6060", mux)
+	}()
 	go streamServer.SimulateStream(errMsg)
 	go go2rtcServer()
 	go apiServer.Init(errMsg)
@@ -41,5 +53,4 @@ func main() {
 			return
 		}
 	}
-
 }

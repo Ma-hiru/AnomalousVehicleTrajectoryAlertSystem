@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
-import vuePlugin from "eslint-plugin-vue";
+// import vuePlugin from "eslint-plugin-vue";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import prettierPlugin from "eslint-plugin-prettier";
@@ -53,28 +53,28 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unsafe-function-type": "off"
     }
-  },
-  {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{vue}"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      globals: {
-        ...globals.browser
-      }
-    },
-    plugins: {
-      vue: vuePlugin,
-      prettier: prettierPlugin
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      "prettier/prettier": ["warn", prettierRules],
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-empty-object-type": "warn",
-      "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off"
-    }
   }
+  // {
+  //   extends: [js.configs.recommended, ...tseslint.configs.recommended],
+  //   files: ["**/*.{vue}"],
+  //   languageOptions: {
+  //     ecmaVersion: "latest",
+  //     globals: {
+  //       ...globals.browser
+  //     }
+  //   },
+  //   plugins: {
+  //     // vue: vuePlugin,
+  //     prettier: prettierPlugin
+  //   },
+  //   rules: {
+  //     ...reactHooks.configs.recommended.rules,
+  //     "prettier/prettier": ["warn", prettierRules],
+  //     "@typescript-eslint/no-explicit-any": "off",
+  //     "@typescript-eslint/no-unused-vars": "warn",
+  //     "@typescript-eslint/no-empty-object-type": "warn",
+  //     "@typescript-eslint/no-unused-expressions": "off",
+  //     "@typescript-eslint/no-unsafe-function-type": "off"
+  //   }
+  // }
 );

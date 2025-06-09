@@ -1,96 +1,94 @@
-import { type FC, memo, MouseEventHandler, useRef, useState } from "react";
-import { Button, Tooltip, ConfigProvider } from "antd";
+import { type FC, memo, useCallback, useState } from "react";
+import { Button, ConfigProvider } from "antd";
 import {
   FullscreenExitOutlined,
   SettingOutlined,
   ReloadOutlined,
-  SunOutlined,
-  FullscreenOutlined,
-  MoonOutlined
+  FullscreenOutlined
 } from "@ant-design/icons";
-import "./BarMenu.scss";
-import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { useFullScreenReact } from "@/hooks/useFullScreen.ts";
-import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
-import { createAntdTheme } from "@/utils/createAntdTheme.ts";
-import MyModal from "@/components/MyModal.tsx";
-import SettingsLayout from "@/components/Settings/SettingsLayout.tsx";
+import { createStyleSheet } from "@/utils/createStyleSheet";
+import { useFullScreenReact } from "@/hooks/useFullScreen";
+import { createAntdTheme } from "@/utils/createAntdTheme";
+import MyModal from "@/components/MyModal";
+import SettingsLayout from "@/components/Settings/SettingsLayout";
+import styled from "styled-components";
+import OnHover from "@/components/Ani/OnHover";
 
-type props = object;
+interface props {
+  setActiveTitle?: (title: string) => void;
+}
 
-const BarMenu: FC<props> = () => {
-  const { isDark, darkAnimate } = useDarkModeReact();
+const BarMenu: FC<props> = ({ setActiveTitle }) => {
   const [isFull, changeFullscreen] = useFullScreenReact();
-  const darkModeRef = useRef<HTMLButtonElement>(null);
-  const changeMode: MouseEventHandler<HTMLButtonElement> = (e) => {
-    darkAnimate(e.nativeEvent.clientX, e.nativeEvent.clientY, isDark);
-  };
-  const [openSettings, setOpenSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const reload = useCallback(() => {
+    window.location.reload();
+  }, []);
+  const openSettings = useCallback(() => {
+    setShowSettings(true);
+  }, []);
+  const setTitle = useCallback(
+    (title: string) => {
+      setActiveTitle && setActiveTitle(title);
+    },
+    [setActiveTitle]
+  );
   return (
     <>
-      <div
-        className="flex items-center justify-end layout-user-container"
-        style={{ height: "var(--layout-bar-height)" }}>
+      <MenuContainer>
         <ConfigProvider theme={theme.All}>
-          <Tooltip title="设置">
+          <OnHover scale={1.5}>
             <Button
               type="text"
               shape="circle"
-              icon={<SettingOutlined style={styles.iconColor} />}
-              onClick={() => {
-                setOpenSettings(true);
+              size="large"
+              icon={<SettingOutlined style={styles.iconColor} size={16} />}
+              onClick={openSettings}
+              onMouseOver={() => {
+                setTitle("设置");
               }}
             />
-          </Tooltip>
-          <Tooltip title="刷新">
+          </OnHover>
+          <OnHover scale={1.5}>
             <Button
               type="text"
               shape="circle"
-              onClick={() => {
-                window.location.reload();
+              size="large"
+              onClick={reload}
+              onMouseOver={() => {
+                setTitle("刷新");
               }}
-              icon={<ReloadOutlined style={styles.iconColor} />}
+              icon={<ReloadOutlined style={styles.iconColor} size={16} />}
             />
-          </Tooltip>
-          <Tooltip title="全屏">
+          </OnHover>
+          <OnHover scale={1.5}>
             <Button
               type="text"
               shape="circle"
+              size="large"
               onClick={changeFullscreen}
+              onMouseOver={() => {
+                setTitle("全屏");
+              }}
               icon={
                 isFull ? (
-                  <FullscreenExitOutlined style={styles.iconColor} />
+                  <FullscreenExitOutlined style={styles.iconColor} size={16} />
                 ) : (
-                  <FullscreenOutlined style={styles.iconColor} />
+                  <FullscreenOutlined style={styles.iconColor} size={16} />
                 )
               }
             />
-          </Tooltip>
-          <Tooltip title={isDark ? "切换日间模式" : "切换夜间模式"}>
-            <Button
-              type="text"
-              shape="circle"
-              ref={darkModeRef}
-              onClick={changeMode}
-              icon={
-                isDark ? (
-                  <MoonOutlined style={styles.iconColor} />
-                ) : (
-                  <SunOutlined style={styles.iconColor} />
-                )
-              }
-            />
-          </Tooltip>
+          </OnHover>
         </ConfigProvider>
-      </div>
+      </MenuContainer>
       <MyModal
         title={"设置"}
-        open={openSettings}
+        open={showSettings}
         onCancel={() => {
-          setOpenSettings(false);
+          setShowSettings(false);
         }}
         onOk={() => {
-          setOpenSettings(false);
+          setShowSettings(false);
         }}>
         <SettingsLayout refresh={() => {}} />
       </MyModal>
@@ -98,6 +96,12 @@ const BarMenu: FC<props> = () => {
   );
 };
 export default memo(BarMenu);
+const MenuContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+`;
 const styles = createStyleSheet({
   iconColor: {
     color: "var(--layout-bar-color)"

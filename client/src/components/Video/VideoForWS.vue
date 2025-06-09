@@ -13,7 +13,7 @@
         @mouseenter="showControls = true"
         @mouseleave="showControls = false">
         <video
-          class="w-full video-js vjs-theme-city"
+          class="w-full"
           ref="videoMse"
           :class="{ active: props.active }"
           :autoplay="true"
@@ -37,9 +37,9 @@
 <!--suppress ES6UnusedImports -->
 <script setup lang="ts" name="Video">
   import { onMounted, onUnmounted, ref, useTemplateRef } from "vue";
-  import { VideoStreamWithWS } from "@/worker/VideoStream.ts";
+  import { VideoStreamWithWS } from "@/worker/VideoStream";
   import { motion } from "motion-v";
-  import { useDarkModeVue } from "@/hooks/useDarkMode.ts";
+  import { useDarkModeVue } from "@/hooks/useDarkMode";
   import { RefreshRight } from "@element-plus/icons-vue";
   /* 组件属性定义 */
   const props = defineProps<{

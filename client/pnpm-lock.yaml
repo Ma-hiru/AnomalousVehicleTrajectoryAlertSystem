@@ -17,6 +17,9 @@ importers:
       '@ant-design/v5-patch-for-react-19':
         specifier: ^1.0.3
         version: 1.0.3(antd@5.24.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@dataview/datav-vue3':
+        specifier: 0.0.0-test.1672506674342
+        version: 0.0.0-test.1672506674342(vue@3.5.13(typescript@5.8.2))
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.5.13(typescript@5.8.2))
@@ -489,6 +492,11 @@ packages:
     resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
     engines: {node: '>=10'}
 
+  '@dataview/datav-vue3@0.0.0-test.1672506674342':
+    resolution: {integrity: sha512-d0oT/msAi592CTvWmQl0umkLpHgMwtTN2+peyo0L2GHNG7b4cKeO9meEF5o28DgFzRwOLeNQW73vKCF4JC+ihw==}
+    peerDependencies:
+      vue: '>=3.2.0'
+
   '@element-plus/icons-vue@2.3.1':
     resolution: {integrity: sha512-XxVUZv48RZAd87ucGS48jPf6pKu0yV5UCg9f4FFwtrYxXOwWuVJo6wOvSLKEoMQKjv8GsX/mhP6UsC1lRwbUWg==}
     peerDependencies:
@@ -791,6 +799,9 @@ packages:
 
   '@jiaminghi/charts@0.2.18':
     resolution: {integrity: sha512-K+HXaOOeWG9OOY1VG6M4mBreeeIAPhb9X+khG651AbnwEwL6G2UtcAQ8GWCq6GzhczcLwwhIhuaHqRygwHC0sA==}
+
+  '@jiaminghi/color@0.1.1':
+    resolution: {integrity: sha512-M09+Sb5HGqVim0zo+nG5gU1v+6gXT8ptr0BZR6dMGt83XmCJgnZtO8s7llTW4hLFFFM5co6geZvTekqLpSPAAQ==}
 
   '@jiaminghi/color@1.1.3':
     resolution: {integrity: sha512-ZY3hdorgODk4OSTbxyXBPxAxHPIVf9rPlKJyK1C1db46a50J0reFKpAvfZG8zMG3lvM60IR7Qawgcu4ZDO3+Hg==}
@@ -4613,6 +4624,13 @@ snapshots:
 
   '@ctrl/tinycolor@3.6.1': {}
 
+  '@dataview/datav-vue3@0.0.0-test.1672506674342(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@jiaminghi/color': 0.1.1
+      classnames: 2.5.1
+      lodash-es: 4.17.21
+      vue: 3.5.13(typescript@5.8.2)
+
   '@element-plus/icons-vue@2.3.1(vue@3.5.13(typescript@5.8.2))':
     dependencies:
       vue: 3.5.13(typescript@5.8.2)
@@ -4886,6 +4904,10 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.27.0
       '@jiaminghi/c-render': 0.4.3
+
+  '@jiaminghi/color@0.1.1':
+    dependencies:
+      '@babel/runtime': 7.27.0
 
   '@jiaminghi/color@1.1.3': {}
 

@@ -18,6 +18,7 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@ant-design/icons": "^5.6.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@dataview/datav-vue3": "0.0.0-test.1672506674342",
     "@element-plus/icons-vue": "^2.3.1",
     "@kjgl77/datav-vue3": "^1.7.4",
     "@reduxjs/toolkit": "^2.6.0",
