@@ -177,7 +177,7 @@ func (f *FFmpeg) timeStamp() {
 				matches := frameRegex.FindStringSubmatch(line)
 				if len(matches) > 1 {
 					timestamp := matches[1]
-					fmt.Printf("Original frame %d: PTS = %s秒\n", frameIndex, timestamp)
+					//fmt.Printf("Original frame %d: PTS = %s秒\n", frameIndex, timestamp)
 					f.stampsLock.Lock()
 					f.frameTimestamps = append(f.frameTimestamps, timestamp)
 					f.stampsLock.Unlock()

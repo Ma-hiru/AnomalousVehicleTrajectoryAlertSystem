@@ -1,13 +1,16 @@
 import * as echarts from "echarts/core";
-import { BarChart } from "echarts/charts";
+import { BarChart, LineChart } from "echarts/charts";
 import { CanvasRenderer } from "echarts/renderers";
 import { onBeforeUnmount, onMounted, Reactive, ref, ShallowRef, watch } from "vue";
 import {
   GridComponent,
   PolarComponent,
   TitleComponent,
-  TooltipComponent
+  TooltipComponent,
+  DatasetComponent,
+  TransformComponent
 } from "echarts/components";
+import { LabelLayout, UniversalTransition } from "echarts/features";
 
 echarts.use([
   TitleComponent,
@@ -15,7 +18,12 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   BarChart,
-  CanvasRenderer
+  CanvasRenderer,
+  DatasetComponent,
+  TransformComponent,
+  LineChart,
+  LabelLayout,
+  UniversalTransition
 ]);
 
 export const useEcharts = <T extends echarts.EChartsCoreOption>(

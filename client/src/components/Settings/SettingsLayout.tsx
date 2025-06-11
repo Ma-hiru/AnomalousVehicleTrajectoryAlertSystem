@@ -1,13 +1,13 @@
 import { FC, useEffect, memo } from "react";
 import { Button } from "antd";
-import { createStyleSheet } from "@/utils/createStyleSheet.ts";
-import { JsonToYaml } from "@/utils/handleYaml.ts";
-import { useMyState } from "@/hooks/useMyState.ts";
-import Loading from "@/components/Settings/Loading.tsx";
-import { useFetchDataReact } from "@/hooks/useFetchData.ts";
-import Logger from "@/utils/logger.ts";
-import Menu from "@/components/Settings/Menu.tsx";
-import Content from "@/components/Settings/Content.tsx";
+import { createStyleSheet } from "@/utils/createStyleSheet";
+import { JsonToYaml } from "@/utils/handleYaml";
+import { useMyState } from "@/hooks/useMyState";
+import Loading from "@/components/Settings/Loading";
+import { useFetchDataReact } from "@/hooks/useFetchData";
+import Logger from "@/utils/logger";
+import Menu from "@/components/Settings/Menu";
+import Content from "@/components/Settings/Content";
 
 interface props {
   refresh: () => void;

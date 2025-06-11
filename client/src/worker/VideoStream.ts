@@ -144,6 +144,7 @@ export class VideoStreamWithWS {
         if (!this.sourceBuffer.updating) {
           this.sourceBuffer!.appendBuffer(packet);
           this.ready = true;
+          this.play().catch();
         }
       } catch {
         this.bufferQueue.push(packet);

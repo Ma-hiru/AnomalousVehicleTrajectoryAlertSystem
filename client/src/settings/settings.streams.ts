@@ -12,3 +12,21 @@ export const GetStreamURL = (name: string) => {
     frame: `${url}/api/gin/frames?name=${name}`
   } as const;
 };
+
+/** 异常行为 */
+export const enum ActionCategory {
+  /** 倒车/逆行 */
+  Reversing,
+  /** 超速 */
+  Speeding,
+  /** 随意变道 */
+  DangerousLaneChanges,
+  /** 占用应急车道 */
+  OccupyingEmergencyLanes,
+  /** 低速 */
+  LowSpeed,
+  /** 停车 */
+  Stopping
+}
+/** 异常枚举最大数目 */
+export const ActionCategoryMaxLen = 6;

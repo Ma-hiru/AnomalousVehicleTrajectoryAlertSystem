@@ -55,7 +55,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 		go func() {
 			defer utils.Logger("StreamServer").Println("读取图片结束")
 			for img := range imgFrame {
-				utils.Logger("StreamServer").Println("FrameMsg=>", img.Index, img.Timestamp)
+				//utils.Logger("StreamServer").Println("FrameMsg=>", img.Index, img.Timestamp)
 				//file, _ := os.Create(filepath.Join("./frames",
 				//	strconv.Itoa(index)+strconv.FormatInt(img.Index, 10)+
 				//		"-"+strconv.FormatFloat(img.Timestamp, 'f', 6, 64)+".jpg"))

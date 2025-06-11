@@ -15,7 +15,7 @@ import source from "@/assets/settings/source.svg";
 import sourceWhite from "@/assets/settings/source_white.svg";
 import { FC, memo } from "react";
 import { AimOutlined } from "@ant-design/icons";
-import { createStyleSheet } from "@/utils/createStyleSheet.ts";
+import { createStyleSheet } from "@/utils/createStyleSheet";
 
 type props = {
   name: string;

@@ -6,10 +6,15 @@
   scrollbar-width: thin;
 
   #menu-item {
-    &:active {
+    background: var(--settings-menu-default-bg);
+    color: var(--settings-menu-default-color);
+
+    &:hover {
       background: var(--settings-menu-active-bg);
       color: var(--settings-menu-active-color);
+
     }
+
 
     .remove-item {
       display: none;

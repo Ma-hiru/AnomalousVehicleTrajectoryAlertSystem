@@ -44,6 +44,14 @@ type WebSocketMSE =
     };
 type WebSocketMSEWorkerEV = MessageEvent<WebSocketMSE>;
 
+type VideoStreamInfo = {
+  id: number;
+  name: string;
+  /** 纬度 */
+  latitude: number;
+  /** 经度 */
+  longitude: number;
+};
 type CarAction = {
   id: string;
   stream: string;

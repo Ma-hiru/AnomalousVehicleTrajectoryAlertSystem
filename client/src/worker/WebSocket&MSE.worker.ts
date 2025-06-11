@@ -1,5 +1,5 @@
 import { io, Socket } from "@/my_socketio-client";
-import { getURLSearchParam } from "@/utils/getURLSearchParam.ts";
+import { getURLSearchParam } from "@/utils/getURLSearchParam";
 
 const WebSocketInstance = {
   stream: null as WebSocket | null,
@@ -82,10 +82,10 @@ const init = () => {
     );
   };
   WebSocketInstance.stream.onerror = (ev) => {
-      self.postMessage({
-        type: "error",
-        error: JSON.stringify(ev)
-      } as WebSocketMSE);
+    self.postMessage({
+      type: "error",
+      error: JSON.stringify(ev)
+    } as WebSocketMSE);
   };
   WebSocketInstance.stream.onclose = (ev) => {
     WebSocketInstance.ready &&

@@ -1,9 +1,9 @@
 import { FC, ReactNode } from "react";
 import { Typography } from "antd";
-import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
-import SelectMap from "@/components/Map/SelectMap.tsx";
-import { useMyState } from "@/hooks/useMyState.ts";
-import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
+import SettingsIcon from "@/components/Settings/SettingsIcon";
+import SelectMap from "@/components/Map/SelectMap";
+import { useMyState } from "@/hooks/useMyState";
+import { useDarkModeReact } from "@/hooks/useDarkMode";
 import AppSettings from "@/settings";
 
 type props = {

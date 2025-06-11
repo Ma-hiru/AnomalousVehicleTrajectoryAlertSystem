@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
-import { createStyleSheet } from "@/utils/createStyleSheet.ts";
+import { createStyleSheet } from "@/utils/createStyleSheet";
 
 type props = {
   loading: boolean;

@@ -3,10 +3,11 @@ package streamServer
 import (
 	"path/filepath"
 	"server/core/ffmpeg"
+	"server/utils"
 )
 
-func SimulateStream(errMsg chan<- error) {
-	errMsg <- SimulateStreams(ffmpeg.SimulateStreamsOptions{
+func SimulateStream() {
+	err := SimulateStreams(ffmpeg.SimulateStreamsOptions{
 		FilePath:   filepath.Join("./video/test.mp4"),
 		FileOutput: "rtsp://127.0.0.1:8554/live",
 		InputOpt: ffmpeg.SimulateInputOption{
@@ -39,4 +40,8 @@ func SimulateStream(errMsg chan<- error) {
 			ConfigPath: filepath.Join("./mediamtx/mediamtx.yml"),
 		},
 	})
+	if err != nil {
+		utils.Logger("streamServer").Println("SimulateStreamsErr:", err)
+		return
+	}
 }

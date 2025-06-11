@@ -1,12 +1,12 @@
 import { FC, memo } from "react";
-import { MyState } from "@/hooks/useMyState.ts";
+import { MyState } from "@/hooks/useMyState";
 import { Typography, Divider, ConfigProvider } from "antd";
-import { createAntdTheme } from "@/utils/createAntdTheme.ts";
+import { createAntdTheme } from "@/utils/createAntdTheme";
 import "./Content.scss";
 import { FormOutlined } from "@ant-design/icons";
-import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
-import StreamSettings from "@/components/Settings/StreamSettings.tsx";
-import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
+import SettingsIcon from "@/components/Settings/SettingsIcon";
+import StreamSettings from "@/components/Settings/StreamSettings";
+import { useDarkModeReact } from "@/hooks/useDarkMode";
 
 interface props {
   currentContent: string | string[];

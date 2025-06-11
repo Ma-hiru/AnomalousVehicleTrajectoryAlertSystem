@@ -1,9 +1,9 @@
 import { FC, memo, useEffect, useMemo, useRef } from "react";
-import Map from "@/components/Map/Map.tsx";
-import { MyState, useMyState } from "@/hooks/useMyState.ts";
+import Map from "@/components/Map/Map";
+import { MyState, useMyState } from "@/hooks/useMyState";
 import "@amap/amap-jsapi-types";
-import { getLocation } from "@/utils/getLocation.ts";
-import Logger from "@/utils/logger.ts";
+import { getLocation } from "@/utils/getLocation";
+import Logger from "@/utils/logger";
 import { Button, Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import "./SelectMap.scss";

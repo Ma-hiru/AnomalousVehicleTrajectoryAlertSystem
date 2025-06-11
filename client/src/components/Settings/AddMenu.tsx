@@ -1,8 +1,8 @@
 import { FC } from "react";
-import MyModal from "@/components/MyModal.tsx";
+import MyModal from "@/components/MyModal";
 import { Input, Space } from "antd";
-import { MyState, useMyState } from "@/hooks/useMyState.ts";
-import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
+import { MyState, useMyState } from "@/hooks/useMyState";
+import SettingsIcon from "@/components/Settings/SettingsIcon";
 import AppSettings from "@/settings";
 
 type props = {
@@ -32,6 +32,7 @@ const AddMenu: FC<props> = ({ openAddItemModal, config }) => {
   return (
     <>
       <MyModal
+        width="unset"
         title="增加视频流"
         onCancel={() => {
           openAddItemModal.set(false);

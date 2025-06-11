@@ -13,7 +13,7 @@ type Log struct {
 	prefix string
 }
 
-var DefaultColor = color.BgHiBlue
+var DefaultColor = color.FgBlue
 
 func Logger(prefix ...string) *Log {
 	Instance := &Log{}

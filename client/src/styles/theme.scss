@@ -120,7 +120,7 @@
 //
 //}
 
-:root.lightMode {
+:root {
   --app-container-bg: #000000;
   --layout-bg: url("/public/layout/pageBg.png") no-repeat center center;
 
@@ -130,13 +130,38 @@
 
 
   --layout-bar-height: 5%;
-  --settings-divider-ratio: minmax(0, 1fr) 5fr;
   --layout-bar-color: #ffffff;
   --layout-bar-bg: transparent;
-}
 
-:root.darkMode {
-  --layout-bg: #fff;
-  --layout-bar-height: 3rem;
+  /* Settings */
   --settings-divider-ratio: minmax(0, 1fr) 5fr;
+  --settings-menu-default-bg: transparent;
+  --settings-menu-default-color: #666666;
+  --settings-menu-actived-bg: #1890ff;
+  --settings-menu-actived-color: #ffffff;
+  --settings-menu-active-bg: #333333;
+  --settings-menu-active-color: #ffffff;
+  --settings-content-title-divider: #999999;
+  --settings-content-text-color: #ffffff;
+  --settings-content-content-divider: rgba(255, 255, 255, 0.3);
+  --settings-content-removeItem-tooltip: #fff;
+  --settings-content-removeItem-tooltip-color: red;
+  --settings-content-addItem-tooltip: #fff;
+  --settings-content-addItem-tooltip-color: #1890ff;
+  --settings-content-item-editIcon-color: #1890ff;
+  --settings-loadingIcon-color: #1890ff;
+  /* AntdModal */
+  --antd-modal-header-bg: #141414;
+  --antd-modal-content-bg: #141414;
+  --antd-modal-title-color: #1890ff;
+  --antd-modal-footer-bg: #141414;
+  /* AntdModal-Cancel */
+  --antd-modal-cancel-textColor: #0958d9;
+  /* AntdModal-Confirm */
+  --antd-modal-Confirm-defaultBg: #1890ff;
+  --antd-modal-Confirm-defaultColor: #fff;
+  --antd-modal-Confirm-defaultActiveBg: #fff;
+  --antd-modal-Confirm-defaultActiveColor: #0958d9;
+  --antd-modal-Confirm-defaultHoverBg: #ffffff;
+  --antd-modal-Confirm-defaultHoverColor: #0958d9;
 }

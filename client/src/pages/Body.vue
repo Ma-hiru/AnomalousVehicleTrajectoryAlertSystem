@@ -1,8 +1,10 @@
 <template>
   <div class="body-container">
-    <PointCharts />
-    <VideoList />
-    <TotalCharts />
+    <div class="content">
+      <TotalCharts />
+      <VideoList />
+      <PointCharts />
+    </div>
   </div>
 </template>
 
@@ -14,9 +16,16 @@
 
 <style scoped lang="scss">
   .body-container {
-    width: 100%;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
     height: 100%;
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+
+    .content {
+      display: grid;
+      height: 100%;
+      width: 100%;
+      grid-template-columns: 2fr 3fr 2fr;
+    }
   }
 </style>

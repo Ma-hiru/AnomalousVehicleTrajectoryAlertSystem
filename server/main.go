@@ -1,20 +1,18 @@
 package main
 
 import (
-	"net/http"
-	"net/http/pprof"
+	"github.com/fatih/color"
 	_ "net/http/pprof"
-	"os"
-	"os/signal"
 	"server/apiServer"
 	"server/control"
+	"server/debug"
 	"server/go2rtc"
 	"server/streamServer"
 	"server/utils"
-	"syscall"
+	"sync"
 )
 
-var errMsg = make(chan error)
+var wg sync.WaitGroup
 
 func go2rtcServer() {
 	go2rtcRoutine := control.NewRoutine("go2rtc", go2rtc.Run)
@@ -26,31 +24,24 @@ func go2rtcServer() {
 	go go2rtcControl.Go()
 }
 func main() {
+	WrapWg(&wg, func() {
+		debug.PProf(":6060", "")
+	})
+	WrapWg(&wg, debug.ListenSignExit)
+	WrapWg(&wg, streamServer.SimulateStream)
+	WrapWg(&wg, go2rtcServer)
+	WrapWg(&wg, apiServer.Init)
+	wg.Wait()
+}
+func WrapWg(wg *sync.WaitGroup, goroutine func()) {
+	wg.Add(1)
 	go func() {
-		mux := http.NewServeMux()
-		mux.HandleFunc("/debug/pprof/", pprof.Index)
-		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-		_ = http.ListenAndServe(":6060", mux)
+		defer func() {
+			if err := recover(); err != nil {
+				utils.Logger("MAIN").SetColor(color.FgRed).Printf("Get panic: %v", err)
+			}
+			wg.Done()
+		}()
+		goroutine()
 	}()
-	go streamServer.SimulateStream(errMsg)
-	go go2rtcServer()
-	go apiServer.Init(errMsg)
-	go func() {
-		for {
-			sigs := make(chan os.Signal, 1)
-			signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-			println("exit with signal:", (<-sigs).String())
-			os.Exit(0)
-		}
-	}()
-	for {
-		select {
-		case err, _ := <-errMsg:
-			utils.Logger().Println(err)
-			return
-		}
-	}
 }

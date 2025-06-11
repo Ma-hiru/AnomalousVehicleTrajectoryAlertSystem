@@ -8,9 +8,10 @@ import (
 	"server/core/gin_server"
 	"server/settings"
 	"server/socketServer"
+	"server/utils"
 )
 
-func Init(errMsg chan<- error) {
+func Init() {
 	defer func() {
 		if r := recover(); r != nil {
 			var err error
@@ -22,7 +23,7 @@ func Init(errMsg chan<- error) {
 			default:
 				err = fmt.Errorf("panic %v", v)
 			}
-			errMsg <- err
+			utils.Logger("apiServer").Println("Err:", err)
 		}
 	}()
 	routes.Init()
@@ -34,5 +35,6 @@ func Init(errMsg chan<- error) {
 		CorsConfig:         settings.CorsConfig,
 		EnablePrintStack:   false,
 		Mode:               gin_server.Mode.DebugMode,
+		Port:               ":824",
 	})
 }

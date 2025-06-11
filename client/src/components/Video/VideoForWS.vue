@@ -1,37 +1,35 @@
 <template>
-  <div>
-    <el-tooltip
-      :effect="isDark ? `dark` : `light`"
-      placement="top"
-      :content="`ID:${props.meta.id}-Name:${props.meta.name}`">
-      <motion.div
-        class="video-container"
-        @click="props.setActive(props.meta.id)"
-        :whileHover="{
+  <el-tooltip
+    :effect="isDark ? `dark` : `light`"
+    placement="top"
+    :content="`ID:${props.meta.id}-Name:${props.meta.name}`">
+    <motion.div
+      class="video-container"
+      @click="props.setActive(props.meta.id)"
+      :whileHover="{
           scale: 1.05
         }"
-        @mouseenter="showControls = true"
-        @mouseleave="showControls = false">
-        <video
-          class="w-full"
-          ref="videoMse"
-          :class="{ active: props.active }"
-          :autoplay="true"
-          :muted="true"
-          :controls="showControls" />
-        <div class="meta">
-          <el-button
-            size="large"
-            circle
-            style="background: rgba(255,255,255,0.5);"
-            @click="refresh"
-            @mouseenter="showControls = false"
-            @mouseleave="showControls = true"
-            :icon="RefreshRight" />
-        </div>
-      </motion.div>
-    </el-tooltip>
-  </div>
+      @mouseenter="showControls = true"
+      @mouseleave="showControls = false">
+      <video
+        class="w-full"
+        ref="videoMse"
+        :class="{ active: props.active }"
+        :autoplay="true"
+        :muted="true"
+        :controls="showControls" />
+      <div class="meta">
+        <el-button
+          size="large"
+          circle
+          style="background: rgba(255,255,255,0.5);"
+          @click="refresh"
+          @mouseenter="showControls = false"
+          @mouseleave="showControls = true"
+          :icon="RefreshRight" />
+      </div>
+    </motion.div>
+  </el-tooltip>
 </template>
 
 <!--suppress ES6UnusedImports -->
@@ -58,7 +56,6 @@
   onMounted(() => {
     if (videoMse.value) {
       videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
-      videoStream.value.play();
     }
   });
   onUnmounted(() => {
@@ -68,7 +65,6 @@
     if (videoMse.value) {
       videoStream.value?.stop();
       videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
-      videoStream.value.play();
     }
   };
   defineExpose({

@@ -1,12 +1,12 @@
 import { FC, useCallback, useMemo } from "react";
-import { MyState, useMyState } from "@/hooks/useMyState.ts";
-import SettingsIcon from "@/components/Settings/SettingsIcon.tsx";
+import { MyState, useMyState } from "@/hooks/useMyState";
+import SettingsIcon from "@/components/Settings/SettingsIcon";
 import "./Menu.scss";
 import { MinusCircleOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { ConfigProvider, Tooltip } from "antd";
-import { createAntdTheme } from "@/utils/createAntdTheme.ts";
-import AddMenu from "@/components/Settings/AddMenu.tsx";
-import { useDarkModeReact } from "@/hooks/useDarkMode.ts";
+import { createAntdTheme } from "@/utils/createAntdTheme";
+import AddMenu from "@/components/Settings/AddMenu";
+import { useDarkModeReact } from "@/hooks/useDarkMode";
 import AppSettings from "@/settings";
 
 type props = {
@@ -85,7 +85,7 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
                 </ConfigProvider>
               )}
             </summary>
-            <ul style={{ color: "var(--settings-content-text-color)" }}>
+            <ul>
               {Object.keys(configContent[level1]).map((level2) => {
                 if (currentIndex.get().length === 0 && firstSet) {
                   setTimeout(() => {
@@ -102,7 +102,11 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
                       currentContent.set(configContent[level1][level2]);
                       currentIndex.set([level1, level2]);
                     }}
-                    className="mt-1 mb-1">
+                    className="mt-1 mb-1"
+                    style={{
+                      background: "var(--settings-menu-default-bg)",
+                      color: "var(--settings-menu-default-color)"
+                    }}>
                     <a
                       id="menu-item"
                       className={active ? "active" : ""}
@@ -144,6 +148,7 @@ const Menu: FC<props> = ({ config, currentContent, currentIndex }) => {
     }
   }, [configContent, currentContent, currentIndex, isDark, openAddItemModal, removeItem]);
 
+  // noinspection com.intellij.reactbuddy.ArrayToJSXMapInspection
   return (
     <>
       <div className="settings-menu-container">
