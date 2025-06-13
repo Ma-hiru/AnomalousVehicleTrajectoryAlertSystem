@@ -30,13 +30,6 @@
     textStyle: {
       color: "#ffffff"
     },
-    title: {
-      text: "异常行为总体分布和趋势",
-      textStyle: {
-        color: "#fff"
-      },
-      left: "center"
-    },
     tooltip: {
       order: "valueDesc",
       trigger: "axis",
@@ -118,7 +111,7 @@
 
     .chart {
       width: 100%;
-      height: 400px;
+      height: 390px;
       background: transparent;
     }
   }

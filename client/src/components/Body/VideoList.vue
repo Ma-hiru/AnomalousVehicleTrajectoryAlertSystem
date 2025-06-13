@@ -1,5 +1,5 @@
 <template>
-  <OnEnter mode="FromBottom" :duration="0.8">
+  <OnEnter mode="FromBottom" :duration="0.8" :delay="1.4">
     <div class="video-list-container">
       <VideoInfo class="info" />
       <dv-border-box7 style="margin-top: 20px">

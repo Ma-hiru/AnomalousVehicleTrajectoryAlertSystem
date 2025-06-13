@@ -1,5 +1,6 @@
 <template>
   <OnHover class="actions-category-container" :scale="1.1">
+    <span class="title">视频（）的行为分布</span>
     <dv-conical-column-chart :config="config" style="width: 400px; height: 200px" />
   </OnHover>
 </template>
@@ -8,6 +9,14 @@
   import { reactive } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
 
+  withDefaults(
+    defineProps<{
+      title?: string;
+    }>(),
+    {
+      title: ""
+    }
+  );
   const config = reactive({
     data: [
       {
@@ -36,15 +45,24 @@
       }
     ],
     img: [],
-    showValue:true
+    showValue: true
   });
 </script>
 
 <style scoped lang="scss">
-  .actions-category-container{
+  .actions-category-container {
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 10px;
+    flex-direction: column;
+
+    .title {
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-family: title, sans-serif;
+      text-align: center;
+    }
   }
 </style>

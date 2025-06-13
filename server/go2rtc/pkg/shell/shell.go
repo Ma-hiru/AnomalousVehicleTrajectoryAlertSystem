@@ -71,8 +71,8 @@ func ReplaceEnvVars(text string) string {
 	})
 }
 
-func RunUntilSignal(exit chan os.Signal) {
-	//sigs := make(chan os.Signal, 1)
-	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
-	println("exit with signal:", (<-exit).String())
+func RunUntilSignal() {
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	println("exit with signal:", (<-sigs).String())
 }

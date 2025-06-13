@@ -1,11 +1,10 @@
-import { FC, ReactNode } from "react";
+import { FC, memo, ReactNode } from "react";
 import { Modal, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme";
 
 type props = {
   open: boolean;
   title: string;
-  onOk: () => void;
   onCancel: () => void;
   children?: ReactNode;
   width?: string | number | "unset";
@@ -38,7 +37,7 @@ const MyModal: FC<props> = ({ open, title, onCancel, children, width = "auto" })
     </>
   );
 };
-export default MyModal;
+export default memo(MyModal);
 
 const themes = createAntdTheme({
   MyModal: {

@@ -17,6 +17,10 @@
 
 html {
   font-size: 16px;
+  @font-face {
+    font-family: "title" ;
+    src: url("/public/xianglifang-Regular.ttf") format("truetype");
+  }
 }
 
 

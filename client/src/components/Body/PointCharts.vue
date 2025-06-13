@@ -1,5 +1,5 @@
 <template>
-  <OnEnter mode="FromLeft" :duration="0.8">
+  <OnEnter mode="FromLeft" :duration="0.8" :delay="0.6">
     <ActionsCategoryChart />
     <ActionsListForm />
     <ActionsTendency />

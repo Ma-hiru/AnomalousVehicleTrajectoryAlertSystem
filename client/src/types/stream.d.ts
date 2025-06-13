@@ -51,6 +51,7 @@ type VideoStreamInfo = {
   latitude: number;
   /** 经度 */
   longitude: number;
+  addr?: string;
 };
 type CarAction = {
   id: string;
@@ -69,6 +70,6 @@ type CarRecord = {
   carId: string;
   stream: string;
   time: string;
-  types: number[];
+  types: number;
   status: boolean;
 };

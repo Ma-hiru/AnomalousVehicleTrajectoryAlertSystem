@@ -2,7 +2,7 @@
   <motion.div
     :initial="initial as VariantLabels"
     :animate="animate as VariantLabels"
-    :transition="{ ease: 'easeInOut', duration: duration }">
+    :transition="{ ease: 'easeInOut', duration, delay }">
     <slot name="default" />
   </motion.div>
 </template>
@@ -15,11 +15,13 @@
   const props = withDefaults(
     defineProps<{
       duration?: number;
+      delay?: number;
       mode?: "unset" | "FromTop" | "FromLeft" | "FromRight" | "FromBottom";
     }>(),
     {
       duration: 0.5,
-      mode: "unset"
+      mode: "unset",
+      delay: 0
     }
   );
   const initial = ref<TargetAndTransition | VariantLabels>({ opacity: 0 });

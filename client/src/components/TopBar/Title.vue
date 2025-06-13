@@ -55,7 +55,8 @@
       background-repeat: no-repeat;
 
       .title-text {
-        font-size: 24px;
+        font-size: 30px;
+        font-family: title, serif;
         position: absolute;
         bottom: 0;
         left: 50%;

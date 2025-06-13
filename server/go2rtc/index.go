@@ -1,8 +1,6 @@
 package go2rtc
 
 import (
-	"fmt"
-	"server/control"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/app"
@@ -37,19 +35,10 @@ import (
 	"server/go2rtc/internal/v4l2"
 	"server/go2rtc/internal/webrtc"
 	"server/go2rtc/internal/webtorrent"
+	"sync"
 )
 
-func Run(ctl *control.Control, self *control.Routine) {
-	defer func() {
-		if r := recover(); r != nil {
-			ctl.Sign <- control.Sign{
-				Err:  fmt.Errorf("panic: %v", r),
-				To:   ctl,
-				Form: self,
-				Ev:   control.ErrEv,
-			}
-		}
-	}()
+func Init() {
 	app.Version = "1.9.9"
 	// 1. Core serviceModule: app, api/ws, streams
 	app.Init()     // init config and logs
@@ -92,18 +81,7 @@ func Run(ctl *control.Control, self *control.Routine) {
 	srtp.Init()  // SRTP server
 	debug.Init() // debug API
 	// 7. Go
-	for {
-		select {
-		case sign, ok := <-self.Sign:
-			if !ok {
-				return
-			}
-			if sign.To.GetName() == self.Name {
-				if sign.Ev == control.StopEv {
-					return
-				}
-			}
-		}
-	}
-	//shell.RunUntilSignal(exit)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 }

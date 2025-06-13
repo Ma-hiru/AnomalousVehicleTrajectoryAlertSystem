@@ -1,7 +1,8 @@
 <template>
   <div class="action-list-container">
-    <dv-border-box8 style="width:90%; height: 500px;padding: 10px;">
-      <dv-scroll-board :config="config" style="height: 100%;width: 100%;"/>
+    <span class="title">视频（）的监测动态</span>
+    <dv-border-box8 style="width: 90%; height: 500px; padding: 10px">
+      <dv-scroll-board :config="config" style="height: 100%; width: 100%" />
     </dv-border-box8>
   </div>
 </template>
@@ -38,6 +39,15 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 40px;
+    flex-direction: column;
+    align-items: center;
+
+    .title {
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-family: title, sans-serif;
+      text-align: center;
+    }
   }
 </style>

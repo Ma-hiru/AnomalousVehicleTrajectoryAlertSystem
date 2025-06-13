@@ -35,3 +35,6 @@ func InitWithInject(settings Settings) {
 func WithUse(use ...func(engine *gin.Engine)) {
 	withUse = append(withUse, use...)
 }
+func GetEngine() *gin.Engine {
+	return engine
+}

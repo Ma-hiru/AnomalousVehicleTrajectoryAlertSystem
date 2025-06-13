@@ -123,6 +123,8 @@
         display: inline-block;
         user-select: none;
         transform: skewX(45deg);
+        font-family: title, serif;
+        font-size: 18px;
       }
     }
 
@@ -154,6 +156,8 @@
         display: inline-block;
         user-select: none;
         transform: skewX(-45deg);
+        font-family: title, serif;
+        font-size: 20px;
       }
     }
   }

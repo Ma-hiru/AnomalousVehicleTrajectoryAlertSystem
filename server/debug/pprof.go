@@ -1,20 +1,9 @@
 package debug
 
-import (
-	"net/http"
-	"net/http/pprof"
-	"strings"
-)
+import "github.com/gin-contrib/pprof"
+import "server/core/gin_server"
 
-func PProf(addr string, prefix string) {
-	mux := http.NewServeMux()
-	if !strings.HasSuffix(prefix, "/") && prefix != "" {
-		prefix = "/" + prefix
-	}
-	mux.HandleFunc(prefix+"/pprof/", pprof.Index)
-	mux.HandleFunc(prefix+"/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc(prefix+"/pprof/profile", pprof.Profile)
-	mux.HandleFunc(prefix+"/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc(prefix+"/pprof/trace", pprof.Trace)
-	_ = http.ListenAndServe(addr, mux)
+func PProf() {
+	engine := gin_server.GetEngine()
+	pprof.Register(engine, pprof.DefaultPrefix)
 }

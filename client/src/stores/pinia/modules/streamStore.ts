@@ -46,10 +46,8 @@ export const useStreamStore = defineStore("streamStore", () => {
       TotalCarRecordList.push(record);
       //TODO MAXLEN AND DELETE
       const recordArr = SingleActionCategoryComputed.get(record.stream);
-      record.types.forEach((actionType) => {
-        recordArr && recordArr[actionType]++;
-        TotalActionCategoryComputed[actionType]++;
-      });
+      recordArr && recordArr[record.types]++;
+      TotalActionCategoryComputed[record.types]++;
     });
   };
   return {
