@@ -64,12 +64,8 @@ type Senders = {
   bytes: number;
   packets: number;
 };
-
-//TODO
 type StreamSimple = {
   name: string;
   url: string[];
 };
-type Stream = StreamSimple & {};
 type StreamSimpleList = StreamSimple[];
-type StreamList = Stream[];

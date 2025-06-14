@@ -1,10 +1,10 @@
 import { FC, memo } from "react";
 
 interface props {
-  carId: string;
+  track: Track[];
 }
 
-const Detail: FC<props> = ({ carId }) => {
-  return <>{carId}</>;
+const Detail: FC<props> = ({ track }) => {
+  return <>{track.length}</>;
 };
 export default memo(Detail);

@@ -1,54 +1,86 @@
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
-import AppSettings from "@/settings";
-// import { fetchDataVue } from "@/hooks/useFetchData.ts";
-// const { fetchData, API } = fetchDataVue();
+
+/** 异常行为 */
+
+export const enum ActionCategory {
+  /** 正常 */
+  Normal,
+  /** 倒车/逆行 */
+  Reversing,
+  /** 超速 */
+  Speeding,
+  /** 随意变道 */
+  DangerousLaneChanges,
+  /** 占用应急车道 */
+  OccupyingEmergencyLanes,
+  /** 低速 */
+  LowSpeed,
+  /** 停车 */
+  Stopping
+}
+
+export const ActionsEnum: string[] = [
+  "正常",
+  "逆行",
+  "超速",
+  "随意变道",
+  "占用应急车道",
+  "低速",
+  "停车"
+];
 
 export const useStreamStore = defineStore("streamStore", () => {
+  // Pre
   const StreamList = ref<VideoStreamInfo[]>([]);
   const ActiveStream = ref<VideoStreamInfo>({
-    id: -1,
-    name: "",
-    latitude: 0,
-    longitude: 0
+    addr: "",
+    latitude: -1,
+    longitude: -1,
+    streamId: -1,
+    streamName: ""
   });
-  const SingleCarRecordList = reactive<Map<VideoStreamInfo["name"], CarRecord[]>>(new Map());
+  // Total
   const TotalCarRecordList = reactive<CarRecord[]>([]);
-  const SingleActionCategoryComputed = reactive<Map<VideoStreamInfo["name"], number[]>>(new Map());
   const TotalActionCategoryComputed = reactive<number[]>([]);
+  const TotalActionCategoryGroupByTime = reactive<Array<number[]>>([]);
+  //Single
+  const SingleCarRecordList = reactive<Map<VideoStreamInfo["streamId"], CarRecord[]>>(new Map());
+  const SingleActionCategoryComputed = reactive<Map<VideoStreamInfo["streamId"], number[]>>(
+    new Map()
+  );
+  //Methods
   const GetStreamList = async (newList: VideoStreamInfo[]) => {
     StreamList.value = newList;
     newList.forEach((stream) => {
-      if (!SingleCarRecordList.has(stream.name)) {
-        SingleCarRecordList.set(stream.name, Array(AppSettings.ActionCategoryMaxLen).fill(0));
+      if (!SingleCarRecordList.has(stream.streamId)) {
+        SingleCarRecordList.set(stream.streamId, Array(ActionsEnum.length).fill(0));
       }
-      if (!SingleActionCategoryComputed.has(stream.name)) {
-        SingleActionCategoryComputed.set(
-          stream.name,
-          Array(AppSettings.ActionCategoryMaxLen).fill(0)
-        );
+      if (!SingleActionCategoryComputed.has(stream.streamId)) {
+        SingleActionCategoryComputed.set(stream.streamId, Array(ActionsEnum.length).fill(0));
       }
     });
-    if (ActiveStream.value.name === "" && ActiveStream.value.id === -1) {
+    if (ActiveStream.value.streamName === "" && ActiveStream.value.streamId === -1 && newList[0]) {
       ActiveStream.value = newList[0];
     }
     if (TotalActionCategoryComputed.length === 0) {
-      TotalActionCategoryComputed.push(...Array(AppSettings.ActionCategoryMaxLen).fill(0));
-    }
-    if (TotalCarRecordList.length === 0) {
-      TotalCarRecordList.push(...Array(AppSettings.ActionCategoryMaxLen).fill(0));
+      TotalActionCategoryComputed.push(...Array(ActionsEnum.length).fill(0));
     }
   };
-  const UpdateRecord = async () => {
-    const NewData: CarRecord[] = [];
+  const UpdateRecord = async (NewData: CarRecord[]) => {
     NewData.forEach((record) => {
-      SingleCarRecordList.get(record.stream)!.push(record);
+      SingleCarRecordList.get(record.streamId)!.push(record);
       TotalCarRecordList.push(record);
       //TODO MAXLEN AND DELETE
-      const recordArr = SingleActionCategoryComputed.get(record.stream);
-      recordArr && recordArr[record.types]++;
-      TotalActionCategoryComputed[record.types]++;
+      const recordArr = SingleActionCategoryComputed.get(record.streamId);
+      recordArr && recordArr[record.actionId]++;
+      TotalActionCategoryComputed[record.actionId]++;
     });
+    const hour = new Date().getHours();
+    TotalActionCategoryGroupByTime[hour] = [...TotalActionCategoryComputed];
+  };
+  const SetActiveStream = (active: VideoStreamInfo) => {
+    ActiveStream.value = active;
   };
   return {
     StreamList,
@@ -57,7 +89,9 @@ export const useStreamStore = defineStore("streamStore", () => {
     TotalCarRecordList,
     SingleActionCategoryComputed,
     TotalActionCategoryComputed,
+    TotalActionCategoryGroupByTime,
     GetStreamList,
-    UpdateRecord
+    UpdateRecord,
+    SetActiveStream
   };
 });

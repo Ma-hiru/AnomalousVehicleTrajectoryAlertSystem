@@ -1,24 +1,27 @@
 <template>
   <VideoForWS
-    :url="urlList[0]"
-    :meta="{ id: i, name: 'ffmpeg' }"
-    v-for="i in 15"
-    :active="activeId === i"
-    :key="i"
-    :set-active="
-      (id) => {
-        activeId = id as number;
-      }
-    " />
+    :url="urlList[index]"
+    :meta="item"
+    v-for="(item, index) in streamStore.StreamList"
+    :active="streamStore.ActiveStream.streamId === item.streamId"
+    :key="item.streamId" />
 </template>
 
 <script setup lang="ts" name="VideoList">
-  import { ref } from "vue";
+  import { computed } from "vue";
   import VideoForWS from "@/components/Video/VideoForWS.vue";
   import AppSettings from "@/settings";
+  import { useStreamStore } from "@/stores/pinia/modules/streamStore";
 
-  const urlList = ref([AppSettings.GetStreamURL("ffmpeg")]);
-  const activeId = ref(1);
+  const streamStore = useStreamStore();
+  const urlList = computed(() => {
+    return streamStore.StreamList.reduce(
+      (pre, cur) => {
+        pre.push(AppSettings.GetStreamURL(cur.streamName));
+        return pre;
+      },
+      [] as { stream: string; frame: string }[]
+    );
+  });
 </script>
-
 <style scoped lang="scss"></style>

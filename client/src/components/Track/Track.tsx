@@ -1,59 +1,74 @@
-import { FC, memo, useCallback, Key, useState } from "react";
+import { FC, memo, useCallback, Key, useMemo } from "react";
 import styled from "styled-components";
-import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker } from "antd";
+import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag } from "antd";
 import MyModal from "@/components/MyModal";
 import Detail from "@/components/Track/Detail";
-import { useReactive } from "ahooks";
+import { useReactive, useUpdate } from "ahooks";
+import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
+import { pinia } from "@/stores/pinia";
+import dayjs from "dayjs";
+import { useImmer } from "use-immer";
+import { ReqTrackList } from "@/api/mock";
 
 const { Column } = Table;
 const { RangePicker } = DatePicker;
 type SearchProps = GetProps<typeof Input.Search>;
 
-interface DataType {
-  key: Key;
-  name: string;
-  age: number;
-  address: string;
-}
-
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park"
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park"
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: 32,
-    address: "Sydney No. 1 Lake Park"
-  }
-];
+const data: (TrackList & { key: Key })[] = ReqTrackList();
+// eslint-disable-next-line
+const streamStore = useStreamStore(pinia);
 const Track: FC<object> = () => {
-  const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>((value, _e, info) => {}, []);
+  //Data
+  const [tableData, setTableData] = useImmer(data);
+  //Search
+  const searchParams = useReactive({
+    text: "",
+    timeRange: [] as number[]
+  });
+  const selectTime = ([start, end]: dayjs.Dayjs[]) => {
+    console.log(start.unix(), end.unix());
+    searchParams.timeRange[0] = start.unix();
+    searchParams.timeRange[1] = end.unix();
+  };
+  const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>(
+    (keyword) => {
+      setTableData(
+        ReqTrackList({
+          keyword,
+          start: searchParams.timeRange[0],
+          end: searchParams.timeRange[1]
+        })
+      );
+    },
+    [searchParams.timeRange, setTableData]
+  );
+  const today = new Date().getDay();
+  const defaultDate = useMemo<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
+    return [dayjs(new Date()), dayjs(new Date())];
+    //eslint-disable-next-line
+  }, [today]);
+  //Modal
   const ShowModal = useReactive({
     detail: false
   });
   const closeDetailModal = useCallback(() => {
     ShowModal.detail = false;
   }, [ShowModal]);
-  const [currentCarId, setCurrentCarId] = useState("");
+  const [track, setTrack] = useImmer<Track[]>([]);
+
   return (
     <>
       <TrackContainer>
         <div className="search">
           <ConfigProvider theme={AntdDatePickerTheme}>
-            <RangePicker />
+            <RangePicker defaultValue={defaultDate} onChange={selectTime as any} showNow />
           </ConfigProvider>
           <ConfigProvider theme={AntdSearchTheme}>
             <Input.Search
+              value={searchParams.text}
+              onChange={(e) => {
+                searchParams.text = e.target.value;
+              }}
               placeholder="输入追踪标识"
               onSearch={onSearch}
               enterButton={"搜索记录"}
@@ -63,27 +78,48 @@ const Track: FC<object> = () => {
         </div>
         <div className="form">
           <ConfigProvider theme={AntdTableTheme}>
-            <Table<DataType>
+            <Table<TrackList>
               dataSource={data}
               size="small"
               bordered
               scroll={{
                 y: 55 * 6
               }}>
-              <Column title={"标识"} dataIndex={"name"}></Column>
-              <Column title={"行为"} dataIndex={"age"}></Column>
-              <Column title={"最近更新时间"} dataIndex={"address"}></Column>
+              <Column align="center" title={"标识"} dataIndex={"carId"} />
               <Column
-                title={"查看轨迹(点击查看详情)"}
-                dataIndex={"address"}
-                render={() => {
+                title={"行为"}
+                dataIndex={"actionId"}
+                align="center"
+                render={(_, row: TrackList) => {
+                  return row.actionIds.map((type) => {
+                    return (
+                      <Tag key={type} color={"red"}>
+                        {ActionsEnum[type]}
+                      </Tag>
+                    );
+                  });
+                }}
+              />
+              <Column
+                title={"最近更新时间"}
+                dataIndex={"time"}
+                align="center"
+                render={(_, row: TrackList) => {
+                  return new Date(row.time).toLocaleString();
+                }}
+              />
+              <Column
+                title={"轨迹"}
+                align="center"
+                dataIndex={"track"}
+                render={(_, row: TrackList) => {
                   return (
                     <Button
                       onClick={() => {
-                        setCurrentCarId(Math.random().toString());
+                        setTrack(row.track);
                         ShowModal.detail = true;
                       }}>
-                      查看轨迹
+                      查看详情
                     </Button>
                   );
                 }}
@@ -97,7 +133,7 @@ const Track: FC<object> = () => {
         width={"60vw"}
         open={ShowModal.detail}
         onCancel={closeDetailModal}>
-        <Detail carId={currentCarId} />
+        <Detail track={track} />
       </MyModal>
     </>
   );

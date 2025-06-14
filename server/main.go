@@ -5,18 +5,17 @@ import (
 	"server/control"
 	"server/debug"
 	"server/go2rtc"
-	"server/streamServer"
 	"sync"
 )
 
 func main() {
 	wg := &sync.WaitGroup{}
 	control.WrapWg(wg, map[string]func(){
-		"debug.PProf":                 debug.PProf,
-		"debug.ListenSignExit":        debug.ListenSignExit,
-		"streamServer.SimulateStream": streamServer.SimulateStream,
-		"go2rtc.Init":                 go2rtc.Init,
-		"apiServer.Init":              apiServer.Init,
+		"debug.PProf":          debug.PProf,
+		"debug.ListenSignExit": debug.ListenSignExit,
+		//"streamServer.SimulateStream": streamServer.SimulateStream,
+		"go2rtc.Init":    go2rtc.Init,
+		"apiServer.Init": apiServer.Init,
 	})
 	wg.Wait()
 }

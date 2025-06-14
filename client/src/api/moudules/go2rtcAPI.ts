@@ -1,6 +1,6 @@
-import request, { NewResponseData } from "@/utils/request.ts";
-import { YamlToJson } from "@/utils/handleYaml.ts";
-import Logger from "@/utils/logger.ts";
+import request, { NewResponseData } from "@/utils/request";
+import { YamlToJson } from "@/utils/handleYaml";
+import Logger from "@/utils/logger";
 import AppSettings from "@/settings";
 
 export const reqGetGo2rtcConfig = async (): Promise<ReqResponse<Go2rtcConfigYaml | null>> => {

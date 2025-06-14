@@ -1,20 +1,20 @@
 <template>
   <el-tooltip
-    :effect="isDark ? `dark` : `light`"
+    effect="dark"
     placement="top"
-    :content="`ID:${props.meta.id}-Name:${props.meta.name}`">
+    :content="`${props.meta.streamName}(${props.meta.streamId})`">
     <motion.div
       class="video-container"
-      @click="props.setActive(props.meta.id)"
+      @mouseover="streamStore.SetActiveStream(props.meta)"
       :whileHover="{
-          scale: 1.05
-        }"
+        scale: 1.05
+      }"
       @mouseenter="showControls = true"
       @mouseleave="showControls = false">
       <video
         class="w-full"
         ref="videoMse"
-        :class="{ active: props.active }"
+        :class="{ active: streamStore.ActiveStream.streamId === meta.streamId }"
         :autoplay="true"
         :muted="true"
         :controls="showControls" />
@@ -22,7 +22,7 @@
         <el-button
           size="large"
           circle
-          style="background: rgba(255,255,255,0.5);"
+          style="background: rgba(255, 255, 255, 0.5)"
           @click="refresh"
           @mouseenter="showControls = false"
           @mouseleave="showControls = true"
@@ -37,25 +37,21 @@
   import { onMounted, onUnmounted, ref, useTemplateRef } from "vue";
   import { VideoStreamWithWS } from "@/worker/VideoStream";
   import { motion } from "motion-v";
-  import { useDarkModeVue } from "@/hooks/useDarkMode";
   import { RefreshRight } from "@element-plus/icons-vue";
+  import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+
+  const streamStore = useStreamStore();
   /* 组件属性定义 */
   const props = defineProps<{
     url: { stream: string; frame: string };
-    active: boolean;
-    setActive: (id: string | number) => void;
-    meta: {
-      id: string | number;
-      name: string;
-    };
+    meta: VideoStreamInfo;
   }>();
-  const [isDark] = useDarkModeVue();
   const showControls = ref(false);
   const videoMse = useTemplateRef("videoMse");
   const videoStream = ref<VideoStreamWithWS>();
   onMounted(() => {
     if (videoMse.value) {
-      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
+      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta);
     }
   });
   onUnmounted(() => {
@@ -64,7 +60,7 @@
   const refresh = () => {
     if (videoMse.value) {
       videoStream.value?.stop();
-      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta.name);
+      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta);
     }
   };
   defineExpose({
@@ -81,7 +77,7 @@
       border-radius: 0.5rem;
       border: 5px solid #999;
       overflow: hidden;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
 
       &.active {

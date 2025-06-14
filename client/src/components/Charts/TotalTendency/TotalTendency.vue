@@ -6,7 +6,7 @@
 
 <script setup lang="ts" name="TotalTendency">
   import { useEcharts } from "@/hooks/useEcharts";
-  import { onMounted, reactive, useTemplateRef } from "vue";
+  import { reactive, useTemplateRef, watch, watchEffect } from "vue";
   import { ComposeOption } from "echarts/core";
   import {
     DatasetComponentOption,
@@ -16,6 +16,7 @@
   } from "echarts/components";
   import { LineSeriesOption } from "echarts/charts";
   import { SeriesOption } from "echarts";
+  import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
 
   type EChartsOption = ComposeOption<
     | DatasetComponentOption
@@ -48,7 +49,7 @@
     //@ts-ignore
     series: [] as SeriesOption[],
     xAxis: { type: "category", name: "时间", data: [] as string[] },
-    yAxis: { name: "数量" },
+    yAxis: { name: "记录数" },
     grid: {
       bottom: 50,
       top: 50,
@@ -56,51 +57,62 @@
       right: 50
     }
   } satisfies EChartsOption);
-  const tendencyChart = useTemplateRef("tendencyChart");
-  useEcharts(tendencyChart, option);
-  onMounted(() => {
-    const salesData = [
-      { Product: "Phone", Quarter: "Q1", Sales: 1200 },
-      { Product: "Phone", Quarter: "Q2", Sales: 1800 },
-      { Product: "Phone", Quarter: "Q3", Sales: 2000 },
-      { Product: "Laptop", Quarter: "Q1", Sales: 800 },
-      { Product: "Laptop", Quarter: "Q2", Sales: 1500 },
-      { Product: "Laptop", Quarter: "Q3", Sales: 4000 }
-    ];
-    option.xAxis.data = [...new Set(salesData.map((item) => item.Quarter))];
-    const products = ["Phone", "Laptop"];
-    products.forEach((product) => {
-      const datasetId = `dataset_${product}`;
-      option.dataset!.push({
-        id: datasetId,
-        source: salesData
-          .filter((item) => item.Product === product)
-          .map((item) => [item.Quarter, item.Sales])
-      });
-      option.series.push({
-        type: "line",
-        showSymbol: false,
-        datasetId: datasetId,
-        encode: {
-          x: 0,
-          y: 1,
-          label: ["Product", "Sales"],
-          itemName: "Product",
-          tooltip: ["Sales"]
-        },
-        name: product,
-        endLabel: {
-          show: true,
-          formatter: (raw: any) => {
-            return raw.seriesName + ": " + raw.value[1];
-          }
-        },
-        emphasis: {
-          focus: "series"
+  useEcharts(useTemplateRef("tendencyChart"), option);
+  const streamStore = useStreamStore();
+
+  watch(
+    () => streamStore.TotalActionCategoryGroupByTime,
+    () => {
+      type dataType = Array<{
+        Name: string;
+        Count: number;
+        Time: string;
+      }>;
+      const data = streamStore.TotalActionCategoryGroupByTime.reduce((pre, cur, hour) => {
+        if (hour <= new Date().getHours()) {
+          cur.forEach((count, type) => {
+            pre.push({
+              Name: ActionsEnum[type],
+              Count: count,
+              Time: hour + "时"
+            });
+          });
         }
+        return pre;
+      }, [] as dataType);
+      option.xAxis.data = [...new Set(data.map((item) => item.Time))];
+      ActionsEnum.forEach((action) => {
+        const datasetId = `dataset_${action}`;
+        option.dataset!.push({
+          id: datasetId,
+          source: data.filter((item) => item.Name === action).map((item) => [item.Time, item.Count])
+        });
+        option.series.push({
+          type: "line",
+          showSymbol: false,
+          datasetId: datasetId,
+          encode: {
+            x: 0,
+            y: 1,
+            label: ["Name", "Count"],
+            itemName: "Name",
+            tooltip: ["Count"]
+          },
+          name: action,
+          endLabel: {
+            show: true,
+            formatter: (raw: any) => {
+              return raw.seriesName + ": " + raw.value[1];
+            }
+          },
+          emphasis: {
+            focus: "series"
+          }
+        });
       });
-    });
-  });
+    },
+    { immediate: true }
+  );
 </script>
 
 <style scoped lang="scss">

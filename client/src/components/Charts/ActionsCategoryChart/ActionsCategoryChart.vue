@@ -1,51 +1,30 @@
 <template>
   <OnHover class="actions-category-container" :scale="1.1">
-    <span class="title">视频（）的行为分布</span>
-    <dv-conical-column-chart :config="config" style="width: 400px; height: 200px" />
+    <span class="title">视频（{{ streamStore.ActiveStream.streamName }}）的行为分布</span>
+    <dv-conical-column-chart v-if="config.data.length" :config="config" style="width: 400px; height: 200px" />
+    <div v-else class="tips">No Data</div>
   </OnHover>
 </template>
 
 <script setup lang="ts" name="ActionsCategoryChart">
-  import { reactive } from "vue";
+  import { computed } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
+  import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
 
-  withDefaults(
-    defineProps<{
-      title?: string;
-    }>(),
-    {
-      title: ""
-    }
-  );
-  const config = reactive({
-    data: [
-      {
-        name: "减速",
-        value: 55
-      },
-      {
-        name: "倒车",
-        value: 120
-      },
-      {
-        name: "掉头",
-        value: 71
-      },
-      {
-        name: "逆行",
-        value: 66
-      },
-      {
-        name: "变道",
-        value: 80
-      },
-      {
-        name: "停车",
-        value: 35
-      }
-    ],
-    img: [],
-    showValue: true
+  const streamStore = useStreamStore();
+  const config = computed(()=>{
+    const dataArr =
+      streamStore.SingleActionCategoryComputed.get(streamStore.ActiveStream.streamId) || [];
+    return {
+      data: dataArr.map((number, index) => {
+        return {
+          name: ActionsEnum[index],
+          value: number
+        };
+      }),
+      img: [],
+      showValue: true
+    };
   });
 </script>
 
@@ -63,6 +42,16 @@
       margin-bottom: 10px;
       font-family: title, sans-serif;
       text-align: center;
+    }
+    .tips{
+      font-size: 24px;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: title, sans-serif;
+      text-align: center;
+      color: white;
     }
   }
 </style>

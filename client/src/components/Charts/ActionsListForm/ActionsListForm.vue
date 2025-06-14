@@ -1,36 +1,73 @@
 <template>
   <div class="action-list-container">
-    <span class="title">视频（）的监测动态</span>
-    <dv-border-box8 style="width: 90%; height: 500px; padding: 10px">
-      <dv-scroll-board :config="config" style="height: 100%; width: 100%" />
+    <span class="title">视频（{{ streamStore.ActiveStream.streamName }}）的监测动态</span>
+    <dv-border-box8 v-if="config.data.length" style="width: 90%; height: 500px; padding: 10px">
+      <dv-scroll-board ref="scrollBoard" :config="config" style="height: 100%; width: 100%" />
     </dv-border-box8>
+    <div v-else class="tips">No Data</div>
   </div>
 </template>
 
 <script setup lang="ts" name="ActionsListForm">
-  import { reactive } from "vue";
+  import { computed, onMounted, reactive, ref, watchEffect } from "vue";
+  import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
+  import dayjs from "dayjs";
+  import { type ScrollBoard } from "@kjgl77/datav-vue3";
 
+  const streamStore = useStreamStore();
+  const scrollBoard = ref<InstanceType<typeof ScrollBoard>>();
+  const records = streamStore.SingleCarRecordList.get(streamStore.ActiveStream.streamId) || [];
+  const data = records.reduce(
+    (pre, cur) => {
+      pre.push([
+        cur.carId,
+        ActionsEnum[cur.actionId],
+        dayjs(cur.time).format("HH:mm:ss"),
+        cur.status
+          ? `<span style="color:#9fe6b8;">正常</span>`
+          : `<span style="color:#fb7293;">异常</span>`
+      ]);
+      return pre;
+    },
+    [] as Array<string[]>
+  );
   const config = reactive({
-    header: ["标识", "行为", "时间"],
-    data: [
-      ["行1列1", "行1列2", "行1列3"],
-      ["行2列1", "行2列2", "行2列3"],
-      ["行3列1", "行3列2", "行3列3"],
-      ["行4列1", "行4列2", "行4列3"],
-      ["行5列1", "行5列2", "行5列3"],
-      ["行6列1", "行6列2", "行6列3"],
-      ["行7列1", "行7列2", "行7列3"],
-      ["行8列1", "行8列2", "行8列3"],
-      ["行9列1", "行9列2", "行9列3"],
-      ["行10列1", "行10列2", "行10列3"],
-      ["行10列1", "行10列2", "行10列3"]
-    ],
+    header: ["标识", "行为", "时间", "异常"],
+    data: data,
     index: true,
-    columnWidth: [100],
+    columnWidth: [100, 100, 80, 100, 50],
     align: ["center"],
     rowNum: 10,
     hoverPause: true,
     waitTime: 2000
+  });
+  const updateRows = (rows: string[][], animationIndex?: number) => {
+    if (scrollBoard.value) {
+      scrollBoard.value.updateRows(rows, 14995);
+    }
+  };
+  onMounted(() => {
+    let lastPos = 0;
+    watchEffect(() => {
+      const records = streamStore.SingleCarRecordList.get(streamStore.ActiveStream.streamId) || [];
+      const data = records.reduce(
+        (pre, cur) => {
+          pre.push([
+            cur.carId,
+            ActionsEnum[cur.actionId],
+            dayjs(cur.time).format("HH:mm:ss"),
+            cur.status
+              ? `<span style="color:#9fe6b8;">正常</span>`
+              : `<span style="color:#fb7293;">异常</span>`
+          ]);
+          return pre;
+        },
+        [] as Array<string[]>
+      );
+      console.log(lastPos);
+      updateRows(data, lastPos);
+      lastPos += data.length;
+    });
   });
 </script>
 
@@ -48,6 +85,17 @@
       margin-bottom: 10px;
       font-family: title, sans-serif;
       text-align: center;
+    }
+
+    .tips {
+      font-size: 24px;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: title, sans-serif;
+      text-align: center;
+      color: white;
     }
   }
 </style>

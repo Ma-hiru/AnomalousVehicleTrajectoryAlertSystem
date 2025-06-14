@@ -14,12 +14,18 @@ export class VideoStreamWithWS {
   private bufferedTime = 0;
   // public onloaderr: () => void;
   public url: { stream: string; frame: string };
-  public streamName = "";
+  public streamName;
+  public streamId: number;
 
-  constructor(video: HTMLVideoElement, url: { stream: string; frame: string }, streamName: string) {
+  constructor(
+    video: HTMLVideoElement,
+    url: { stream: string; frame: string },
+    meta: { streamName: string; streamId: number }
+  ) {
     this.video = video;
     this.url = url;
-    this.streamName = streamName;
+    this.streamName = meta.streamName;
+    this.streamId = meta.streamId;
     this.mediaSource = new MediaSource();
     this.mediaSource.addEventListener("sourceopen", this.sourceopen.bind(this), { passive: true });
     this.video.src = URL.createObjectURL(this.mediaSource);
