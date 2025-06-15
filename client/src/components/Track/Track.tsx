@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag } from "antd";
 import MyModal from "@/components/MyModal";
 import Detail from "@/components/Track/Detail";
-import { useReactive, useUpdate } from "ahooks";
+import { useReactive } from "ahooks";
 import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
 import { pinia } from "@/stores/pinia";
 import dayjs from "dayjs";

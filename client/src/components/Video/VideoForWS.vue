@@ -28,6 +28,11 @@
           @mouseleave="showControls = true"
           :icon="RefreshRight" />
       </div>
+      <div
+        class="cover"
+        :style="{
+          backgroundImage: `url('/mock/cover${Math.floor(Math.random() * 3 + 1)}.png')`
+        }" />
     </motion.div>
   </el-tooltip>
 </template>
@@ -87,6 +92,15 @@
 
     .meta {
       display: none;
+    }
+
+    .cover {
+      position: absolute;
+      inset: 0;
+      z-index: 1000;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
 
     &:hover {

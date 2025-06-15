@@ -7,7 +7,7 @@
       </dv-border-box8>
       <span class="title-2">异常行为总体分布和趋势</span>
       <dv-border-box8 :dur="5" :reverse="true" style="margin-top: 20px; padding: 10px; width: 90%">
-        <TotalTendency />
+        <TotalTendency :normal-behavior-index="0" :show-controls="false" />
       </dv-border-box8>
     </div>
   </OnEnter>

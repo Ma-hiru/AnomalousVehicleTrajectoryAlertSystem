@@ -10,6 +10,7 @@
   import { computed } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
   import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
+  import { ActionsIcons } from "@/assets/actions/actions";
 
   const streamStore = useStreamStore();
   const config = computed(()=>{
@@ -22,8 +23,10 @@
           value: number
         };
       }),
-      img: [],
-      showValue: true
+      img: ActionsIcons,
+      imgSideLength: 30,
+      showValue: true,
+      columnColor:"rgba(43,95,244,0.4)"
     };
   });
 </script>

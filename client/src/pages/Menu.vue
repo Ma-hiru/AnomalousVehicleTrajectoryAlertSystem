@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="flex aside-width">
-        <div class="react-right bg-color-blue mr-3">
+        <div class="react-right bg-[#0E369999] mr-3">
           <span
             class="text text-base font-bold"
             @mouseover="setActiveTitle && setActiveTitle('项目名')">

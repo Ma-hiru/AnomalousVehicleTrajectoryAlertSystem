@@ -128,27 +128,26 @@ const TrackMap: FC<object> = () => {
       markersRef.current = videoStreams.map((stream) => {
         // 获取该摄像头的异常行为数量
         const anomalyCount = getAnomalyCount(stream.streamId);
-
         // 创建标记
         const marker = new currentAMap.Marker({
           position: new currentAMap.LngLat(stream.longitude, stream.latitude),
           title: stream.streamName,
           icon: new currentAMap.Icon({
-            size: new currentAMap.Size(40, 40),
+            size: new currentAMap.Size(20, 35),
             image: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
-            imageSize: new currentAMap.Size(40, 40)
+            imageSize: new currentAMap.Size(15, 25)
           }),
           offset: new currentAMap.Pixel(-20, -40),
           label: {
-            content: `<div style="padding:2px 4px;font-size:12px;color:#fff;background-color:rgba(0,0,0,0.6);border-radius:4px;">${anomalyCount}异常</div>`,
+            content: `<div style="padding:2px 4px;font-size:12px;color:#fff;background-color:mediumvioletred;border-radius:4px;">${anomalyCount}异常</div>`,
             direction: "bottom"
           }
         });
-
         // 创建信息窗口
         const infoWindow = new currentAMap.InfoWindow({
+          isCustom: true,
           content: `
-            <div style="padding: 12px; border-radius: 5px;">
+            <div style="padding: 12px; border-radius: 5px;background:rgba(0,0,0,0.6);">
               <h4 style="margin: 0 0 8px 0; color: #1890ff;">${stream.streamName}</h4>
               <p style="margin: 5px 0; font-size: 13px;"><b>位置:</b> ${stream.addr}</p>
               <p style="margin: 5px 0; font-size: 13px;"><b>异常行为:</b> <span style="color:${

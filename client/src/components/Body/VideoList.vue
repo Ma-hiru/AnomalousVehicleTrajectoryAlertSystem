@@ -5,6 +5,9 @@
       <dv-border-box7 style="margin-top: 20px" v-if="streamStore.StreamList.length">
         <div class="content">
           <VideoModule />
+          <VideoModule />
+          <VideoModule />
+          <VideoModule />
         </div>
       </dv-border-box7>
       <dv-border-box7 style="margin-top: 20px" v-else>
