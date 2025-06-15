@@ -46,27 +46,31 @@
       scrollBoard.value.updateRows(rows, 14995);
     }
   };
+  const lastPosition = new Map<number, number>();
   onMounted(() => {
-    let lastPos = 0;
     watchEffect(() => {
       const records = streamStore.SingleCarRecordList.get(streamStore.ActiveStream.streamId) || [];
+      if (!lastPosition.has(streamStore.ActiveStream.streamId)) {
+        lastPosition.set(streamStore.ActiveStream.streamId, 0);
+      }
+      const lastPos = lastPosition.get(streamStore.ActiveStream.streamId)!;
       const data = records.reduce(
         (pre, cur) => {
-          pre.push([
-            cur.carId,
-            ActionsEnum[cur.actionId],
-            dayjs(cur.time).format("HH:mm:ss"),
-            cur.status
-              ? `<span style="color:#9fe6b8;">正常</span>`
-              : `<span style="color:#fb7293;">异常</span>`
-          ]);
+          cur.carId &&
+            pre.push([
+              cur.carId,
+              ActionsEnum[cur.actionId],
+              dayjs(cur.time).format("HH:mm:ss"),
+              cur.status
+                ? `<span style="color:#9fe6b8;">正常</span>`
+                : `<span style="color:#fb7293;">异常</span>`
+            ]);
           return pre;
         },
         [] as Array<string[]>
       );
-      console.log(lastPos);
       updateRows(data, lastPos);
-      lastPos += data.length;
+      lastPosition.set(streamStore.ActiveStream.streamId, lastPos + data.length);
     });
   });
 </script>

@@ -40,7 +40,7 @@
     timer && clearInterval(timer);
     return setInterval(() => {
       streamStore.UpdateRecord(ReqRecords());
-    }, 1500);
+    }, 3000);
   };
 </script>
 

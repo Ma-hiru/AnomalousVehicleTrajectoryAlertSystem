@@ -38,8 +38,8 @@ export const MockAction: actions[] = [
   { actionId: 0, actionName: "正常" },
   { actionId: 1, actionName: "逆行" },
   { actionId: 2, actionName: "超速" },
-  { actionId: 3, actionName: "随意变道" },
-  { actionId: 4, actionName: "占用应急车道" },
+  { actionId: 3, actionName: "变道" },
+  { actionId: 4, actionName: "占应急道" },
   { actionId: 5, actionName: "低速" },
   { actionId: 6, actionName: "停车" }
 ];
