@@ -14,6 +14,7 @@ declare module 'vue' {
     AnalysisModule: typeof import('./src/components/Analysis/AnalysisModule.vue')['default']
     AppCard: typeof import('./src/components/AppCard.vue')['default']
     BasicCard: typeof import('./src/components/BasicCard.vue')['default']
+    CustomScrollBoard: typeof import('./src/components/Charts/CustomScrollBoard/CustomScrollBoard.vue')['default']
     MapCharts: typeof import('./src/components/Charts/MapCharts.vue')['default']
     OnEnter: typeof import('./src/components/Ani/OnEnter.vue')['default']
     OnHover: typeof import('./src/components/Ani/OnHover.vue')['default']

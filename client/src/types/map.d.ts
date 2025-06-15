@@ -580,7 +580,7 @@ declare namespace AMap {
     extData?: any;
 
     /**添加文本标注, content为文本标注的内容, offset为偏移量, 左上角为偏移量为(0, 0)**/
-    label?: { content: string; offset: LngLat };
+    label?: { content?: string; offset?: LngLat; direction?: string };
   }
 
   /** Marker类 **/
@@ -721,6 +721,20 @@ declare namespace AMap {
 
     /**获取用户自定义属性**/
     public getExtData(): any;
+
+    /**
+     * 给实例绑定事件回调函数，同一个类型、同一个回调函数、同一个上下文只会绑定一次
+     * @name on
+     * @function
+     * @param {String} type 事件类型
+     * @param fn
+     * @param {Object} context 事件上下文，缺省为实例本身
+     * @param {Boolean} once 是否只执行一次
+     * @return {Object} 当前实例
+     * @memberof Event
+     * @instance
+     */
+    on(type: T | T[], fn: (e: any) => void, context?: any, once?: boolean): this;
   }
 
   /** MarkerShapeOptions **/

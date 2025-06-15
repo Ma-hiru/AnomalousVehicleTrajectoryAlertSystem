@@ -39,11 +39,11 @@ const Map: FC<props> = ({ containerStyle, map, amap, id, mapOptions, loadOptions
     if (loadOptions) {
       const plugins = [...defaultPlugins];
       loadOptions.plugins &&
-      loadOptions.plugins.forEach((plugin) => {
-        if (!plugins.find((item) => item === plugin)) {
-          plugins.push(plugin);
-        }
-      });
+        loadOptions.plugins.forEach((plugin) => {
+          if (!plugins.find((item) => item === plugin)) {
+            plugins.push(plugin);
+          }
+        });
       return {
         ...defaultOpt,
         ...loadOptions,

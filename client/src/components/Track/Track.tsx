@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, Key, useMemo } from "react";
+import { FC, memo, useCallback, Key, useMemo, useEffect } from "react";
 import styled from "styled-components";
 import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag } from "antd";
 import MyModal from "@/components/MyModal";
@@ -25,28 +25,52 @@ const Track: FC<object> = () => {
     text: "",
     timeRange: [] as number[]
   });
-  const selectTime = ([start, end]: dayjs.Dayjs[]) => {
-    console.log(start.unix(), end.unix());
-    searchParams.timeRange[0] = start.unix();
-    searchParams.timeRange[1] = end.unix();
+
+  // 修改时间选择函数，确保正确设置时间戳
+  const selectTime = (values: dayjs.Dayjs[]) => {
+    if (values && values.length === 2) {
+      const [start, end] = values;
+      searchParams.timeRange[0] = start.valueOf(); // 使用valueOf获取毫秒时间戳
+      searchParams.timeRange[1] = end.valueOf();
+      console.log("时间范围:", searchParams.timeRange);
+    } else {
+      // 清空时间范围
+      searchParams.timeRange = [];
+    }
   };
+
+  // 改进搜索函数，确保正确传递参数
   const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>(
     (keyword) => {
-      setTableData(
-        ReqTrackList({
-          keyword,
-          start: searchParams.timeRange[0],
-          end: searchParams.timeRange[1]
-        })
-      );
+      console.log("搜索参数:", {
+        keyword,
+        start: searchParams.timeRange[0] || undefined,
+        end: searchParams.timeRange[1] || undefined
+      });
+
+      const results = ReqTrackList({
+        keyword,
+        start: searchParams.timeRange[0] || undefined,
+        end: searchParams.timeRange[1] || undefined
+      });
+
+      setTableData(results);
     },
     [searchParams.timeRange, setTableData]
   );
+
+  // 初始化时也应用一次搜索，确保显示正确数据
+  useEffect(() => {
+    onSearch(searchParams.text);
+  }, []);
+
   const today = new Date().getDay();
   const defaultDate = useMemo<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
-    return [dayjs(new Date()), dayjs(new Date())];
-    //eslint-disable-next-line
+    const now = dayjs();
+    const dayStart = now.startOf("day");
+    return [dayStart, now];
   }, [today]);
+
   //Modal
   const ShowModal = useReactive({
     detail: false
@@ -61,7 +85,12 @@ const Track: FC<object> = () => {
       <TrackContainer>
         <div className="search">
           <ConfigProvider theme={AntdDatePickerTheme}>
-            <RangePicker defaultValue={defaultDate} onChange={selectTime as any} showNow />
+            <RangePicker
+              defaultValue={defaultDate}
+              onChange={selectTime as any}
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+            />
           </ConfigProvider>
           <ConfigProvider theme={AntdSearchTheme}>
             <Input.Search
@@ -79,7 +108,7 @@ const Track: FC<object> = () => {
         <div className="form">
           <ConfigProvider theme={AntdTableTheme}>
             <Table<TrackList>
-              dataSource={data}
+              dataSource={tableData}
               size="small"
               bordered
               scroll={{
@@ -105,7 +134,16 @@ const Track: FC<object> = () => {
                 dataIndex={"time"}
                 align="center"
                 render={(_, row: TrackList) => {
-                  return new Date(row.time).toLocaleString();
+                  // 修复时间显示问题
+                  if (typeof row.time === "object" && row.time !== null && "time" in row.time) {
+                    // 如果是CarRecord对象
+                    return new Date(row.time.time).toLocaleString();
+                  } else if (typeof row.time === "number") {
+                    // 如果是时间戳
+                    return new Date(row.time).toLocaleString();
+                  } else {
+                    return "未知时间";
+                  }
                 }}
               />
               <Column

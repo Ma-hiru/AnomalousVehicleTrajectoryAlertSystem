@@ -1,35 +1,75 @@
-import { FC, memo, useEffect } from "react";
-import Map from "@/components/Map/Map";
+import { FC, memo, useCallback, useEffect, useRef, useState } from "react";
 import { useMyState } from "@/hooks/useMyState";
+import BaseMap from "@/components/Map/Map";
 import "@amap/amap-jsapi-types";
 import { getLocation } from "@/utils/getLocation";
 import Logger from "@/utils/logger";
 import "./SelectMap.scss";
-import AppCard from "@/components/AppCard";
+import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
+import { MockVideo, ReqRecords, ReqVideoList } from "@/api/mock";
 
-type props = {
-  layoutSpiltSize: number;
-};
-const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
+const TrackMap: FC<object> = () => {
   const map = useMyState<AMap.Map | null>(null);
   const amap = useMyState<typeof window.AMap | null>(null);
   const loca = useMyState<typeof Loca | null>(null);
-  //初始化当前位置作为中心点
+  const markersRef = useRef<Array<AMap.Marker>>([]);
+  const heatmapLayerRef = useRef<any>(null);
+  const timerRef = useRef<number | null>(null);
+
+  const [videoStreams, setVideoStreams] = useState<VideoStreamInfo[]>([]);
+  const [anomalyStats, setAnomalyStats] = useState<Map<number, number[]>>(new Map());
+  // 更新异常记录统计
+  const updateAnomalyRecords = useCallback(() => {
+    // 获取新的异常记录
+    const newRecords = ReqRecords();
+    // 更新异常统计
+    setAnomalyStats((prevStats) => {
+      const newStats = new Map(prevStats);
+      newRecords.forEach((record) => {
+        const streamId = record.streamId;
+        const actionId = record.actionId;
+        if (newStats.has(streamId)) {
+          const stats = [...newStats.get(streamId)!];
+          stats[actionId]++;
+          newStats.set(streamId, stats);
+        }
+      });
+      return newStats;
+    });
+  }, []);
+  // 获取摄像头的异常总数
+  const getAnomalyCount = useCallback(
+    (streamId: number): number => {
+      if (!anomalyStats.has(streamId)) return 0;
+      // 计算除了正常行为(index 0)外的所有行为数量总和
+      return anomalyStats
+        .get(streamId)!
+        .reduce((sum, count, index) => (index === 0 ? sum : sum + count), 0);
+    },
+    [anomalyStats]
+  );
+  // 加载摄像头数据
   useEffect(() => {
-    const currentMap = map.get();
-    const currentAMap = amap.get();
-    if (currentMap !== null && currentAMap !== null) {
-      getLocation()
-        .then((pos) => {
-          //TODO 模拟数据
-          // if (pos) currentMap.setCenter([112.86, 27.88]);
-          if (pos) currentMap.setCenter([102.618687, 31.790976]);
-        })
-        .catch(() => {
-          Logger.Message.Error("地点定位失败！");
-        });
-    }
-  }, [amap, map]);
+    // 直接从mock获取摄像头列表
+    setVideoStreams(ReqVideoList());
+    // 初始化异常统计数据
+    const initialStats = new Map<number, number[]>();
+    MockVideo.forEach((stream) => {
+      initialStats.set(stream.streamId, Array(ActionsEnum.length).fill(0));
+    });
+    setAnomalyStats(initialStats);
+    // 开始定期获取异常记录
+    updateAnomalyRecords();
+    // 设置定时器定期更新异常记录（每3秒更新一次）
+    timerRef.current = window.setInterval(updateAnomalyRecords, 3000);
+    // 组件卸载时清除定时器
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [updateAnomalyRecords]);
   //使用插件
   useEffect(() => {
     const currentAMap = amap.get();
@@ -70,87 +110,236 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
       );
     }
   }, [loca, map]);
-  // heatmap
+  //显示摄像头标记
+  useEffect(() => {
+    const currentMap = map.get();
+    const currentAMap = amap.get();
+
+    if (currentMap && currentAMap && videoStreams.length > 0) {
+      console.log("初始化地图视图和摄像头标记...");
+
+      // 清除之前的标记
+      if (markersRef.current.length > 0) {
+        currentMap.remove(markersRef.current);
+        markersRef.current = [];
+      }
+
+      // 为每个视频流创建标记
+      markersRef.current = videoStreams.map((stream) => {
+        // 获取该摄像头的异常行为数量
+        const anomalyCount = getAnomalyCount(stream.streamId);
+
+        // 创建标记
+        const marker = new currentAMap.Marker({
+          position: new currentAMap.LngLat(stream.longitude, stream.latitude),
+          title: stream.streamName,
+          icon: new currentAMap.Icon({
+            size: new currentAMap.Size(40, 40),
+            image: "https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+            imageSize: new currentAMap.Size(40, 40)
+          }),
+          offset: new currentAMap.Pixel(-20, -40),
+          label: {
+            content: `<div style="padding:2px 4px;font-size:12px;color:#fff;background-color:rgba(0,0,0,0.6);border-radius:4px;">${anomalyCount}异常</div>`,
+            direction: "bottom"
+          }
+        });
+
+        // 创建信息窗口
+        const infoWindow = new currentAMap.InfoWindow({
+          content: `
+            <div style="padding: 12px; border-radius: 5px;">
+              <h4 style="margin: 0 0 8px 0; color: #1890ff;">${stream.streamName}</h4>
+              <p style="margin: 5px 0; font-size: 13px;"><b>位置:</b> ${stream.addr}</p>
+              <p style="margin: 5px 0; font-size: 13px;"><b>异常行为:</b> <span style="color:${
+                anomalyCount > 0 ? "#ff4d4f" : "#52c41a"
+              }">${anomalyCount}次</span></p>
+              <p style="margin: 5px 0; font-size: 13px;"><b>经纬度:</b> ${stream.longitude.toFixed(
+                6
+              )}, ${stream.latitude.toFixed(6)}</p>
+            </div>
+          `,
+          offset: new currentAMap.Pixel(0, -30),
+          anchor: "bottom-center"
+        });
+
+        // 鼠标悬停显示信息窗口
+        marker.on("mouseover", () => {
+          infoWindow.open(currentMap, marker.getPosition());
+        });
+
+        marker.on("mouseout", () => {
+          infoWindow.close();
+        });
+
+        return marker;
+      });
+
+      // 添加标记到地图
+      currentMap.add(markersRef.current);
+
+      // 设置地图视图以包含所有标记
+      if (markersRef.current.length > 0) {
+        currentMap.setFitView(markersRef.current);
+      } else {
+        getLocation()
+          .then((pos) => {
+            if (pos) {
+              currentMap.setCenter([112.86, 27.88]);
+              currentMap.setZoom(12);
+            }
+          })
+          .catch(() => {
+            Logger.Message.Error("地点定位失败！");
+          });
+      }
+    }
+  }, [amap, getAnomalyCount, map, videoStreams]);
+  // 热力图
   useEffect(() => {
     const currentLoca = loca.get();
     const currentMap = map.get();
-    if (currentLoca && currentMap) {
-      const geo = new Loca.GeoJSONSource({
-        url: "https://a.amap.com/Loca/static/loca-v2/demos/mock_data/traffic.json"
-      });
-      const heatmap = new Loca.HeatMapLayer({
-        // loca,
-        zIndex: 10,
-        opacity: 1,
-        visible: true,
-        zooms: [2, 22]
-      });
-      heatmap.setSource(geo, {
-        radius: 200000,
-        unit: "meter",
-        height: 500000,
-        //radius: 35,
-        //unit: 'px',
-        //height: 100,
-        gradient: {
-          0.1: "#2A85B8",
-          0.2: "#16B0A9",
-          0.3: "#29CF6F",
-          0.4: "#5CE182",
-          0.5: "#7DF675",
-          0.6: "#FFF100",
-          0.7: "#FAA53F",
-          1: "#D04343"
-        },
-        value: function (index: any, feature: any) {
-          return feature.properties.avg;
-          // const value = feature.properties.mom.slice(0, -1);
-          // return value + 10 * Math.random();
-        },
-        // min: -100,
-        // max: 100,
-        heightBezier: [0, 0.53, 0.37, 0.98]
-      });
-      currentLoca.add(heatmap);
-      console.log(heatmap);
-      heatmap.addAnimate({
-        key: "height",
-        value: [0, 1],
-        duration: 2000,
-        easing: "BackOut"
-        // yoyo: true,
-        // repeat: 2,
-      });
-      heatmap.addAnimate({
-        key: "radius",
-        value: [0, 1],
-        duration: 2000,
-        easing: "BackOut",
-        // 开启随机动画
-        transform: 1000,
-        random: true,
-        delay: 5000
-      });
-      currentMap.on("click", function (e: any) {
-        const feat = heatmap.queryFeature(e.pixel.toArray());
-        if (feat) {
-          currentMap.clearMap();
-          currentMap.add(
-            new AMap.Marker({
-              position: feat.lnglat,
-              anchor: "bottom-center",
-              content:
-                '<div style="margin-bottom: 15px; border:1px solid #fff; border-radius: 4px;color: #fff; width: 150px; text-align: center;">热力值: ' +
-                feat.value.toFixed(2) +
-                "</div>"
-            }) as any
-          );
+    if (currentLoca && currentMap && videoStreams.length > 0) {
+      console.log("创建热力图...");
+      // 清除现有热力图层
+      if (heatmapLayerRef.current) {
+        currentLoca.remove(heatmapLayerRef.current);
+        heatmapLayerRef.current = null;
+      }
+      // 准备热力图数据 - 转换为GeoJSON格式
+      const heatmapData = {
+        type: "FeatureCollection",
+        features: videoStreams
+          .map((camera) => {
+            const anomalyCount = getAnomalyCount(camera.streamId);
+            if (anomalyCount > 0) {
+              return {
+                type: "Feature",
+                properties: {
+                  count: anomalyCount
+                },
+                geometry: {
+                  type: "Point",
+                  coordinates: [camera.longitude, camera.latitude]
+                }
+              };
+            }
+            return null;
+          })
+          .filter((item) => item !== null)
+      };
+      // 确保有数据点
+      if (heatmapData.features.length > 0) {
+        console.log("热力图数据点:", heatmapData.features.length, heatmapData);
+        try {
+          // 创建热力图数据源 - 使用GeoJSONSource而不是LocalSource
+          const dataSource = new Loca.GeoJSONSource({
+            data: heatmapData
+          });
+          // 创建热力图层
+          const heatmapLayer = new Loca.HeatMapLayer({
+            zIndex: 10,
+            opacity: 0.8,
+            visible: true,
+            zooms: [3, 20]
+          });
+          // 设置热力图样式
+          heatmapLayer.setSource(dataSource, {
+            radius: 35,
+            unit: "px",
+            height: 100,
+            gradient: {
+              0.1: "#2A85B8",
+              0.2: "#16B0A9",
+              0.3: "#29CF6F",
+              0.4: "#5CE182",
+              0.5: "#7DF675",
+              0.6: "#FFF100",
+              0.7: "#FAA53F",
+              1: "#D04343"
+            },
+            // 使用properties中的count属性作为热力值
+            value: (index: number, feature: any) => {
+              return feature.properties.count;
+            },
+            heightBezier: [0, 0.53, 0.37, 0.98]
+          });
+          // 添加到Loca容器
+          currentLoca.add(heatmapLayer);
+          heatmapLayerRef.current = heatmapLayer;
+          // 添加动画效果
+          heatmapLayer.addAnimate({
+            key: "height",
+            value: [0, 1],
+            duration: 2000,
+            easing: "BackOut"
+          });
+          // 添加点击事件
+          currentMap.on("click", function (e: any) {
+            const feature = heatmapLayer.queryFeature(e.pixel.toArray());
+            if (feature) {
+              const infoWindow = new AMap.InfoWindow({
+                content: `<div style="padding: 10px;">
+                  <p>热力值: ${feature.value.toFixed(2)}</p>
+                  <p>位置: ${feature.lnglat[0].toFixed(6)}, ${feature.lnglat[1].toFixed(6)}</p>
+                </div>`,
+                offset: new AMap.Pixel(0, -30)
+              });
+
+              infoWindow.open(currentMap, new AMap.LngLat(feature.lnglat[0], feature.lnglat[1]));
+            }
+          });
+        } catch (error) {
+          console.error("创建热力图出错:", error);
+          // 如果Loca热力图创建失败，回退到使用AMap.HeatMap
+          try {
+            console.log("尝试使用AMap.HeatMap...");
+            const aMapHeatmapData = videoStreams
+              .map((camera) => {
+                const anomalyCount = getAnomalyCount(camera.streamId);
+                if (anomalyCount > 0) {
+                  return {
+                    lng: camera.longitude,
+                    lat: camera.latitude,
+                    count: anomalyCount * 5 // 增大权重使效果更明显
+                  };
+                }
+                return null;
+              })
+              .filter((item) => item !== null);
+            if (aMapHeatmapData.length > 0) {
+              window.AMap.plugin(["AMap.HeatMap"], function () {
+                const heatmap = new (AMap as any).HeatMap(currentMap, {
+                  radius: 25,
+                  opacity: [0, 0.8],
+                  gradient: {
+                    0.4: "#2A85B8",
+                    0.5: "#16B0A9",
+                    0.6: "#29CF6F",
+                    0.7: "#5CE182",
+                    0.8: "#7DF675",
+                    0.9: "#FFF100",
+                    1.0: "#D04343"
+                  },
+                  zooms: [3, 18]
+                });
+                heatmap.setDataSet({
+                  data: aMapHeatmapData,
+                  max: Math.max(...aMapHeatmapData.map((p) => p.count)) || 10
+                });
+                heatmapLayerRef.current = heatmap;
+              });
+            }
+          } catch (fallbackError) {
+            console.error("AMap.HeatMap 也创建失败:", fallbackError);
+          }
         }
-      });
+      }
     }
-  }, [loca, map]);
+  }, [getAnomalyCount, loca, map, videoStreams]);
+
   return (
-    <Map
+    <BaseMap
       map={map}
       amap={amap}
       containerStyle={{
@@ -159,14 +348,14 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
       }}
       id="TrackMap-container"
       mapOptions={{
-        zooms: [2, 22],
-        zoom: 4.7,
+        zooms: [3, 20],
+        zoom: 12,
         showLabel: true,
-        // Tips:地图设置成 3D 模式，否则图层会失去高度信息
         viewMode: "3D",
         pitch: 40
       }}
       loadOptions={{
+        plugins: ["AMap.HeatMap"],
         Loca: {
           version: "2.0.0"
         }
@@ -174,4 +363,5 @@ const TrackMap: FC<props> = ({ layoutSpiltSize }) => {
     />
   );
 };
+
 export default memo(TrackMap);
