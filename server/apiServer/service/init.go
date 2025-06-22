@@ -2,18 +2,22 @@ package service
 
 import (
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+	"server/utils"
 )
 
-var Db *gorm.DB
+var (
+	db  *gorm.DB
+	err error
+)
 
 func init() {
-	var err error
-	if Db, err = gorm.Open(dbDialector, &gorm.Config{
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: false,
-		},
-	}); err != nil {
-		panic("数据库连接失败！")
+	if db, err = gorm.Open(dbDialector, initConfig); err != nil {
+		utils.Logger("GORM").Panic("数据库连接失败")
+	} else {
+		utils.Logger("GORM").Println("连接数据库成功")
 	}
+}
+
+func GetDbInstance() *gorm.DB {
+	return db
 }

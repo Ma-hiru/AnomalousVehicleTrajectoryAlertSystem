@@ -6,7 +6,7 @@ import (
 )
 
 func GetUser(u model.User) (*model.User, bool) {
-	if res := Db.Where(&u).First(&u); res.Error != nil {
+	if res := db.Where(&u).First(&u); res.Error != nil {
 		log.Println(res.Error)
 		return nil, false
 	}
@@ -14,7 +14,7 @@ func GetUser(u model.User) (*model.User, bool) {
 }
 func GetAllUser(page, size int) (users []model.User, ok bool) {
 	offset := (page - 1) * size
-	if res := Db.Offset(offset).Limit(size).Find(&users); res.Error != nil {
+	if res := db.Offset(offset).Limit(size).Find(&users); res.Error != nil {
 		log.Println(res.Error)
 		return nil, false
 	}
@@ -25,14 +25,14 @@ func UpdateUser(old model.User, new model.User) (*model.User, bool) {
 		log.Println("Id is null.")
 		return nil, false
 	} else {
-		if res := Db.Model(model.User{Id: old.Id}).Updates(&new); res.Error != nil {
+		if res := db.Model(model.User{Id: old.Id}).Updates(&new); res.Error != nil {
 			return nil, false
 		}
 		return &new, true
 	}
 }
 func CreateUser(u model.User) (*model.User, bool) {
-	if res := Db.Create(&u); res.Error != nil {
+	if res := db.Create(&u); res.Error != nil {
 		log.Println(res.Error)
 		return nil, false
 	}
@@ -43,7 +43,7 @@ func DeleteUser(u model.User) (*model.User, bool) {
 		log.Println("Id is null.")
 		return nil, false
 	} else {
-		if res := Db.Delete(&model.User{Id: u.Id}); res.Error != nil {
+		if res := db.Delete(&model.User{Id: u.Id}); res.Error != nil {
 			return nil, false
 		}
 		return &u, true

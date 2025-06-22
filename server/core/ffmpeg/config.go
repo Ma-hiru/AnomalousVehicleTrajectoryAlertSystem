@@ -45,7 +45,7 @@ type (
 		Fflags      string `json:"fflags"` // 生成PTS时间戳 "+genpts"
 		StartTime   string // 起始时间 hh:mm:ss
 		Duration    string // 抽帧时长 hh:mm:ss
-		Hwaccel     string `json:"hwaccel"` // CUDA硬件加速 (example "cuda" )
+		Hwaccel     string `json:"hwaccel"` // Hwaccel 硬件加速类型，可选值: "qsv", "cuda"
 		CV          string `json:"c:v"`     // NVIDIA编码器 (example "h264_nvenc")
 		InputFormat string `json:"f"`
 		Loglevel    string `json:"loglevel"` //warning

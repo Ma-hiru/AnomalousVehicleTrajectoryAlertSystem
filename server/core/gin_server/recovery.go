@@ -7,14 +7,13 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"runtime/debug"
 )
 
 func customRecovery(errMsg any) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("Recovered panic: %v\n%s", err, debug.Stack())
+				log.Printf("Gin Recovered panic: %v\n", err)
 				if enablePrintStack {
 					printStack()
 				}

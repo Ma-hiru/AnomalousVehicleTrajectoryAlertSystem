@@ -5,11 +5,19 @@ import (
 	"server/core/gin_server"
 )
 
+type Version int8
+
+const (
+	V1 Version = iota
+)
+
 func UseRoutes(app *gin.Engine) {
 	root := app.Group("/api")
-	userRoutes(root)
-	go2rtcRoutes(root)
-	appRoutes(root)
+	{
+		go2rtcRoutes(root, V1)
+		appRoutes(root, V1)
+		carRoutes(root, V1)
+	}
 }
 
 func Init() {

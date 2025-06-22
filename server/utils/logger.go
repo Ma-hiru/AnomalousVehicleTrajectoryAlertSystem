@@ -36,6 +36,10 @@ func (l *Log) Println(data ...any) {
 	l.logTime()
 	text(data...)
 }
+func (l *Log) Panic(msg string) {
+	l.Println(msg)
+	panic(msg)
+}
 func (l *Log) SPrintln(data ...any) string {
 	text := l.fn.SprintlnFunc()
 	l.logTime()

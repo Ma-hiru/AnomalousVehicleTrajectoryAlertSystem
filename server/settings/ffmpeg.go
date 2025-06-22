@@ -5,10 +5,10 @@ import (
 	"server/core/ffmpeg"
 )
 
-func ExtractOptions() ffmpeg.ExtractFramesOptions {
+func ExtractOptions(name string) ffmpeg.ExtractFramesOptions {
 	return ffmpeg.ExtractFramesOptions{
 		InputOpt: ffmpeg.ExtractInputOption{
-			Hwaccel:     "cuda", //"qsv" "cuda"
+			Hwaccel:     "cuda",
 			InputFormat: "mp4",
 			Loglevel:    "debug",
 			CV:          "h264",
@@ -22,6 +22,8 @@ func ExtractOptions() ffmpeg.ExtractFramesOptions {
 			FpsMode:      "vfr",
 			OutputFormat: "image2",
 			FrameType:    "I",
+			ImageFormat:  "jpg",
 		},
+		Name: name,
 	}
 }

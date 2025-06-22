@@ -6,6 +6,10 @@ import (
 	"server/apiServer/model"
 )
 
+func CustomResponse(ctx *gin.Context, res *model.Response) {
+	ctx.JSON(http.StatusOK, res)
+}
+
 func SuccessResponse(ctx *gin.Context, message string, data any) {
 	ctx.JSON(http.StatusOK, model.Response{
 		Code:    http.StatusOK,
