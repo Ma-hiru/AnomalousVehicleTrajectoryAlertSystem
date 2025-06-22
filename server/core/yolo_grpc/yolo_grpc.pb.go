@@ -20,16 +20,13 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	YoloService_DetectSingle_FullMethodName = "/YoloService/DetectSingle"
-	YoloService_DetectStream_FullMethodName = "/YoloService/DetectStream"
 )
 
 // YoloServiceClient is the client API for YoloService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type YoloServiceClient interface {
-	// TODO waiting for yolo service
 	DetectSingle(ctx context.Context, in *ImageRequest, opts ...grpc.CallOption) (*DetectionResult, error)
-	DetectStream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ImageRequest, DetectionResult], error)
 }
 
 type yoloServiceClient struct {
@@ -50,26 +47,11 @@ func (c *yoloServiceClient) DetectSingle(ctx context.Context, in *ImageRequest, 
 	return out, nil
 }
 
-func (c *yoloServiceClient) DetectStream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ImageRequest, DetectionResult], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &YoloService_ServiceDesc.Streams[0], YoloService_DetectStream_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[ImageRequest, DetectionResult]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type YoloService_DetectStreamClient = grpc.BidiStreamingClient[ImageRequest, DetectionResult]
-
 // YoloServiceServer is the server API for YoloService service.
 // All implementations must embed UnimplementedYoloServiceServer
 // for forward compatibility.
 type YoloServiceServer interface {
-	// TODO waiting for yolo service
 	DetectSingle(context.Context, *ImageRequest) (*DetectionResult, error)
-	DetectStream(grpc.BidiStreamingServer[ImageRequest, DetectionResult]) error
 	mustEmbedUnimplementedYoloServiceServer()
 }
 
@@ -82,9 +64,6 @@ type UnimplementedYoloServiceServer struct{}
 
 func (UnimplementedYoloServiceServer) DetectSingle(context.Context, *ImageRequest) (*DetectionResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DetectSingle not implemented")
-}
-func (UnimplementedYoloServiceServer) DetectStream(grpc.BidiStreamingServer[ImageRequest, DetectionResult]) error {
-	return status.Errorf(codes.Unimplemented, "method DetectStream not implemented")
 }
 func (UnimplementedYoloServiceServer) mustEmbedUnimplementedYoloServiceServer() {}
 func (UnimplementedYoloServiceServer) testEmbeddedByValue()                     {}
@@ -125,13 +104,6 @@ func _YoloService_DetectSingle_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _YoloService_DetectStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(YoloServiceServer).DetectStream(&grpc.GenericServerStream[ImageRequest, DetectionResult]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type YoloService_DetectStreamServer = grpc.BidiStreamingServer[ImageRequest, DetectionResult]
-
 // YoloService_ServiceDesc is the grpc.ServiceDesc for YoloService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -144,13 +116,6 @@ var YoloService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _YoloService_DetectSingle_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "DetectStream",
-			Handler:       _YoloService_DetectStream_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "yolo.proto",
 }

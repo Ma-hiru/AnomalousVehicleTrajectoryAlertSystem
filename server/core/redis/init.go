@@ -1,14 +1,14 @@
 package redis
 
 import (
-	redis "github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v8"
 	"log"
 	"time"
 )
 
 var Rdb *redis.Client
 
-func init() {
+func Init() {
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:         "localhost:6379",
 		PoolSize:     20,

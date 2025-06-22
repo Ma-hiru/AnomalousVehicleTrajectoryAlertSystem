@@ -21,14 +21,15 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 图像（jpeg）请求
 type ImageRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	ImageData           []byte                 `protobuf:"bytes,1,opt,name=imageData,proto3" json:"imageData,omitempty"`
-	Width               *int32                 `protobuf:"varint,2,opt,name=width,proto3,oneof" json:"width,omitempty"`
-	Height              *int32                 `protobuf:"varint,3,opt,name=height,proto3,oneof" json:"height,omitempty"`
-	ConfidenceThreshold float32                `protobuf:"fixed32,4,opt,name=confidenceThreshold,proto3" json:"confidenceThreshold,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`                 // 视频流ID
+	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`             // 图像字节数据
+	Timestamp     float32                `protobuf:"fixed32,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // 时间戳
+	Index         int64                  `protobuf:"varint,3,opt,name=index,proto3" json:"index,omitempty"`          // 单个视频请求开始的第几帧
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ImageRequest) Reset() {
@@ -61,38 +62,38 @@ func (*ImageRequest) Descriptor() ([]byte, []int) {
 	return file_yolo_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ImageRequest) GetImageData() []byte {
+func (x *ImageRequest) GetId() string {
 	if x != nil {
-		return x.ImageData
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ImageRequest) GetData() []byte {
+	if x != nil {
+		return x.Data
 	}
 	return nil
 }
 
-func (x *ImageRequest) GetWidth() int32 {
-	if x != nil && x.Width != nil {
-		return *x.Width
-	}
-	return 0
-}
-
-func (x *ImageRequest) GetHeight() int32 {
-	if x != nil && x.Height != nil {
-		return *x.Height
-	}
-	return 0
-}
-
-func (x *ImageRequest) GetConfidenceThreshold() float32 {
+func (x *ImageRequest) GetTimestamp() float32 {
 	if x != nil {
-		return x.ConfidenceThreshold
+		return x.Timestamp
 	}
 	return 0
 }
 
+func (x *ImageRequest) GetIndex() int64 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
+}
+
+// 检测响应
 type DetectionResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Boxes         []*BoundingBox         `protobuf:"bytes,1,rep,name=boxes,proto3" json:"boxes,omitempty"`
-	ProcessTimeMs int64                  `protobuf:"varint,2,opt,name=processTimeMs,proto3" json:"processTimeMs,omitempty"`
+	Detections    []*Detection           `protobuf:"bytes,1,rep,name=detections,proto3" json:"detections,omitempty"` // 检测对象列表
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -127,36 +128,96 @@ func (*DetectionResult) Descriptor() ([]byte, []int) {
 	return file_yolo_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *DetectionResult) GetBoxes() []*BoundingBox {
+func (x *DetectionResult) GetDetections() []*Detection {
 	if x != nil {
-		return x.Boxes
+		return x.Detections
 	}
 	return nil
 }
 
-func (x *DetectionResult) GetProcessTimeMs() int64 {
+// 单个检测对象
+type Detection struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CarId         string                 `protobuf:"bytes,1,opt,name=car_id,json=carId,proto3" json:"car_id,omitempty"` // 对象唯一ID (跟踪ID)
+	Bbox          *BoundingBox           `protobuf:"bytes,2,opt,name=bbox,proto3" json:"bbox,omitempty"`                // 边界框 (归一化坐标)
+	Confidence    float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`  // 置信度 (0-1)
+	Behavior      int32                  `protobuf:"varint,3,opt,name=behavior,proto3" json:"behavior,omitempty"`       // 行为类别(数字，枚举映射需要讨论)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Detection) Reset() {
+	*x = Detection{}
+	mi := &file_yolo_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Detection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Detection) ProtoMessage() {}
+
+func (x *Detection) ProtoReflect() protoreflect.Message {
+	mi := &file_yolo_proto_msgTypes[2]
 	if x != nil {
-		return x.ProcessTimeMs
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Detection.ProtoReflect.Descriptor instead.
+func (*Detection) Descriptor() ([]byte, []int) {
+	return file_yolo_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Detection) GetCarId() string {
+	if x != nil {
+		return x.CarId
+	}
+	return ""
+}
+
+func (x *Detection) GetBbox() *BoundingBox {
+	if x != nil {
+		return x.Bbox
+	}
+	return nil
+}
+
+func (x *Detection) GetConfidence() float32 {
+	if x != nil {
+		return x.Confidence
 	}
 	return 0
 }
 
+func (x *Detection) GetBehavior() int32 {
+	if x != nil {
+		return x.Behavior
+	}
+	return 0
+}
+
+// 边界框 (归一化坐标)
 type BoundingBox struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	XMin          float32                `protobuf:"fixed32,1,opt,name=xMin,proto3" json:"xMin,omitempty"`
-	YMin          float32                `protobuf:"fixed32,2,opt,name=yMin,proto3" json:"yMin,omitempty"`
-	XMax          float32                `protobuf:"fixed32,3,opt,name=xMax,proto3" json:"xMax,omitempty"`
-	YMax          float32                `protobuf:"fixed32,4,opt,name=yMax,proto3" json:"yMax,omitempty"`
-	Label         string                 `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
-	Confidence    float32                `protobuf:"fixed32,6,opt,name=confidence,proto3" json:"confidence,omitempty"`
-	Mask          []byte                 `protobuf:"bytes,7,opt,name=mask,proto3,oneof" json:"mask,omitempty"`
+	XCenter       float32                `protobuf:"fixed32,1,opt,name=x_center,json=xCenter,proto3" json:"x_center,omitempty"` // 中心点x坐标 (0-1)
+	YCenter       float32                `protobuf:"fixed32,2,opt,name=y_center,json=yCenter,proto3" json:"y_center,omitempty"` // 中心点y坐标 (0-1)
+	Width         float32                `protobuf:"fixed32,3,opt,name=width,proto3" json:"width,omitempty"`                    // 框宽 (0-1)
+	Height        float32                `protobuf:"fixed32,4,opt,name=height,proto3" json:"height,omitempty"`                  // 框高 (0-1)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BoundingBox) Reset() {
 	*x = BoundingBox{}
-	mi := &file_yolo_proto_msgTypes[2]
+	mi := &file_yolo_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +229,7 @@ func (x *BoundingBox) String() string {
 func (*BoundingBox) ProtoMessage() {}
 
 func (x *BoundingBox) ProtoReflect() protoreflect.Message {
-	mi := &file_yolo_proto_msgTypes[2]
+	mi := &file_yolo_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,56 +242,35 @@ func (x *BoundingBox) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BoundingBox.ProtoReflect.Descriptor instead.
 func (*BoundingBox) Descriptor() ([]byte, []int) {
-	return file_yolo_proto_rawDescGZIP(), []int{2}
+	return file_yolo_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *BoundingBox) GetXMin() float32 {
+func (x *BoundingBox) GetXCenter() float32 {
 	if x != nil {
-		return x.XMin
+		return x.XCenter
 	}
 	return 0
 }
 
-func (x *BoundingBox) GetYMin() float32 {
+func (x *BoundingBox) GetYCenter() float32 {
 	if x != nil {
-		return x.YMin
+		return x.YCenter
 	}
 	return 0
 }
 
-func (x *BoundingBox) GetXMax() float32 {
+func (x *BoundingBox) GetWidth() float32 {
 	if x != nil {
-		return x.XMax
+		return x.Width
 	}
 	return 0
 }
 
-func (x *BoundingBox) GetYMax() float32 {
+func (x *BoundingBox) GetHeight() float32 {
 	if x != nil {
-		return x.YMax
+		return x.Height
 	}
 	return 0
-}
-
-func (x *BoundingBox) GetLabel() string {
-	if x != nil {
-		return x.Label
-	}
-	return ""
-}
-
-func (x *BoundingBox) GetConfidence() float32 {
-	if x != nil {
-		return x.Confidence
-	}
-	return 0
-}
-
-func (x *BoundingBox) GetMask() []byte {
-	if x != nil {
-		return x.Mask
-	}
-	return nil
 }
 
 var File_yolo_proto protoreflect.FileDescriptor
@@ -238,31 +278,31 @@ var File_yolo_proto protoreflect.FileDescriptor
 const file_yolo_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"yolo.proto\"\xab\x01\n" +
-	"\fImageRequest\x12\x1c\n" +
-	"\timageData\x18\x01 \x01(\fR\timageData\x12\x19\n" +
-	"\x05width\x18\x02 \x01(\x05H\x00R\x05width\x88\x01\x01\x12\x1b\n" +
-	"\x06height\x18\x03 \x01(\x05H\x01R\x06height\x88\x01\x01\x120\n" +
-	"\x13confidenceThreshold\x18\x04 \x01(\x02R\x13confidenceThresholdB\b\n" +
-	"\x06_widthB\t\n" +
-	"\a_height\"[\n" +
-	"\x0fDetectionResult\x12\"\n" +
-	"\x05boxes\x18\x01 \x03(\v2\f.BoundingBoxR\x05boxes\x12$\n" +
-	"\rprocessTimeMs\x18\x02 \x01(\x03R\rprocessTimeMs\"\xb5\x01\n" +
-	"\vBoundingBox\x12\x12\n" +
-	"\x04xMin\x18\x01 \x01(\x02R\x04xMin\x12\x12\n" +
-	"\x04yMin\x18\x02 \x01(\x02R\x04yMin\x12\x12\n" +
-	"\x04xMax\x18\x03 \x01(\x02R\x04xMax\x12\x12\n" +
-	"\x04yMax\x18\x04 \x01(\x02R\x04yMax\x12\x14\n" +
-	"\x05label\x18\x05 \x01(\tR\x05label\x12\x1e\n" +
+	"yolo.proto\"f\n" +
+	"\fImageRequest\x12\x0e\n" +
+	"\x02id\x18\x04 \x01(\tR\x02id\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12\x1c\n" +
+	"\ttimestamp\x18\x02 \x01(\x02R\ttimestamp\x12\x14\n" +
+	"\x05index\x18\x03 \x01(\x03R\x05index\"=\n" +
+	"\x0fDetectionResult\x12*\n" +
 	"\n" +
-	"confidence\x18\x06 \x01(\x02R\n" +
-	"confidence\x12\x17\n" +
-	"\x04mask\x18\a \x01(\fH\x00R\x04mask\x88\x01\x01B\a\n" +
-	"\x05_mask2w\n" +
+	"detections\x18\x01 \x03(\v2\n" +
+	".DetectionR\n" +
+	"detections\"\x80\x01\n" +
+	"\tDetection\x12\x15\n" +
+	"\x06car_id\x18\x01 \x01(\tR\x05carId\x12 \n" +
+	"\x04bbox\x18\x02 \x01(\v2\f.BoundingBoxR\x04bbox\x12\x1e\n" +
+	"\n" +
+	"confidence\x18\x04 \x01(\x02R\n" +
+	"confidence\x12\x1a\n" +
+	"\bbehavior\x18\x03 \x01(\x05R\bbehavior\"q\n" +
+	"\vBoundingBox\x12\x19\n" +
+	"\bx_center\x18\x01 \x01(\x02R\axCenter\x12\x19\n" +
+	"\by_center\x18\x02 \x01(\x02R\ayCenter\x12\x14\n" +
+	"\x05width\x18\x03 \x01(\x02R\x05width\x12\x16\n" +
+	"\x06height\x18\x04 \x01(\x02R\x06height2@\n" +
 	"\vYoloService\x121\n" +
-	"\fDetectSingle\x12\r.ImageRequest\x1a\x10.DetectionResult\"\x00\x125\n" +
-	"\fDetectStream\x12\r.ImageRequest\x1a\x10.DetectionResult\"\x00(\x010\x01B\n" +
+	"\fDetectSingle\x12\r.ImageRequest\x1a\x10.DetectionResult\"\x00B\n" +
 	"Z\b.;yolov8b\x06proto3"
 
 var (
@@ -277,23 +317,23 @@ func file_yolo_proto_rawDescGZIP() []byte {
 	return file_yolo_proto_rawDescData
 }
 
-var file_yolo_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_yolo_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_yolo_proto_goTypes = []any{
 	(*ImageRequest)(nil),    // 0: ImageRequest
 	(*DetectionResult)(nil), // 1: DetectionResult
-	(*BoundingBox)(nil),     // 2: BoundingBox
+	(*Detection)(nil),       // 2: Detection
+	(*BoundingBox)(nil),     // 3: BoundingBox
 }
 var file_yolo_proto_depIdxs = []int32{
-	2, // 0: DetectionResult.boxes:type_name -> BoundingBox
-	0, // 1: YoloService.DetectSingle:input_type -> ImageRequest
-	0, // 2: YoloService.DetectStream:input_type -> ImageRequest
+	2, // 0: DetectionResult.detections:type_name -> Detection
+	3, // 1: Detection.bbox:type_name -> BoundingBox
+	0, // 2: YoloService.DetectSingle:input_type -> ImageRequest
 	1, // 3: YoloService.DetectSingle:output_type -> DetectionResult
-	1, // 4: YoloService.DetectStream:output_type -> DetectionResult
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_yolo_proto_init() }
@@ -301,15 +341,13 @@ func file_yolo_proto_init() {
 	if File_yolo_proto != nil {
 		return
 	}
-	file_yolo_proto_msgTypes[0].OneofWrappers = []any{}
-	file_yolo_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_yolo_proto_rawDesc), len(file_yolo_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

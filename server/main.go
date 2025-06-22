@@ -3,18 +3,24 @@ package main
 import (
 	"server/apiServer"
 	"server/control"
+	"server/core/redis"
+	yolov8 "server/core/yolo_grpc"
 	"server/debug"
+	"server/go2rtc"
+	"server/streamServer"
 	"sync"
 )
 
 func main() {
 	wg := &sync.WaitGroup{}
 	control.WrapWg(wg, map[string]func(){
-		//"debug.PProf":          debug.PProf,
-		"debug.ListenSignExit": debug.ListenSignExit,
-		//"streamServer.SimulateStream": streamServer.SimulateStream,
-		//"go2rtc.Init":    go2rtc.Init,
-		"apiServer.Init": apiServer.Init,
+		"pprof":                       debug.PProf,
+		"listenSignExit":              debug.ListenSignExit,
+		"streamServer.SimulateStream": streamServer.SimulateStream,
+		"go2rtc":                      go2rtc.Init,
+		"yolo":                        yolov8.Init,
+		"redis":                       redis.Init,
+		"apiServer":                   apiServer.Init,
 	})
 	wg.Wait()
 }
