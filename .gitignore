@@ -8,6 +8,5 @@
 /server/video/
 /server/scripts/
 /server/frames/
-/server/yolo/
 /client/src/__tests__
 server/core/yolo_opencv/yolov8n.onnx

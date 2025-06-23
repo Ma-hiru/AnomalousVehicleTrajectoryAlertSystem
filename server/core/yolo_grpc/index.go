@@ -2,6 +2,7 @@ package yolov8
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -48,6 +49,8 @@ func Init() {
 	yolo, err = newClient(":50051")
 	if err != nil {
 		panic(err)
+	} else {
+		fmt.Println("Yolo client initialized")
 	}
 }
 func GetClient() *YoloClient {

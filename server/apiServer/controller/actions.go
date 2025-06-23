@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"server/apiServer/model"
 	"server/apiServer/service"
+	"server/core/functional"
 	"server/utils"
 )
 
@@ -23,7 +24,7 @@ func GetActions(ctx *gin.Context) {
 			ActionName: actionName,
 		})
 	}
-	jsonArr := utils.SliceReduce(
+	jsonArr := functional.SliceReduce(
 		resultArr,
 		func(
 			pre []*model.ActionsLayout,
