@@ -2,8 +2,8 @@ package socketServer
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/core/gin_server"
 	"server/core/my_socketio"
+	"shiina-mahiru.cn/gin_server"
 )
 
 //func example() {

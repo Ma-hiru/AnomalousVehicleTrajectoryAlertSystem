@@ -1,10 +1,9 @@
 package main
 
 import (
+	"server/apiServer"
 	"server/control"
-	yolov8 "server/core/yolo_grpc"
 	"server/debug"
-	"server/test"
 	"sync"
 )
 
@@ -15,10 +14,10 @@ func main() {
 		"listenSignExit": debug.ListenSignExit,
 		//"streamServer.SimulateStream": streamServer.SimulateStream,
 		//"go2rtc":    go2rtc.Init,
-		"yolo": yolov8.Init,
+		//"yolo": yolov8.Init,
 		//"redis":     redis.Init,
-		//"apiServer": apiServer.Init,
-		"testYolo": test.YoloSimulate,
+		"apiServer": apiServer.Init,
+		//"testYolo":  test.YoloSimulate,
 	})
 	wg.Wait()
 }

@@ -27,7 +27,7 @@ func WrapWg(wg *sync.WaitGroup, goroutine map[string]func()) map[string]bool {
 			defer wg.Done()
 			defer func() {
 				if err := recover(); err != nil {
-					utils.Logger("MAIN").SetColor(color.FgRed).Printf("Get panic: %v", err)
+					utils.Logger("MAIN").SetColor(color.FgRed).Printf("Get [%v] panic: %v", name, err)
 				}
 				lock.Lock()
 				started[name] = false

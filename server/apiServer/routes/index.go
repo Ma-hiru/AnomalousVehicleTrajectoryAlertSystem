@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/core/gin_server"
+	"shiina-mahiru.cn/gin_server"
 )
 
 type Version int8

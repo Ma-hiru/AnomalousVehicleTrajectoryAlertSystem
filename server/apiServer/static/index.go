@@ -2,7 +2,7 @@ package static
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/core/gin_server"
+	"shiina-mahiru.cn/gin_server"
 )
 
 func UseStatic(app *gin.Engine) {

@@ -1,9 +1,13 @@
 package debug
 
-import "github.com/gin-contrib/pprof"
-import "server/core/gin_server"
+import (
+	"github.com/gin-contrib/pprof"
+	"github.com/gin-gonic/gin"
+)
+import "shiina-mahiru.cn/gin_server"
 
 func PProf() {
-	engine := gin_server.GetEngine()
-	pprof.Register(engine, pprof.DefaultPrefix)
+	gin_server.WithUse(func(engine *gin.Engine) {
+		pprof.Register(engine, pprof.DefaultPrefix)
+	})
 }
