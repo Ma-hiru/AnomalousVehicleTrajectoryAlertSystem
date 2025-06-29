@@ -33,19 +33,13 @@ type Records struct {
 	StreamId sql.Null[int]  `gorm:"column:streamId;not null" json:"streamId,omitempty"`
 	ActionId sql.Null[int8] `gorm:"type:int8;column:actionId" json:"actionId,omitempty"`
 	Time     int64          `gorm:"type:bigint;column:time;not null" json:"time,omitempty"`
-	Cars     Cars           `gorm:"foreignKey:CarId;references:CarId" json:"cars,omitempty"`
-	Streams  Streams        `gorm:"foreignKey:StreamId;references:StreamId" json:"streams,omitempty"`
-	Actions  Actions        `gorm:"foreignKey:ActionId;references:ActionId" json:"actions,omitempty"`
 }
 type RecordsLayout struct {
-	RecordId string  `gorm:"type:varchar(15);column:recordId;primaryKey" json:"recordId,omitempty"`
-	CarId    string  `gorm:"type:varchar(10);column:carId;not null" json:"carId,omitempty"`
-	StreamId int     `gorm:"column:streamId;not null" json:"streamId,omitempty"`
-	ActionId int8    `gorm:"type:int8;column:actionId" json:"actionId,omitempty"`
-	Time     int64   `gorm:"type:bigint;column:time;not null" json:"time,omitempty"`
-	Cars     Cars    `gorm:"foreignKey:CarId;references:CarId" json:"cars,omitempty"`
-	Streams  Streams `gorm:"foreignKey:StreamId;references:StreamId" json:"streams,omitempty"`
-	Actions  Actions `gorm:"foreignKey:ActionId;references:ActionId" json:"actions,omitempty"`
+	RecordId string `gorm:"type:varchar(15);column:recordId;primaryKey" json:"recordId,omitempty"`
+	CarId    string `gorm:"type:varchar(10);column:carId;not null" json:"carId,omitempty"`
+	StreamId int    `gorm:"column:streamId;not null" json:"streamId,omitempty"`
+	ActionId int8   `gorm:"type:int8;column:actionId" json:"actionId,omitempty"`
+	Time     int64  `gorm:"type:bigint;column:time;not null" json:"time,omitempty"`
 }
 
 func (c Cars) TableName() string {

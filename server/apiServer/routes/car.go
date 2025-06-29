@@ -31,7 +31,7 @@ func managerActions(app *gin.RouterGroup, version Version) {
 }
 func managerRecords(app *gin.RouterGroup, version Version) {
 	if version == V1 {
-		// 获取行为记录 query: streamId | streamName | from to | null
+		// 获取行为记录 query: streamId | streamName | startTime endTime | null
 		app.GET("/v1/Records", controller.GetRecords)
 	}
 }

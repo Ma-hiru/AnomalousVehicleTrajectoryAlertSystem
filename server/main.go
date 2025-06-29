@@ -12,7 +12,7 @@ func main() {
 	control.WrapWg(wg, map[string]func(){
 		"pprof":          debug.PProf,
 		"listenSignExit": debug.ListenSignExit,
-		//"streamServer.SimulateStream": streamServer.SimulateStream,
+		//"simulateStream": streamServer.SimulateStream,
 		//"go2rtc":    go2rtc.Init,
 		//"yolo": yolov8.Init,
 		//"redis":     redis.Init,

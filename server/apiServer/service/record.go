@@ -1,6 +1,8 @@
 package service
 
-import "server/apiServer/model"
+import (
+	"server/apiServer/model"
+)
 
 // CreateRecord  增加行为记录
 func CreateRecord(records []*model.Records) (rowsAffected int64, err error) {
@@ -12,9 +14,9 @@ func CreateRecord(records []*model.Records) (rowsAffected int64, err error) {
 }
 
 // GetRecord 获取行为记录
-func GetRecord(condition any) (records []*model.Records, ok bool) {
-	if condition != nil {
-		res := db.Where(condition).Find(&records)
+func GetRecord(condition ...any) (records []*model.Records, ok bool) {
+	if condition != nil && len(condition) > 0 && condition[0] != nil {
+		res := db.Where(condition[0], condition[1:]...).Find(&records)
 		return records, res.Error == nil
 	} else {
 		res := db.Find(&records)

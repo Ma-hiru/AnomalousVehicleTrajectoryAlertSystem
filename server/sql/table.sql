@@ -20,8 +20,9 @@ create table if not exists actions
 create table if not exists records
 (
     recordId varchar(15) primary key,
-    carId    varchar(10) not null references cars (carId),
-    streamId int         not null references streams (streamId),
-    actionId int8 references actions (actionId),
+    carId    varchar(10) not null,
+    streamId int         not null,
+    actionId int8,
     time     bigint      not null
 );
+create index idx_time on records (time);
