@@ -1,4 +1,6 @@
-create database if not exists avtas;
+create database if not exists avtas
+    character set = utf8mb4
+    collate = utf8mb4_unicode_ci;
 use avtas;
 create table if not exists cars
 (

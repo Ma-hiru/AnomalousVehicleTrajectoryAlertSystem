@@ -1,0 +1,9 @@
+{
+  "stack": true,
+  "cors": {
+    "allow_all_origins": false
+  },
+  "key": "/ssl.key",
+  "chain": "/chain.pem",
+  "ssl": false
+}

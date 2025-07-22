@@ -2,7 +2,7 @@ package service
 
 import (
 	"gorm.io/gorm"
-	"server/utils"
+	"shiina-mahiru.cn/gin_server/pkg/logger"
 )
 
 var (
@@ -12,9 +12,9 @@ var (
 
 func init() {
 	if db, err = gorm.Open(dbDialector, initConfig); err != nil {
-		utils.Logger("GORM").Panic("数据库连接失败")
+		logger.New("GORM").Panic("数据库连接失败" + err.Error())
 	} else {
-		utils.Logger("GORM").Println("连接数据库成功")
+		logger.New("GORM").Println("连接数据库成功")
 	}
 }
 

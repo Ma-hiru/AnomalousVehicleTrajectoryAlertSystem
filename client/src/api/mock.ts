@@ -58,11 +58,9 @@ export const ReqRecords = (): CarRecord[] => {
 
   return records;
 };
-
 export const ReqVideoList = (): VideoStreamInfo[] => {
   return MockVideo;
 };
-
 export const ReqTrackList = (options?: {
   start?: number;
   end?: number;
@@ -75,18 +73,12 @@ export const ReqTrackList = (options?: {
       GenerateRecords(false); // 生成异常记录
     }
   }
-
-  console.log("筛选选项:", options);
-
   // 获取异常车辆ID
   const exceptionsCarId = FilterExceptionsCarId(options?.keyword || "");
-
   return exceptionsCarId.reduce(
     (pre, carId) => {
       const [records, actionIds, streamIds] = FilterRecordsAndActionsAndStreamsByCarId(carId);
-
       if (records.length === 0) return pre;
-
       // 时间筛选 - 筛选时间范围内的记录
       let filteredRecords = records;
       if (options?.start || options?.end) {
@@ -97,14 +89,11 @@ export const ReqTrackList = (options?: {
           const beforeEnd = options.end ? record.time <= options.end : true;
           return afterStart && beforeEnd;
         });
-
         // 如果筛选后没有记录，跳过这个车辆
         if (filteredRecords.length === 0) return pre;
       }
-
       // 重新计算轨迹
       const track = ComputeTrack(filteredRecords, streamIds);
-
       pre.push({
         carId,
         time: filteredRecords[0], // 使用筛选后的记录
@@ -112,21 +101,17 @@ export const ReqTrackList = (options?: {
         track,
         key: carId
       });
-
       return pre;
     },
     [] as (TrackList & { key: Key })[]
   );
 };
-
 /** utils */
 const GenerateRecords = (allowNormal: boolean = true): CarRecord => {
   const carId = MockCar[Math.floor(Math.random() * MockCar.length)].carId;
   const streamId = MockVideo[Math.floor(Math.random() * MockVideo.length)].streamId;
-
   // 增加异常行为出现的概率，提高可视化效果
   let actionId;
-
   if (allowNormal && Math.random() < 0.3) {
     // 30%概率是正常行为
     actionId = 0;
@@ -134,7 +119,6 @@ const GenerateRecords = (allowNormal: boolean = true): CarRecord => {
     // 异常行为 (1-6)
     actionId = Math.floor(Math.random() * 6) + 1;
   }
-
   const status = actionId === 0;
   const mockData = {
     recordId: carId + Date.now() + Math.random().toString(36).substring(2, 8),
@@ -144,18 +128,14 @@ const GenerateRecords = (allowNormal: boolean = true): CarRecord => {
     time: Date.now() - Math.floor(Math.random() * 3600000), // 随机生成过去1小时内的时间
     status
   };
-
   // 添加到记录库
   recordsDB.push(mockData);
-
   // 限制记录库大小
   if (recordsDB.length > MAX_RECORDS_DB_SIZE) {
     recordsDB.splice(0, recordsDB.length - MAX_RECORDS_DB_SIZE);
   }
-
   return mockData;
 };
-
 const FilterExceptionsCarId = (keyword: string = "") => {
   return [
     ...recordsDB.reduce((pre, cur) => {
@@ -199,7 +179,6 @@ const FilterTimeRangeAndRecordsByStream = (
   const timeRange = [recordsSet[recordsSet.length - 1].time, recordsSet[0].time];
   return [recordsSet, timeRange as [number, number]];
 };
-
 const ComputeTrack = (recordSet: CarRecord[], streamIds: number[]): Track[] => {
   return streamIds.map((streamId) => {
     const [records, timeRange] = FilterTimeRangeAndRecordsByStream(recordSet, streamId);

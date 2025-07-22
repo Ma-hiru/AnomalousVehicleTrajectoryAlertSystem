@@ -6,7 +6,7 @@ import autoprefixer from "autoprefixer";
 import { defineConfig, loadEnv } from "vite";
 import viteCompression from "vite-plugin-compression2";
 import VueDevTools from "vite-plugin-vue-devtools";
-// import crypto from "node:crypto";
+import crypto from "node:crypto";
 import MyViteAliases from "./plugins/MyViteAliases";
 import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
 import Logger from "./plugins/Logger";
@@ -28,14 +28,7 @@ export default defineConfig(({ mode }) => {
       }),
       react({
         babel: {
-          plugins: [
-            [
-              "babel-plugin-react-compiler",
-              {
-                target: "19"
-              }
-            ]
-          ]
+          plugins: [["babel-plugin-react-compiler", { target: "19" }]]
         }
       }),
       VueDevTools(),
@@ -75,19 +68,19 @@ export default defineConfig(({ mode }) => {
           main: fileURLToPath(new URL("index.html", import.meta.url))
         },
         output: {
-          // manualChunks: (id) => {
-          //   if (id.includes("node_modules"))
-          //     if (id.includes(".pnpm"))
-          //       return crypto
-          //         .createHash("sha256")
-          //         .update(id.split(".pnpm/")[1].split("/")[0].toString())
-          //         .digest("hex");
-          //     else
-          //       return crypto
-          //         .createHash("sha256")
-          //         .update(id.split("node_modules/")[1].split("/")[0].toString())
-          //         .digest("hex");
-          // }
+          manualChunks: (id) => {
+            if (id.includes("node_modules"))
+              if (id.includes(".pnpm"))
+                return crypto
+                  .createHash("sha256")
+                  .update(id.split(".pnpm/")[1].split("/")[0].toString())
+                  .digest("hex");
+              else
+                return crypto
+                  .createHash("sha256")
+                  .update(id.split("node_modules/")[1].split("/")[0].toString())
+                  .digest("hex");
+          }
         }
       }
     },

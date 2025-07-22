@@ -24,31 +24,31 @@ const SettingsIcon: FC<props> = ({ name }) => {
   const render = () => {
     switch (name) {
       case "api":
-        return <img src={api} alt="" style={styles.Level1} />;
+        return <img src={apiWhite} alt="" style={styles.Level1} />;
       case "apiWhite":
         return <img src={apiWhite} alt="" style={styles.Level1} />;
       case "rtsp":
-        return <img src={network} alt="" style={styles.Level1} />;
+        return <img src={networkWhite} alt="" style={styles.Level1} />;
       case "rtspWhite":
         return <img src={networkWhite} alt="" style={styles.Level1} />;
       case "streams":
-        return <img src={stream} alt="" style={styles.Level1} />;
+        return <img src={streamWhite} alt="" style={styles.Level1} />;
       case "streamsWhite":
         return <img src={streamWhite} alt="" style={styles.Level1} />;
       case "webrtc":
-        return <img src={RTC} alt="" style={styles.Level1} />;
+        return <img src={RTCWhite} alt="" style={styles.Level1} />;
       case "webrtcWhite":
         return <img src={RTCWhite} alt="" style={styles.Level1} />;
       case "dot":
-        return <img src={dot} alt="" style={styles.Level2} />;
+        return <img src={dotWhite} alt="" style={styles.Level2} />;
       case "dotWhite":
         return <img src={dotWhite} alt="" style={styles.Level2} />;
       case "link":
-        return <img src={link} alt="" style={styles.Level2} />;
+        return <img src={linkWhite} alt="" style={styles.Level2} />;
       case "linkWhite":
         return <img src={linkWhite} alt="" style={styles.Level2} />;
       case "origin":
-        return <img src={source} alt="" style={styles.Level2} />;
+        return <img src={sourceWhite} alt="" style={styles.Level2} />;
       case "originWhite":
         return <img src={sourceWhite} alt="" style={styles.Level2} />;
       case "listen":

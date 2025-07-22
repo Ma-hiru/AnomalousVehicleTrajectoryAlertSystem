@@ -1,0 +1,8 @@
+{
+  "mysql": {
+    "user": "root",
+    "password": "0514+",
+    "port": 3306,
+    "schema": "avtas"
+  }
+}

@@ -11,7 +11,7 @@ const (
 	V1 Version = iota
 )
 
-func UseRoutes(app *gin.Engine) {
+func useRoutes(app *gin.Engine) {
 	root := app.Group("/api")
 	{
 		go2rtcRoutes(root, V1)
@@ -21,5 +21,5 @@ func UseRoutes(app *gin.Engine) {
 }
 
 func Init() {
-	gin_server.WithUse(UseRoutes)
+	gin_server.WithUse(useRoutes)
 }

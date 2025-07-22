@@ -31,7 +31,7 @@
       <div
         class="cover"
         :style="{
-          backgroundImage: `url('/mock/cover${Math.floor(Math.random() * 3 + 1)}.png')`
+          backgroundImage: cover ? `url(${getURL(cover)})` : undefined
         }" />
     </motion.div>
   </el-tooltip>
@@ -44,12 +44,14 @@
   import { motion } from "motion-v";
   import { RefreshRight } from "@element-plus/icons-vue";
   import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+  import { getURL } from "@/utils/getURL";
 
   const streamStore = useStreamStore();
   /* 组件属性定义 */
   const props = defineProps<{
     url: { stream: string; frame: string };
     meta: VideoStreamInfo;
+    cover?: string;
   }>();
   const showControls = ref(false);
   const videoMse = useTemplateRef("videoMse");

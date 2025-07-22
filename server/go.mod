@@ -3,7 +3,7 @@ module server
 go 1.24.4
 
 require (
-	github.com/gin-contrib/cors v1.7.6
+	github.com/gin-contrib/cors v1.7.6 // indirect
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/websocket v1.5.3
@@ -92,4 +92,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 )
 
-replace shiina-mahiru.cn/gin_server => D:\Project\Go\pkg\gin_server
+replace shiina-mahiru.cn/gin_server => ./core/gin_server

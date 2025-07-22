@@ -1,6 +1,6 @@
 import jsyaml from "js-yaml";
 import { omitBy } from "lodash-es";
-import Logger from "@/utils/logger.ts";
+import Logger from "@/utils/logger";
 
 export const JsonToYaml = (json: Record<string, any>) => {
   try {

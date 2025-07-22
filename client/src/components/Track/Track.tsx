@@ -69,7 +69,7 @@ const Track: FC<object> = () => {
     const now = dayjs();
     const dayStart = now.startOf("day");
     return [dayStart, now];
-  }, [today]);
+  }, []);
 
   //Modal
   const ShowModal = useReactive({

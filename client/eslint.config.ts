@@ -1,8 +1,9 @@
+// import vuePlugin from "eslint-plugin-vue";
 import js from "@eslint/js";
 import globals from "globals";
-// import vuePlugin from "eslint-plugin-vue";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import * as reactCompiler from "eslint-plugin-react-compiler";
 import prettierPlugin from "eslint-plugin-prettier";
 import tseslint from "typescript-eslint";
 import pluginVitest from "@vitest/eslint-plugin";
@@ -31,11 +32,14 @@ export default tseslint.config(
     files: ["**/*.{ts,tsx,js,jsx}"],
     languageOptions: {
       ecmaVersion: "latest",
-      globals: globals.browser
+      globals: {
+        ...globals.browser
+      }
     },
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "react-compiler": reactCompiler,
       prettier: prettierPlugin
     },
     rules: {
@@ -54,27 +58,4 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-function-type": "off"
     }
   }
-  // {
-  //   extends: [js.configs.recommended, ...tseslint.configs.recommended],
-  //   files: ["**/*.{vue}"],
-  //   languageOptions: {
-  //     ecmaVersion: "latest",
-  //     globals: {
-  //       ...globals.browser
-  //     }
-  //   },
-  //   plugins: {
-  //     // vue: vuePlugin,
-  //     prettier: prettierPlugin
-  //   },
-  //   rules: {
-  //     ...reactHooks.configs.recommended.rules,
-  //     "prettier/prettier": ["warn", prettierRules],
-  //     "@typescript-eslint/no-explicit-any": "off",
-  //     "@typescript-eslint/no-unused-vars": "warn",
-  //     "@typescript-eslint/no-empty-object-type": "warn",
-  //     "@typescript-eslint/no-unused-expressions": "off",
-  //     "@typescript-eslint/no-unsafe-function-type": "off"
-  //   }
-  // }
 );
