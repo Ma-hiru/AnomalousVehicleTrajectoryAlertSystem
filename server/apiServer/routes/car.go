@@ -13,33 +13,33 @@ func carRoutes(app *gin.RouterGroup, version Version) {
 }
 func managerVideos(app *gin.RouterGroup, version Version) {
 	if version == V1 {
-		// 获取视频列表 query: streamId | streamName | null
-		app.GET("/v1/Videos", controller.GetVideos)
+		// 获取视频列表 query: streamId or streamName(like) | null(all)
+		app.GET("/v1/videos", controller.GetVideos)
 		// 更新视频列表 param: streamId streamName? addr? latitude? longitude?
-		app.PATCH("/v1/Videos", controller.PatchVideos)
+		app.PATCH("/v1/videos", controller.PatchVideos)
 		// 添加视频流信息 param: streamName addr? latitude longitude
-		app.POST("/v1/Videos", controller.AddVideos)
+		app.POST("/v1/videos", controller.AddVideos)
 		// 删除视频流信息 query: streamId | streamName
-		app.DELETE("/v1/Videos", controller.DelVideos)
+		app.DELETE("/v1/videos", controller.DelVideos)
 	}
 }
 func managerActions(app *gin.RouterGroup, version Version) {
 	if version == V1 {
-		// 获取行为枚举 query: actionId | actionName | null
-		app.GET("/v1/Actions", controller.GetActions)
+		// 获取行为枚举 query: actionId or actionName | null
+		app.GET("/v1/actions", controller.GetActions)
 	}
 }
 func managerRecords(app *gin.RouterGroup, version Version) {
 	if version == V1 {
-		// 获取行为记录 query: streamId | streamName | startTime endTime | null
-		app.GET("/v1/Records", controller.GetRecords)
+		// 获取行为记录 query: (streamId or streamName) & from & to | null
+		app.GET("/v1/records", controller.GetRecords)
 	}
 }
 func managerCategory(app *gin.RouterGroup, version Version) {
 	if version == V1 {
-		// 获取行为分类统计 query: streamId | streamName | from to | null
-		app.GET("/v1/Category", controller.GetCategory)
-		// 按分钟获取行为分类统计 query: streamId | streamName | from to | null
-		app.GET("/v1/Category/minute", controller.GetCategoryMinute)
+		// 获取行为分类统计 query: (streamId or streamName) & from & to | null(all)
+		app.GET("/v1/category", controller.GetCategory)
+		// 按分钟获取行为分类统计 query: (streamId or streamName or null) & from & to & gap(Minute)
+		app.GET("/v1/category/minute", controller.GetCategoryMinute)
 	}
 }

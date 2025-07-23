@@ -1,4 +1,4 @@
-import Logger from "@/utils/logger.ts";
+import Logger from "@/utils/logger";
 
 export const fetchData = async <T extends ReqResponse<any>, P extends any[]>(
   reqFn: (...args: P) => Promise<T>,

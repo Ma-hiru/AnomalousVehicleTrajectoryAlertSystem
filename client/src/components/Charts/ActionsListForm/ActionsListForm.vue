@@ -11,13 +11,14 @@
 </template>
 
 <script setup lang="ts" name="ActionsListForm">
-import { computed, watch } from "vue";
-import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
+import { computed } from "vue";
+import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
 import dayjs from "dayjs";
 import CustomScrollBoard from "@/components/Charts/CustomScrollBoard/CustomScrollBoard.vue";
 
-const streamStore = useStreamStore();
+
 const config = computed(() => {
+  //TODO 单个视频流行为数据统计，随着Active切换
   const records = streamStore.SingleCarRecordList.get(streamStore.ActiveStream.streamId) || [];
 
   return {

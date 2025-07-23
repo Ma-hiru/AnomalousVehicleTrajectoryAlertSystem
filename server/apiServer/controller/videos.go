@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"database/sql"
+	"context"
 	"github.com/gin-gonic/gin"
 	"server/apiServer/model"
 	"server/apiServer/service"
@@ -9,20 +9,20 @@ import (
 	"strings"
 )
 
-// GetVideos 获取视频列表 query: streamId | streamName | null
+// GetVideos 获取视频列表 query: streamId or streamName(like) | null(all)
 func GetVideos(ctx *gin.Context) {
 	var (
-		resultArr    []*model.StreamsLayout
+		resultArr    []*model.Stream
 		streamName   = ctx.Query("streamName")
 		streamId, ok = utils.ParseInt(ctx.Query("streamId"))
 	)
 	if streamName == "" && !ok {
-		resultArr, _ = service.GetStreamLayout(nil)
+		resultArr, _ = service.Stream.WithContext(context.Background()).Find()
 	} else {
-		resultArr, _ = service.GetStreamLayout(&model.Streams{
-			StreamId:   sql.Null[int]{V: streamId, Valid: ok},
-			StreamName: streamName,
-		})
+		resultArr, _ = service.Stream.WithContext(context.Background()).
+			Where(service.Stream.StreamID.Eq(int32(streamId))).
+			Or(service.Stream.StreamName.Like(streamName)).
+			Find()
 	}
 	utils.SuccessResponse(ctx, "查询成功", resultArr)
 }
@@ -39,30 +39,27 @@ func PatchVideos(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&params); err != nil {
 		utils.FailResponse(ctx, 201, "参数错误")
 	} else {
-		rowsAffected, err := service.UpdateStream(
-			&model.Streams{
-				StreamId: sql.Null[int]{V: params.StreamId, Valid: true},
-			},
-			&model.Streams{
+		info, err := service.Stream.WithContext(context.Background()).
+			Where(service.Stream.StreamID.Eq(int32(params.StreamId))).
+			Updates(model.Stream{
 				StreamName: params.StreamName,
 				Addr:       params.Addr,
 				Latitude:   params.Latitude,
 				Longitude:  params.Longitude,
-			},
-		)
+			})
 		if err != nil {
-			utils.CustomResponse(ctx, &model.Response{
+			utils.CustomResponse(ctx, &utils.Response{
 				Code:    201,
 				Message: "修改失败",
 				Ok:      false,
 				Data: gin.H{
-					"rowsAffected": rowsAffected,
+					"rowsAffected": info.RowsAffected,
 					"err":          err.Error(),
 				},
 			})
 		} else {
 			utils.SuccessResponse(ctx, "修改成功", gin.H{
-				"rowsAffected": rowsAffected,
+				"rowsAffected": info.RowsAffected,
 			})
 		}
 	}
@@ -79,33 +76,29 @@ func AddVideos(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&params); err != nil {
 		utils.FailResponse(ctx, 201, "参数错误")
 	} else {
-		rowsAffected, err := service.CreateStream([]*model.Streams{
-			{
+		err := service.Stream.WithContext(context.Background()).
+			Create(&model.Stream{
 				StreamName: params.StreamName,
 				Addr:       params.Addr,
 				Latitude:   params.Latitude,
 				Longitude:  params.Longitude,
-			},
-		})
+			})
 		if err != nil {
 			errMsg := err.Error()
 			if strings.Contains(errMsg, "Duplicate entry") {
 				errMsg = "视频流已存在"
 			}
-			utils.CustomResponse(ctx, &model.Response{
+			utils.CustomResponse(ctx, &utils.Response{
 				Code:    201,
 				Message: "添加失败",
 				Ok:      false,
 				Data: gin.H{
-					"rowsAffected": rowsAffected,
-					"err":          errMsg,
+					"err": errMsg,
 				},
 			})
 			return
 		} else {
-			utils.SuccessResponse(ctx, "添加成功", gin.H{
-				"rowsAffected": rowsAffected,
-			})
+			utils.SuccessResponse(ctx, "添加成功", gin.H{})
 		}
 	}
 }
@@ -113,26 +106,25 @@ func AddVideos(ctx *gin.Context) {
 // DelVideos 删除视频流信息 query: streamId | streamName
 func DelVideos(ctx *gin.Context) {
 	var (
-		streamName   = ctx.Query("streamName")
-		streamId, ok = utils.ParseInt(ctx.Query("streamId"))
+		streamName  = ctx.Query("streamName")
+		streamId, _ = utils.ParseInt(ctx.Query("streamId"))
 	)
-	if rowsAffected, err := service.DelStream([]*model.Streams{
-		{
-			StreamId:   sql.Null[int]{V: streamId, Valid: ok},
-			StreamName: streamName,
-		},
-	}); err != nil {
-		utils.CustomResponse(ctx, &model.Response{
+	info, err := service.Stream.WithContext(context.Background()).
+		Where(service.Stream.StreamID.Eq(int32(streamId))).
+		Or(service.Stream.StreamName.Eq(streamName)).
+		Delete()
+	if err != nil {
+		utils.CustomResponse(ctx, &utils.Response{
 			Code:    201,
 			Message: "删除失败",
 			Ok:      false,
 			Data: gin.H{
-				"rowsAffected": rowsAffected,
+				"rowsAffected": info.RowsAffected,
 			},
 		})
 	} else {
 		utils.SuccessResponse(ctx, "删除成功", gin.H{
-			"rowsAffected": rowsAffected,
+			"rowsAffected": info.RowsAffected,
 		})
 	}
 }

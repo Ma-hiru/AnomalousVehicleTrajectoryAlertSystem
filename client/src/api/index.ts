@@ -1,5 +1,7 @@
-import * as go2rtcAPI from "./moudules/go2rtcAPI";
+import * as go2rtc from "./go2rtc";
+import * as gin from "./server";
 
 export const API = {
-  ...go2rtcAPI
+  ...go2rtc,
+  ...gin
 };

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"database/sql"
+	"context"
 	"github.com/gin-gonic/gin"
 	"server/apiServer/model"
 	"server/apiServer/service"
@@ -9,40 +9,38 @@ import (
 	"server/utils"
 )
 
-// GetActions 获取行为枚举 query: actionId | actionName | null
+// GetActions 获取行为枚举 query: actionId or actionName | null
 func GetActions(ctx *gin.Context) {
 	var (
-		resultArr    []*model.Actions
+		resultArr    []*model.Action
 		actionName   = ctx.Query("actionName")
 		actionId, ok = utils.ParseInt(ctx.Query("actionId"))
 	)
 	if actionName == "" && !ok {
-		resultArr, _ = service.GetActions(nil)
+		resultArr, _ = service.Action.WithContext(context.Background()).Find()
 	} else {
-		resultArr, _ = service.GetActions(&model.Actions{
-			ActionId:   sql.Null[int8]{V: int8(actionId), Valid: ok},
-			ActionName: actionName,
-		})
+		resultArr, _ = service.Action.WithContext(context.Background()).
+			Where(service.Action.ActionID.Eq(int64(actionId))).
+			Or(service.Action.ActionName.Eq(actionName)).
+			Find()
 	}
-	jsonArr := functional.SliceReduce(
-		resultArr,
-		func(
-			pre []*model.ActionsLayout,
-			curValue *model.Actions,
-			curIndex int,
-		) []*model.ActionsLayout {
-			newData := &model.ActionsLayout{
-				ActionName: curValue.ActionName,
+	utils.SuccessResponse(ctx, "查询成功", resultArr)
+}
+
+func getActions() (resultArr []*model.Action) {
+	resultArr, _ = service.Action.WithContext(context.Background()).Find()
+	return
+}
+
+func getActionsMaxId() int64 {
+	return functional.SliceReduce(
+		getActions(),
+		func(pre int64, curValue *model.Action, curIndex int) int64 {
+			if curValue.ActionID > pre {
+				pre = curValue.ActionID
 			}
-			if curValue.ActionId.Valid {
-				newData.ActionId = curValue.ActionId.V
-			} else {
-				newData.ActionId = -1
-			}
-			pre = append(pre, newData)
 			return pre
 		},
-		[]*model.ActionsLayout{},
+		-1,
 	)
-	utils.SuccessResponse(ctx, "查询成功", jsonArr)
 }

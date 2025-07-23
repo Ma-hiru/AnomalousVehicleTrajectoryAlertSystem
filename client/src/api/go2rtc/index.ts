@@ -6,7 +6,7 @@ import AppSettings from "@/settings";
 export const reqGetGo2rtcConfig = async (): Promise<ReqResponse<Go2rtcConfigYaml | null>> => {
   const ResponseData = NewResponseData<Go2rtcConfigYaml>();
   try {
-    const res: string = await request.get(AppSettings.API.Go2rtcConfig);
+    const res: string = await request.get(AppSettings.Go2rtcAPI.Go2rtcConfig);
     ResponseData.data = YamlToJson(res);
     if (ResponseData.data.data === null) {
       ResponseData.code = 201;
@@ -29,7 +29,7 @@ export const reqGetGo2rtcConfig = async (): Promise<ReqResponse<Go2rtcConfigYaml
  * */
 export const reqPatchGo2rtcConfig = async (data: string): Promise<ReqResponse<null>> => {
   try {
-    await request.patch(AppSettings.API.Go2rtcConfig, data);
+    await request.patch(AppSettings.Go2rtcAPI.Go2rtcConfig, data);
     return NewResponseData(null, 200, true);
   } catch (err) {
     Logger.Echo({ err });
@@ -39,7 +39,7 @@ export const reqPatchGo2rtcConfig = async (data: string): Promise<ReqResponse<nu
 export const reqGetAllStreamsInfo = async (): Promise<ReqResponse<StreamInfoResponse>> => {
   try {
     const ResponseData = NewResponseData<StreamInfoResponse>(
-      await request.get(AppSettings.API.Go2rtcStreams)
+      await request.get(AppSettings.Go2rtcAPI.Go2rtcStreams)
     );
     if (ResponseData.data === null) {
       ResponseData.code = 201;
@@ -77,7 +77,7 @@ export const reqGetStreamList = async (): Promise<ReqResponse<StreamSimpleList>>
 };
 export const reqRestart = async (): Promise<ReqResponse<null>> => {
   try {
-    await request.post(AppSettings.API.GinRestart);
+    await request.post(AppSettings.GinAPI.restart);
     return NewResponseData(null, 200, true);
   } catch (err) {
     Logger.Echo({ err });
@@ -92,7 +92,7 @@ export const reqCreateNewStream = async (name: string, url: string[]) => {
       return pre + "&src=" + cur;
     }, "");
   try {
-    await request.put(AppSettings.API.Go2rtcStreams + query);
+    await request.put(AppSettings.Go2rtcAPI.Go2rtcStreams + query);
     return NewResponseData(null, 200, true);
   } catch (err) {
     Logger.Echo({ err });
@@ -101,7 +101,7 @@ export const reqCreateNewStream = async (name: string, url: string[]) => {
 };
 export const reqDeleteStream = async (name: string) => {
   try {
-    await request.delete(AppSettings.API.Go2rtcStreams + `?src=${name}`);
+    await request.delete(AppSettings.Go2rtcAPI.Go2rtcStreams + `?src=${name}`);
     return NewResponseData(null, 200, true);
   } catch (err) {
     Logger.Echo({ err });

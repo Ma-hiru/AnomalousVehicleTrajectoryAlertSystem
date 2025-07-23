@@ -17,8 +17,18 @@ export enum tokenTypePrefix {
 /** The prefix of token in this project. */
 export const tokenPrefix = tokenTypePrefix.Bearer;
 
-export enum API {
+export enum Go2rtcAPI {
   Go2rtcConfig = "/api/go2rtc/config",
-  Go2rtcStreams = "/api/go2rtc/streams",
-  GinRestart = "/api/gin/restart"
+  Go2rtcStreams = "/api/go2rtc/streams"
 }
+
+export const GinAPI = {
+  V1: {
+    video_stream: "/api/gin/v1/videos",
+    actions_enum: "/api/gin/v1/actions",
+    records: "/api/gin/v1/records",
+    category: "/api/gin/v1/category",
+    category_minute: "/api/gin/v1/category/minute"
+  },
+  restart: "/api/gin/restart"
+} as const;

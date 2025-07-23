@@ -2,8 +2,6 @@ package settings
 
 import (
 	"encoding/json"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"os"
 	"path/filepath"
 	"shiina-mahiru.cn/gin_server/pkg/logger"
@@ -21,10 +19,8 @@ type JsonConfig = struct {
 }
 
 var (
-	// mysqlDsn mysql适配器
-	myDialector gorm.Dialector
-	// DbDialector 数据库适配器
-	DbDialector = myDialector
+	// MySqlDSN mysqlDSN
+	MySqlDSN string
 	// JsonConfig json配置
 	jsonConfig JsonConfig
 )
@@ -51,5 +47,5 @@ func init() {
 		return
 	}
 
-	myDialector = mysql.Open(builder.String())
+	MySqlDSN = builder.String()
 }

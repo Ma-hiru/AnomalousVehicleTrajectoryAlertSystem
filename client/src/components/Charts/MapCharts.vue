@@ -20,16 +20,16 @@ import {
 } from "echarts/components";
 import { BarSeriesOption } from "echarts/charts";
 import { applyReactInVue } from "veaury";
-import MapTable from "@/components/Table/MapTable.tsx";
+import MapTable from "@/components/Table/MapTable";
 import AppCard from "@/components/AppCard.vue";
-import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+
 
 type EChartsOption = echarts.ComposeOption<
   TitleComponentOption | PolarComponentOption | TooltipComponentOption | BarSeriesOption
 >;
 
 const totalChart = useTemplateRef("totalChart");
-const streamStore = useStreamStore();
+
 
 const option = reactive<EChartsOption>({
   title: [
@@ -106,6 +106,7 @@ const MapTableReact = applyReactInVue(MapTable);
 
 // 监听异常行为数据变化
 watch(
+  //TODO 总体行为统计
   () => streamStore.TotalActionCategoryComputed,
   () => {
     if (streamStore.TotalActionCategoryComputed.length > 0) {

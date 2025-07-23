@@ -21,11 +21,10 @@
   import OnEnter from "@/components/Ani/OnEnter.vue";
   import VideoModule from "@/components/Video/VideoModule.vue";
   import VideoInfo from "@/components/Body/VideoInfo.vue";
-  import { useStreamStore } from "@/stores/pinia/modules/streamStore";
   import { onMounted, onUnmounted } from "vue";
   import { ReqRecords, ReqVideoList } from "@/api/mock";
 
-  const streamStore = useStreamStore();
+  // const streamStore = useStreamStore();
   let timer: ReturnType<typeof setInterval>;
   onMounted(() => {
     GetVideoList();
@@ -35,14 +34,14 @@
     clearInterval(timer);
   });
   const GetVideoList = () => {
-    //TODO Mock getList
-    streamStore.GetStreamList(ReqVideoList());
+    //TODO 需要初始化时首先获取视频列表
+    // streamStore.GetStreamList(ReqVideoList());
   };
   const UpdateRecord = () => {
-    //TODO Mock UpdateRecord
+    //TODO 隔段时间获取最新总体记录
     timer && clearInterval(timer);
     return setInterval(() => {
-      streamStore.UpdateRecord(ReqRecords());
+      // streamStore.UpdateRecord(ReqRecords());
     }, 3000);
   };
 </script>
