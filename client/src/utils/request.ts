@@ -2,7 +2,7 @@ import axios from "axios";
 import AppSettings from "@/settings";
 
 const request = axios.create({
-  timeout: 5000,
+  timeout: 5000
 });
 
 request.interceptors.request.use((config) => {

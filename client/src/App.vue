@@ -5,10 +5,15 @@
 </template>
 
 <script setup lang="ts" name="App">
+  import init, { greet } from "@/wasm/pkg";
+
+  init().then(() => {
+    greet("JavaScript");
+  });
 </script>
 
 <style scoped lang="scss">
-  .app-container{
+  .app-container {
     width: 100vw;
     height: 100vh;
     background-color: #020308;

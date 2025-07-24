@@ -16,7 +16,8 @@ export class VideoStreamWithWS {
   public url: { stream: string; frame: string };
   public streamName;
   public streamId: number;
-
+  private syncThreshold = 1.0; // 同步阈值
+  private maxJumpTime = 5.0; // 最大跳跃时间
   constructor(
     video: HTMLVideoElement,
     url: { stream: string; frame: string },
@@ -70,22 +71,33 @@ export class VideoStreamWithWS {
             // 接收到二进制数据，添加到媒体源
             this.readPacket(ev.data.packet);
             break;
-          case "frame":
+          case "frame": {
             /*TODO 目前是简单对齐 */
+            const timeDiff = Math.abs(ev.data.data.timestamp - this.video.currentTime);
             if (!this.paused && this.video.buffered != null && this.video.buffered.length > 0) {
+              // 如果页面隐藏，跳到最新帧
               if (document && document.hidden) {
                 this.video.currentTime = this.video.buffered.end(this.video.buffered.length - 1);
               }
-            }
-            if (
-              !this.video.paused &&
-              Math.abs(ev.data.data.timestamp - this.video.currentTime) > 1
-            ) {
-              if (this.bufferedTime < ev.data.data.timestamp)
-                this.video.currentTime = this.bufferedTime - 0.5;
-              else this.video.currentTime = ev.data.data.timestamp;
+              // 时间差超过阈值且在合理范围内才进行跳跃
+              else if (
+                !this.video.paused &&
+                timeDiff > this.syncThreshold &&
+                timeDiff < this.maxJumpTime
+              ) {
+                const targetTime =
+                  this.bufferedTime < ev.data.data.timestamp
+                    ? Math.max(0, this.bufferedTime - 0.5)
+                    : ev.data.data.timestamp;
+
+                // 确保目标时间在缓冲范围内
+                if (this.isTimeBuffered(targetTime)) {
+                  this.video.currentTime = targetTime;
+                }
+              }
             }
             break;
+          }
           case "sdp":
             // 创建SourceBuffer，添加到MediaSource
             this.sourceBuffer = this.mediaSource.addSourceBuffer(ev.data.sdp.value);
@@ -114,6 +126,16 @@ export class VideoStreamWithWS {
     );
   }
 
+  private isTimeBuffered(time: number): boolean {
+    const buffered = this.video.buffered;
+    for (let i = 0; i < buffered.length; i++) {
+      if (time >= buffered.start(i) && time <= buffered.end(i)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // 将媒体数据片段添加到SourceBuffer
   private pushPacket() {
     if (this.bufferQueue.length > 0) {
@@ -123,7 +145,10 @@ export class VideoStreamWithWS {
         if (!this.sourceBuffer!.updating) {
           try {
             this.sourceBuffer!.appendBuffer(segments);
-          } catch {
+          } catch (error) {
+            if (error instanceof DOMException && error.name === "QuotaExceededError") {
+              this.clearBuffer();
+            }
             this.bufferQueue.unshift(segments);
           }
         } else {
@@ -163,16 +188,27 @@ export class VideoStreamWithWS {
   }
 
   public stop() {
-    this.ready && this.pause();
+    try {
+      this.ready && this.pause();
 
-    if (this.ready && this.mediaSource.readyState === "open") this.mediaSource.endOfStream();
-    this.sourceBuffer?.abort();
-    this.sourceBuffer && this.mediaSource.removeSourceBuffer(this.sourceBuffer);
+      if (this.ready && this.mediaSource.readyState === "open") this.mediaSource.endOfStream();
+      this.sourceBuffer?.abort();
+      this.sourceBuffer && this.mediaSource.removeSourceBuffer(this.sourceBuffer);
 
-    this.sourceBuffer = null;
-    this.worker?.postMessage({ type: "terminate" } satisfies WebSocketMSE);
-    this.worker?.terminate();
-    window.clearInterval(this.timer);
+      this.sourceBuffer = null;
+      this.worker?.postMessage({ type: "terminate" } satisfies WebSocketMSE);
+      this.worker?.terminate();
+      window.clearInterval(this.timer);
+
+      this.bufferQueue = [];
+      if (this.video.src.startsWith("blob:")) {
+        URL.revokeObjectURL(this.video.src);
+      }
+      this.worker = null;
+      this.timer = undefined;
+    } catch (err) {
+      console.warn(err);
+    }
   }
 
   private clearBuffer() {

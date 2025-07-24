@@ -64,7 +64,6 @@ const Track: FC<object> = () => {
     onSearch(searchParams.text);
   }, []);
 
-  const today = new Date().getDay();
   const defaultDate = useMemo<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
     const now = dayjs();
     const dayStart = now.startOf("day");
