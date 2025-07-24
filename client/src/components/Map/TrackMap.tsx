@@ -5,10 +5,11 @@ import "@amap/amap-jsapi-types";
 import { getLocation } from "@/utils/getLocation";
 import Logger from "@/utils/logger";
 import "./SelectMap.scss";
-import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
+import { pinia, useStreamStore } from "@/stores/pinia";
 import { MockVideo, ReqRecords, ReqVideoList } from "@/api/mock";
 
 const TrackMap: FC<object> = () => {
+  const streamStore = useStreamStore(pinia);
   const map = useMyState<AMap.Map | null>(null);
   const amap = useMyState<typeof window.AMap | null>(null);
   const loca = useMyState<typeof Loca | null>(null);
@@ -55,7 +56,7 @@ const TrackMap: FC<object> = () => {
     // 初始化异常统计数据
     const initialStats = new Map<number, number[]>();
     MockVideo.forEach((stream) => {
-      initialStats.set(stream.streamId, Array(ActionsEnum.length).fill(0));
+      initialStats.set(stream.streamId, Array(streamStore.ActionsEnum.length).fill(0));
     });
     setAnomalyStats(initialStats);
     // 开始定期获取异常记录

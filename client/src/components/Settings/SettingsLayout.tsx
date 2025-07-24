@@ -4,10 +4,10 @@ import { createStyleSheet } from "@/utils/createStyleSheet";
 import { JsonToYaml } from "@/utils/handleYaml";
 import { useMyState } from "@/hooks/useMyState";
 import Loading from "@/components/Settings/Loading";
-import { useFetchDataReact } from "@/hooks/useFetchData";
 import Logger from "@/utils/logger";
 import Menu from "@/components/Settings/Menu";
 import Content from "@/components/Settings/Content";
+import { useFetchDataCallback } from "@/hooks/useFetchData";
 
 interface props {
   refresh: () => void;
@@ -19,7 +19,7 @@ const Config: FC<props> = ({ refresh }) => {
     loading: false,
     result: false
   });
-  const { fetchData, API } = useFetchDataReact();
+  const { fetchData, API } = useFetchDataCallback();
   useEffect(() => {
     let isMounted = true;
     loading.set((draft) => {

@@ -17,9 +17,11 @@
 <script setup lang="ts" name="VideoInfo">
   import { computed, ref } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
-  import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
+  import { useStreamStore } from "@/stores/pinia";
   import dayjs from "dayjs";
   import CustomScrollBoard from "@/components/Charts/CustomScrollBoard/CustomScrollBoard.vue";
+
+  const streamStore =useStreamStore();
 
   // const streamStore = useStreamStore();
   const total = ref(0);
@@ -44,7 +46,7 @@
       header: ["标识", "行为", "时间", "视频id"],
       data: exceptionRecords.map((cur) => [
         cur.carId,
-        ActionsEnum[cur.actionId],
+        streamStore.ActionsEnum[cur.actionId],
         dayjs(cur.time).format("HH:mm:ss"),
         cur.streamId
       ]),

@@ -12,8 +12,10 @@
 <script setup lang="ts" name="ActionsCategoryChart">
   import { computed } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
-  import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
+  import { useStreamStore } from "@/stores/pinia";
   import { ActionsIcons } from "@/assets/actions/actions";
+
+  const streamStore = useStreamStore();
 
   const config = computed(() => {
     //TODO 单个视频流行为数据统计
@@ -22,7 +24,7 @@
     return {
       data: dataArr.map((number, index) => {
         return {
-          name: ActionsEnum[index],
+          name: streamStore.ActionsEnum[index],
           value: number
         };
       }),

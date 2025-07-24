@@ -13,7 +13,7 @@
   import { computed, ref } from "vue";
   import VideoForWS from "@/components/Video/VideoForWS.vue";
   import AppSettings from "@/settings";
-  import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+  import { useStreamStore } from "@/stores/pinia";
   import cover1 from "/public/mock/cover1.png";
   import cover2 from "/public/mock/cover2.png";
   import cover3 from "/public/mock/cover3.png";

@@ -1,8 +1,7 @@
 import { FC, memo, useState } from "react";
 import { Table, Timeline, Card, Descriptions, Badge, Tabs, Tag, ConfigProvider, theme } from "antd";
 import styled from "styled-components";
-import { ActionsEnum } from "@/stores/pinia/modules/streamStore";
-import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+import { useStreamStore } from "@/stores/pinia";
 import { pinia } from "@/stores/pinia";
 
 interface props {
@@ -66,7 +65,7 @@ const Detail: FC<props> = ({ track }) => {
                 dataIndex="actionId"
                 key="actionId"
                 render={(actionId) => (
-                  <Tag color={actionId === 0 ? "green" : "red"}>{ActionsEnum[actionId]}</Tag>
+                  <Tag color={actionId === 0 ? "green" : "red"}>{streamStore.ActionsEnum[actionId]}</Tag>
                 )}
               />
               <Table.Column

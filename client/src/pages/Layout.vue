@@ -13,11 +13,8 @@
   import Body from "@/pages/Body.vue";
 
   const activeTitle = ref("欢迎使用");
-  const setActiveTitle = (title: string) => {
-    activeTitle.value = title;
-  };
   provide(ActiveTitle, activeTitle);
-  provide(SetActiveTitle, setActiveTitle);
+  provide(SetActiveTitle, (title) => (activeTitle.value = title));
 </script>
 
 <style scoped lang="scss"></style>

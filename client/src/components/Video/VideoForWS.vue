@@ -5,7 +5,7 @@
     :content="`${props.meta.streamName}(${props.meta.streamId})`">
     <motion.div
       class="video-container"
-      @mouseover="streamStore.SetActiveStream(props.meta)"
+      @mouseover="streamStore.set_active_stream(props.meta)"
       :whileHover="{
         scale: 1.05
       }"
@@ -43,7 +43,7 @@
   import { VideoStreamWithWS } from "@/worker/VideoStream";
   import { motion } from "motion-v";
   import { RefreshRight } from "@element-plus/icons-vue";
-  import { useStreamStore } from "@/stores/pinia/modules/streamStore";
+  import { useStreamStore } from "@/stores/pinia";
   import { getURL } from "@/utils/getURL";
 
   const streamStore = useStreamStore();

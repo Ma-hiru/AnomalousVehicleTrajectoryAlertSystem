@@ -4,7 +4,7 @@ import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag 
 import MyModal from "@/components/MyModal";
 import Detail from "@/components/Track/Detail";
 import { useReactive } from "ahooks";
-import { ActionsEnum, useStreamStore } from "@/stores/pinia/modules/streamStore";
+import { useStreamStore } from "@/stores/pinia";
 import { pinia } from "@/stores/pinia";
 import dayjs from "dayjs";
 import { useImmer } from "use-immer";
@@ -123,7 +123,7 @@ const Track: FC<object> = () => {
                   return row.actionIds.map((type) => {
                     return (
                       <Tag key={type} color={"red"}>
-                        {ActionsEnum[type]}
+                        {streamStore.ActionsEnum[type]}
                       </Tag>
                     );
                   });

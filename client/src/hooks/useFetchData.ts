@@ -1,10 +1,8 @@
-import { fetchData } from "@/utils/fetchData.ts";
+import { fetchData } from "@/utils/fetchData";
 import { API } from "@/api";
-import { useMemo } from "react";
 
-export const useFetchDataReact = () => {
-  return useMemo(() => ({ fetchData, API }), []);
+const fetcher = {
+  fetchData,
+  API
 };
-export const fetchDataVue = () => {
-  return { fetchData, API };
-};
+export const useFetchDataCallback = () => fetcher;

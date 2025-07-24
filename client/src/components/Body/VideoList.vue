@@ -5,9 +5,6 @@
       <dv-border-box7 style="margin-top: 20px" v-if="streamStore.StreamList.length">
         <div class="content">
           <VideoModule />
-          <VideoModule />
-          <VideoModule />
-          <VideoModule />
         </div>
       </dv-border-box7>
       <dv-border-box7 style="margin-top: 20px" v-else>
@@ -22,28 +19,34 @@
   import VideoModule from "@/components/Video/VideoModule.vue";
   import VideoInfo from "@/components/Body/VideoInfo.vue";
   import { onMounted, onUnmounted } from "vue";
-  import { ReqRecords, ReqVideoList } from "@/api/mock";
+  import { useStreamStore } from "@/stores/pinia";
 
-  // const streamStore = useStreamStore();
+  const streamStore = useStreamStore();
+  const startTime = new Date().getTime();
   let timer: ReturnType<typeof setInterval>;
   onMounted(() => {
-    GetVideoList();
-    timer = UpdateRecord();
+    streamStore
+      .GetActionsEnum()
+      .then((ok: boolean | Promise<boolean>) => {
+        ok && (ok = streamStore.GetVideoList());
+        return ok;
+      })
+      .then((ok) => {
+        ok && (timer = UpdateRecord());
+      });
   });
   onUnmounted(() => {
     clearInterval(timer);
   });
-  const GetVideoList = () => {
-    //TODO 需要初始化时首先获取视频列表
-    // streamStore.GetStreamList(ReqVideoList());
-  };
-  const UpdateRecord = () => {
-    //TODO 隔段时间获取最新总体记录
+
+  function UpdateRecord() {
     timer && clearInterval(timer);
     return setInterval(() => {
-      // streamStore.UpdateRecord(ReqRecords());
+      streamStore.GetTotalRecords();
+      streamStore.GetTotalCategory();
+      streamStore.GetTotalCategoryByTime(1, startTime);
     }, 3000);
-  };
+  }
 </script>
 
 <style scoped lang="scss">

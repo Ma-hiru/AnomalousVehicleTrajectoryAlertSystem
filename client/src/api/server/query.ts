@@ -63,7 +63,7 @@ export const req_actions_get = (
  * @param query (streamId or streamName) & from & to | null
  * @return records[]
  **/
-export const req_records_get = (query?: RecordsQuery): Promise<ReqResponse<records[]>> => {
+export const req_records_get = (query?: RecordsQuery): Promise<ReqResponse<CarRecord[]>> => {
   return request.get(buildQuery(V1.records, query));
 };
 
@@ -88,6 +88,9 @@ export const req_category_minute_get = (
 };
 
 export function buildQuery(baseURL: string, query?: Record<string, string>): string {
+  if (baseURL && !baseURL.startsWith("http")) {
+    baseURL = AppSettings.baseUrl + baseURL;
+  }
   const url = new URL(baseURL);
   if (query) {
     for (const key in query) {
