@@ -18,16 +18,10 @@ import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 // import "element-plus/theme-chalk/dark/css-vars.css";
-
 app.use(ElementPlus, {
   locale: zhCn
 });
 
-//arco
-import ArcoVue from "@arco-design/web-vue";
-import "@arco-design/web-vue/dist/arco.css";
-
-app.use(ArcoVue);
 //pinia
 import { pinia } from "./stores/pinia";
 
@@ -41,6 +35,17 @@ import "./styles/index.scss";
 
 //DataV
 import DataVVue3 from "@kjgl77/datav-vue3";
+
+//WebAssembly
+import init from "@/wasm/pkg";
+
+init()
+  .then((res) => {
+    console.log("WebAssembly init success\n", res);
+  })
+  .catch(() => {
+    console.error("WebAssembly init failed");
+  });
 
 app.use(DataVVue3);
 

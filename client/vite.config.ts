@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "tailwindcss";
 import autoprefixer from "autoprefixer";
 import { defineConfig, loadEnv } from "vite";
-import viteCompression from "vite-plugin-compression2";
+// import viteCompression from "vite-plugin-compression2";
 import VueDevTools from "vite-plugin-vue-devtools";
 import crypto from "node:crypto";
 import MyViteAliases from "./plugins/MyViteAliases";
@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       }),
       VueDevTools(),
       vue(),
-      viteCompression(),
+      // viteCompression(),
       MyViteAliases({
         prefix: "@",
         baseUrl: fileURLToPath(new URL("./src", import.meta.url))

@@ -4,13 +4,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="App">
-  import init, { greet } from "@/wasm/pkg";
-
-  init().then(() => {
-    greet("JavaScript");
-  });
-</script>
+<script setup lang="ts" name="App"></script>
 
 <style scoped lang="scss">
   .app-container {
