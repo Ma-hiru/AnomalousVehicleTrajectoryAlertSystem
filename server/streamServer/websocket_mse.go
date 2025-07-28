@@ -17,7 +17,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 	defer pr.Close()
 	defer utils.Logger("StreamServer").Println("视频帧处理结束")
 	streamName := query.Get("src")
-	imgFrame, metaData, err := ExtractVideoFramesWithStream(
+	imgFrame, err := ExtractVideoFramesWithStream(
 		pr,
 		settings.ExtractOptions(streamName),
 	)
@@ -26,7 +26,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 	} else {
 		utils.Logger("StreamServer").Println("开始处理视频帧")
 		go readIMG(imgFrame, streamName)
-		readMETA(metaData, streamName)
+		//readMETA(metaData, streamName)
 	}
 }
 func readIMG(imgFrame chan *ffmpeg.FrameData, StreamName string) {

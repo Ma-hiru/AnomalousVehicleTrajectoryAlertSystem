@@ -28,11 +28,6 @@
           @mouseleave="showControls = true"
           :icon="RefreshRight" />
       </div>
-      <div
-        class="cover"
-        :style="{
-          backgroundImage: cover ? `url(${getURL(cover)})` : undefined
-        }" />
     </motion.div>
   </el-tooltip>
 </template>
@@ -40,34 +35,32 @@
 <!--suppress ES6UnusedImports -->
 <script setup lang="ts" name="Video">
   import { onMounted, onUnmounted, ref, useTemplateRef } from "vue";
-  import { VideoStreamWithWS } from "@/worker/VideoStream";
+  import { VideoStreamByWS } from "@/worker/stream";
   import { motion } from "motion-v";
   import { RefreshRight } from "@element-plus/icons-vue";
   import { useStreamStore } from "@/stores/pinia";
-  import { getURL } from "@/utils/getURL";
 
   const streamStore = useStreamStore();
   /* 组件属性定义 */
   const props = defineProps<{
     url: { stream: string; frame: string };
     meta: VideoStreamInfo;
-    cover?: string;
   }>();
   const showControls = ref(false);
   const videoMse = useTemplateRef("videoMse");
-  const videoStream = ref<VideoStreamWithWS>();
+  const videoStream = ref<VideoStreamByWS>();
   onMounted(() => {
     if (videoMse.value) {
-      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta);
+      videoStream.value = new VideoStreamByWS(videoMse.value, { ...props.url, ...props.meta });
     }
   });
   onUnmounted(() => {
-    videoStream.value?.stop();
+    videoStream.value?.destroy();
   });
   const refresh = () => {
     if (videoMse.value) {
-      videoStream.value?.stop();
-      videoStream.value = new VideoStreamWithWS(videoMse.value, props.url, props.meta);
+      videoStream.value?.destroy();
+      videoStream.value = new VideoStreamByWS(videoMse.value, { ...props.url, ...props.meta });
     }
   };
   defineExpose({

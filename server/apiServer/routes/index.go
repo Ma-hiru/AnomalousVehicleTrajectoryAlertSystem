@@ -17,6 +17,7 @@ func useRoutes(app *gin.Engine) {
 		go2rtcRoutes(root, V1)
 		appRoutes(root, V1)
 		carRoutes(root, V1)
+		trackRoutes(root, V1)
 	}
 }
 

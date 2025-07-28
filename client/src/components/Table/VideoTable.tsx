@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Space, Table, Tag, TableProps } from "antd";
-import AppCard from "@/components/AppCard.tsx";
+import AppCard from "@/components/AppCard";
 import "./VideoTable.scss";
 
 const columns: TableProps<CarRecord>["columns"] = [

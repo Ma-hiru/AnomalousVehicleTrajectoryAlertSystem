@@ -78,3 +78,24 @@ export const ResponseDataFrom = (<T>(res: T): ReqResponse<any> => {
   }
   return response;
 }) as ResponseDataFrom;
+
+export function buildQuery(baseURL: string, query?: Record<string, string>): string {
+  if (baseURL && !baseURL.startsWith("http")) {
+    baseURL = AppSettings.baseUrl + baseURL;
+  }
+  const url = new URL(baseURL);
+  if (query) {
+    for (const key in query) {
+      url.searchParams.append(key, query[key]);
+    }
+  }
+  return url.href;
+}
+
+export type Stringify<T> = {
+  [key in keyof T]: T[key] extends object ? Stringify<T[key]> : string;
+};
+
+export type RequiredField<T, U extends keyof T> = T & Required<Pick<T, U>>;
+
+export type PartialField<T, U extends keyof T> = Omit<T, U> & Partial<Pick<T, U>>;

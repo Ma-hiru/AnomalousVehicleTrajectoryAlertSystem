@@ -65,7 +65,9 @@ const Detail: FC<props> = ({ track }) => {
                 dataIndex="actionId"
                 key="actionId"
                 render={(actionId) => (
-                  <Tag color={actionId === 0 ? "green" : "red"}>{streamStore.ActionsEnum[actionId]}</Tag>
+                  <Tag color={actionId === 0 ? "green" : "red"}>
+                    {streamStore.ActionsEnum[actionId]}
+                  </Tag>
                 )}
               />
               <Table.Column

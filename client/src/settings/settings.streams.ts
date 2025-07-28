@@ -1,7 +1,7 @@
 import { baseUrl } from "@/settings/settings.api";
 
 /** seconds */
-export const BUFFER_MAX_DURATION = 30;
+export const BUFFER_MAX_DURATION = 10;
 export const MAX_QUEUE_LENGTH = 100;
 export const STREAMS_CONF_NAME = "streams";
 

@@ -1,5 +1,5 @@
 import AppSettings from "@/settings";
-import request from "@/utils/request";
+import request, { buildQuery, Stringify, RequiredField, PartialField } from "@/utils/request";
 
 const V1 = AppSettings.GinAPI.V1;
 
@@ -87,19 +87,6 @@ export const req_category_minute_get = (
   return request.get(buildQuery(V1.category_minute, query));
 };
 
-export function buildQuery(baseURL: string, query?: Record<string, string>): string {
-  if (baseURL && !baseURL.startsWith("http")) {
-    baseURL = AppSettings.baseUrl + baseURL;
-  }
-  const url = new URL(baseURL);
-  if (query) {
-    for (const key in query) {
-      url.searchParams.append(key, query[key]);
-    }
-  }
-  return url.href;
-}
-
 /**
  * @desc `Records Param`
  * @define (streamId or streamName) & from & to | null
@@ -114,11 +101,3 @@ export type RecordsQuery = {
 export interface QueryInfo {
   rowsAffected: number;
 }
-
-export type Stringify<T> = {
-  [key in keyof T]: T[key] extends object ? Stringify<T[key]> : string;
-};
-
-export type RequiredField<T, U extends keyof T> = T & Required<Pick<T, U>>;
-
-export type PartialField<T, U extends keyof T> = Omit<T, U> & Partial<Pick<T, U>>;

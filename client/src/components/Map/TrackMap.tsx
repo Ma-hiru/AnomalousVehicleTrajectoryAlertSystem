@@ -70,7 +70,7 @@ const TrackMap: FC<object> = () => {
         timerRef.current = null;
       }
     };
-  }, [updateAnomalyRecords]);
+  }, [streamStore.ActionsEnum.length, updateAnomalyRecords]);
   //使用插件
   useEffect(() => {
     const currentAMap = amap.get();

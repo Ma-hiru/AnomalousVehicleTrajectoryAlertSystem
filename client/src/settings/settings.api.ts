@@ -28,7 +28,8 @@ export const GinAPI = {
     actions_enum: "/api/gin/v1/actions",
     records: "/api/gin/v1/records",
     category: "/api/gin/v1/category",
-    category_minute: "/api/gin/v1/category/minute"
+    category_minute: "/api/gin/v1/category/minute",
+    tracks: "/api/gin/v1/tracks"
   },
   restart: "/api/gin/restart"
 } as const;

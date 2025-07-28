@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, Key, useMemo, useEffect } from "react";
+import { FC, memo, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag } from "antd";
 import MyModal from "@/components/MyModal";
@@ -8,67 +8,71 @@ import { useStreamStore } from "@/stores/pinia";
 import { pinia } from "@/stores/pinia";
 import dayjs from "dayjs";
 import { useImmer } from "use-immer";
-import { ReqTrackList } from "@/api/mock";
+import { fetchDataAsync } from "@/utils/fetchData";
+import { useTrackZustandStore } from "@/stores/zustand/track";
+import { useShallow } from "zustand/react/shallow";
+import { useDebounceEffect } from "ahooks";
 
 const { Column } = Table;
 const { RangePicker } = DatePicker;
 type SearchProps = GetProps<typeof Input.Search>;
 
-const data: (TrackList & { key: Key })[] = ReqTrackList();
-// eslint-disable-next-line
-const streamStore = useStreamStore(pinia);
 const Track: FC<object> = () => {
   //Data
-  const [tableData, setTableData] = useImmer(data);
+  const streamStore = useStreamStore(pinia);
+  const { currentTrackList, setTrackList, setTrackDetail, currentTrackDetail } =
+    useTrackZustandStore(
+      useShallow((state) => ({
+        currentTrackList: state.currentTrackList,
+        currentTrackDetail: state.currentTrackDetail,
+        setTrackList: state.setTrackList,
+        setTrackDetail: state.setTrackDetail
+      }))
+    );
   //Search
-  const searchParams = useReactive({
-    text: "",
-    timeRange: [] as number[]
-  });
-
-  // 修改时间选择函数，确保正确设置时间戳
-  const selectTime = (values: dayjs.Dayjs[]) => {
-    if (values && values.length === 2) {
-      const [start, end] = values;
-      searchParams.timeRange[0] = start.valueOf(); // 使用valueOf获取毫秒时间戳
-      searchParams.timeRange[1] = end.valueOf();
-      console.log("时间范围:", searchParams.timeRange);
-    } else {
-      // 清空时间范围
-      searchParams.timeRange = [];
-    }
-  };
-
-  // 改进搜索函数，确保正确传递参数
-  const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>(
-    (keyword) => {
-      console.log("搜索参数:", {
-        keyword,
-        start: searchParams.timeRange[0] || undefined,
-        end: searchParams.timeRange[1] || undefined
-      });
-
-      const results = ReqTrackList({
-        keyword,
-        start: searchParams.timeRange[0] || undefined,
-        end: searchParams.timeRange[1] || undefined
-      });
-
-      setTableData(results);
-    },
-    [searchParams.timeRange, setTableData]
-  );
-
-  // 初始化时也应用一次搜索，确保显示正确数据
-  useEffect(() => {
-    onSearch(searchParams.text);
-  }, []);
-
   const defaultDate = useMemo<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
     const now = dayjs();
     const dayStart = now.startOf("day");
     return [dayStart, now];
   }, []);
+
+  const [query, setQuery] = useImmer({
+    from: defaultDate[0].toDate().setHours(0, 0, 0, 0).toString(),
+    to: defaultDate[1].toDate().getTime().toString(),
+    offset: "0",
+    limit: "20",
+    keywords: ""
+  });
+
+  useDebounceEffect(() => {
+    fetchDataAsync("req_track_get", [query]).then((res) => {
+      setTrackList(res.data);
+    });
+  }, [query, setTrackList]);
+
+  const selectTime = (values: dayjs.Dayjs[]) => {
+    if (values && values.length === 2) {
+      const [start, end] = values;
+      setQuery((draft) => {
+        draft.from = start.toDate().getTime().toString();
+        draft.to = end.toDate().getTime().toString();
+      });
+    } else {
+      setQuery((draft) => {
+        draft.from = new Date().setHours(0, 0, 0, 0).toString();
+        draft.to = new Date().getTime().toString();
+      });
+    }
+  };
+
+  const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>(
+    (keyword) => {
+      setQuery((draft) => {
+        draft.keywords = keyword;
+      });
+    },
+    [setQuery]
+  );
 
   //Modal
   const ShowModal = useReactive({
@@ -77,7 +81,6 @@ const Track: FC<object> = () => {
   const closeDetailModal = useCallback(() => {
     ShowModal.detail = false;
   }, [ShowModal]);
-  const [track, setTrack] = useImmer<Track[]>([]);
 
   return (
     <>
@@ -93,9 +96,11 @@ const Track: FC<object> = () => {
           </ConfigProvider>
           <ConfigProvider theme={AntdSearchTheme}>
             <Input.Search
-              value={searchParams.text}
+              value={query.keywords}
               onChange={(e) => {
-                searchParams.text = e.target.value;
+                setQuery((draft) => {
+                  draft.keywords = e.target.value;
+                });
               }}
               placeholder="输入追踪标识"
               onSearch={onSearch}
@@ -107,7 +112,7 @@ const Track: FC<object> = () => {
         <div className="form">
           <ConfigProvider theme={AntdTableTheme}>
             <Table<TrackList>
-              dataSource={tableData}
+              dataSource={currentTrackList}
               size="small"
               bordered
               scroll={{
@@ -133,12 +138,9 @@ const Track: FC<object> = () => {
                 dataIndex={"time"}
                 align="center"
                 render={(_, row: TrackList) => {
-                  // 修复时间显示问题
                   if (typeof row.time === "object" && row.time !== null && "time" in row.time) {
-                    // 如果是CarRecord对象
                     return new Date(row.time.time).toLocaleString();
                   } else if (typeof row.time === "number") {
-                    // 如果是时间戳
                     return new Date(row.time).toLocaleString();
                   } else {
                     return "未知时间";
@@ -153,7 +155,7 @@ const Track: FC<object> = () => {
                   return (
                     <Button
                       onClick={() => {
-                        setTrack(row.track);
+                        setTrackDetail(row.track);
                         ShowModal.detail = true;
                       }}>
                       查看详情
@@ -170,7 +172,7 @@ const Track: FC<object> = () => {
         width={"60vw"}
         open={ShowModal.detail}
         onCancel={closeDetailModal}>
-        <Detail track={track} />
+        <Detail track={currentTrackDetail} />
       </MyModal>
     </>
   );

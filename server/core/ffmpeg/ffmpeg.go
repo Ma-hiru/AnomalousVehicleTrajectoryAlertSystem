@@ -260,7 +260,7 @@ func (f *FFmpeg) BuildForStream() *FFmpeg {
 	f.frameDataTemp = make([]*FrameData, 0, 1000)
 	return f
 }
-func (f *FFmpeg) RunForStream(frameChannel chan *FrameData, metaChannel chan *MetaData) error {
+func (f *FFmpeg) RunForStream(frameChannel chan *FrameData) error {
 	if f.cmd == nil {
 		return errors.New("未构建命令")
 	}
@@ -269,9 +269,9 @@ func (f *FFmpeg) RunForStream(frameChannel chan *FrameData, metaChannel chan *Me
 	}
 	f.imgReader, f.imgWriter = io.Pipe()
 	f.cmd.Stdout = f.imgWriter
-	f.metaDataChan = metaChannel
+	//f.metaDataChan = metaChannel
 	defer close(frameChannel)
-	defer close(metaChannel)
+	//defer close(metaChannel)
 	defer f.Close()
 	defer f.imgWriter.Close()
 	if f.frameTimestamps != nil {
