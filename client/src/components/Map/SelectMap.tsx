@@ -1,16 +1,18 @@
-import { FC, memo, useEffect, useMemo, useRef } from "react";
+import { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map from "@/components/Map/Map";
-import { MyState, useMyState } from "@/hooks/useMyState";
+import { useMyState } from "@/hooks/useMyState";
 import "@amap/amap-jsapi-types";
 import { getLocation } from "@/utils/getLocation";
 import Logger from "@/utils/logger";
 import { Button, Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import "./SelectMap.scss";
-import { useMemoizedFn } from "ahooks";
+import { createStyleSheet } from "@/utils/createStyleSheet";
+import { useSettingsZustandStore } from "@/stores/zustand/settings";
+import { useShallow } from "zustand/react/shallow";
 
 type props = {
-  position: MyState<StreamPosition>;
+  position: StreamPosition;
 };
 const SelectMap: FC<props> = ({ position }) => {
   const map = useMyState<AMap.Map | null>(null);
@@ -20,7 +22,7 @@ const SelectMap: FC<props> = ({ position }) => {
     const currentAMap = amap.get();
     if (currentAMap) {
       marker.current = new currentAMap.Marker({
-        position: new window.AMap.LngLat(position.get().longitude, position.get().latitude)
+        position: new window.AMap.LngLat(position.longitude, position.latitude)
       });
       return [marker.current];
     }
@@ -31,19 +33,23 @@ const SelectMap: FC<props> = ({ position }) => {
     const currentMap = map.get();
     const currentAMap = amap.get();
     if (currentMap !== null && currentAMap !== null) {
-      getLocation()
-        .then((pos) => {
-          if (pos) {
-            //TODO 模拟数据
-            // currentMap.setCenter(new currentAMap.LngLat(pos.coords.longitude,pos.coords.latitude))
-            currentMap.setCenter(new currentAMap.LngLat(112.86, 27.88));
-          }
-        })
-        .catch(() => {
-          Logger.Message.Error("地点定位失败！");
-        });
+      if (position.longitude === 0 || position.latitude === 0) {
+        getLocation()
+          .then((pos) => {
+            if (pos) {
+              currentMap.setCenter(
+                new currentAMap.LngLat(pos.coords.longitude, pos.coords.latitude)
+              );
+            }
+          })
+          .catch(() => {
+            Logger.Message.Error("地点定位失败！");
+          });
+      } else {
+        currentMap.setCenter(new currentAMap.LngLat(position.longitude, position.latitude));
+      }
     }
-  }, [amap, map]);
+  }, [amap, map, position.latitude, position.longitude]);
   //更新标记点
   useEffect(() => {
     const currentMap = map.get();
@@ -59,13 +65,21 @@ const SelectMap: FC<props> = ({ position }) => {
     };
   }, [amap, map, markers, position]);
   //绑定点击事件以便于更新标记点
-  const UpdatePosition = useMemoizedFn((e: AMap.MapsEvent) => {
-    position.set((draft) => {
+  const { addModifiedVideos } = useSettingsZustandStore(
+    useShallow((state) => ({
+      addModifiedVideos: state.addModifiedVideos
+    }))
+  );
+  const UpdatePosition = useCallback(
+    (e: AMap.MapsEvent) => {
       console.log(e);
-      draft.latitude = e.lnglat.lat;
-      draft.longitude = e.lnglat.lng;
-    });
-  });
+      addModifiedVideos(position.name, {
+        longitude: e.lnglat.lng,
+        latitude: e.lnglat.lat
+      });
+    },
+    [addModifiedVideos, position.name]
+  );
   useEffect(() => {
     const currentMap = map.get();
     const currentAMap = amap.get();
@@ -81,7 +95,7 @@ const SelectMap: FC<props> = ({ position }) => {
     };
   }, [UpdatePosition, amap, map]);
   //使用插件
-  const searchText = useMyState("");
+  const [searchText, setSearchText] = useState("");
   useEffect(() => {
     const currentAMap = amap.get();
     const currentMap = map.get();
@@ -112,7 +126,7 @@ const SelectMap: FC<props> = ({ position }) => {
         e: Parameters<Parameters<InstanceType<typeof AMap.AutoComplete>["on"]>[1]>[number]
       ) => {
         PlaceSearch.search(e.poi.name);
-        searchText.set(e.poi.name);
+        setSearchText(e.poi.name);
       };
       AutoComplete.on("select", handlePOI);
       return () => {
@@ -126,7 +140,6 @@ const SelectMap: FC<props> = ({ position }) => {
         }
       };
     }
-    //eslint-disable-next-line
   }, [amap, map]);
   return (
     <>
@@ -135,24 +148,23 @@ const SelectMap: FC<props> = ({ position }) => {
           <Input
             type="text"
             id="tipinput"
-            value={searchText.get()}
+            value={searchText}
             onChange={(e) => {
-              searchText.set(e.target.value);
+              setSearchText(e.target.value);
             }}
           />
           <Button type="primary" shape="circle" icon={<SearchOutlined />} />
         </div>
-        <Map
-          id="SelectMap-container"
-          map={map}
-          amap={amap}
-          containerStyle={{
-            width: "100%",
-            height: "95%"
-          }}
-        />
+        <Map id="SelectMap-container" map={map} amap={amap} containerStyle={MapStyle} />
       </div>
     </>
   );
 };
 export default memo(SelectMap);
+
+const { MapStyle } = createStyleSheet({
+  MapStyle: {
+    width: "95%",
+    height: "95%"
+  }
+});

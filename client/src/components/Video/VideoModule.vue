@@ -10,18 +10,12 @@
 <script setup lang="ts" name="VideoList">
   import { computed } from "vue";
   import VideoForWS from "@/components/Video/VideoForWS.vue";
-  import AppSettings from "@/settings";
   import { useStreamStore } from "@/stores/pinia";
+  import { GetStreamSource } from "@/utils/getStreamSource";
 
   const streamStore = useStreamStore();
   const urlList = computed(() => {
-    return streamStore.StreamList.reduce(
-      (pre, cur) => {
-        pre.push(AppSettings.GetStreamURL(cur.streamName));
-        return pre;
-      },
-      [] as { stream: string; frame: string }[]
-    );
+    return GetStreamSource(streamStore.StreamList);
   });
 </script>
 <style scoped lang="scss"></style>

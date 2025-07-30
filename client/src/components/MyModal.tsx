@@ -20,19 +20,8 @@ const MyModal: FC<props> = ({ open, title, onCancel, children, width = "auto" })
           onCancel={onCancel}
           width={width === "unset" ? undefined : width}
           footer={null}
-          // footer={
-          //   <>
-          //     <ConfigProvider theme={themes.CancelBtn}>
-          //       <Button type="text" color="default" onClick={onCancel}>取消</Button>
-          //     </ConfigProvider>
-          //     <ConfigProvider theme={themes.ConfirmBtn}>
-          //       <Button color="default" type="default" onClick={onOk}>确认</Button>
-          //     </ConfigProvider>
-          //   </>
-          // }
-        >
-          {children}
-        </Modal>
+          children={children}
+        />
       </ConfigProvider>
     </>
   );

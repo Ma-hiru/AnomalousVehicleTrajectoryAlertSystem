@@ -1,6 +1,10 @@
 import { fetchDataAsync } from "@/utils/fetchData";
 import { StateType } from "./state";
 import { ActionType } from "./action";
+import { useMapZustandStore } from "@/stores/zustand/map";
+
+//Link Zustand
+const { setVideoList, updateAnomalousCount } = useMapZustandStore.getState();
 
 export const api = (states: StateType, actions: ActionType) => {
   const { SingleCarRecordList, TotalCarRecordList } = states;
@@ -23,6 +27,7 @@ export const api = (states: StateType, actions: ActionType) => {
   async function GetVideoList() {
     const { data, ok } = await fetchDataAsync("req_videos_get", []);
     ok && set_stream_list(data);
+    ok && setVideoList(data);
     return ok;
   }
 
@@ -35,7 +40,7 @@ export const api = (states: StateType, actions: ActionType) => {
         to: new Date().getTime().toString()
       }
     ]);
-    ok && update_total_records(data);
+    ok && data.length && update_total_records(data);
     return ok;
   }
 
@@ -47,7 +52,7 @@ export const api = (states: StateType, actions: ActionType) => {
         to: new Date().getTime().toString()
       }
     ]);
-    ok && set_total_action_category(data);
+    ok && data.length && set_total_action_category(data);
     return ok;
   }
 
@@ -59,7 +64,7 @@ export const api = (states: StateType, actions: ActionType) => {
         gap: minute.toString()
       }
     ]);
-    ok && set_total_action_category_by_time(data, minute, start);
+    ok && data.length && set_total_action_category_by_time(data, minute, start);
     return ok;
   }
 
@@ -94,6 +99,14 @@ export const api = (states: StateType, actions: ActionType) => {
     return ok;
   }
 
+  async function GetAnomalousCount() {
+    const from = new Date().setHours(0, 0, 0, 0).toString();
+    const to = new Date().getTime().toString();
+    const { ok, data } = await fetchDataAsync("req_anomaly_count", [{ from, to }]);
+    ok && data.length && updateAnomalousCount(data);
+    return ok;
+  }
+
   return {
     GetActionsEnum,
     GetVideoList,
@@ -101,7 +114,8 @@ export const api = (states: StateType, actions: ActionType) => {
     GetTotalCategory,
     GetTotalCategoryByTime,
     GetSingleRecords,
-    GetSingleCategory
+    GetSingleCategory,
+    GetAnomalousCount
   };
 };
 

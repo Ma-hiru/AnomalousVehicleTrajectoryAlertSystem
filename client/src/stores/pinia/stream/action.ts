@@ -1,4 +1,5 @@
 import { StateType } from "@/stores/pinia/stream/state";
+import { useMapZustandStore } from "@/stores/zustand/map";
 
 export const action = (state: StateType) => {
   function init_map(list: videos[]) {
@@ -33,6 +34,9 @@ export const action = (state: StateType) => {
       },
       <string[]>[]
     );
+    //Link Zustand
+    const { setActionEnum } = useMapZustandStore.getState();
+    setActionEnum(state.ActionsEnum.value);
   }
 
   function update_total_records(records: CarRecord[]) {

@@ -17,3 +17,15 @@ export const req_track_get = (query: {
 }): Promise<ReqResponse<TrackList[]>> => {
   return request.get(buildQuery(V1.tracks, query));
 };
+
+/**
+ * @desc `视频流的异常数`
+ * @param query from & to
+ * @return AnomalyCountResult[]
+ * */
+export const req_anomaly_count = (query: {
+  from: string;
+  to: string;
+}): Promise<ReqResponse<AnomalyCountResult[]>> => {
+  return request.get(buildQuery(V1.anomaly_count, query));
+};

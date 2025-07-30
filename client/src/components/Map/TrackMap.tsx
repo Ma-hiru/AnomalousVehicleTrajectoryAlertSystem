@@ -1,76 +1,29 @@
-import { FC, memo, useCallback, useEffect, useRef, useState } from "react";
+import { FC, memo, useCallback, useEffect, useRef } from "react";
 import { useMyState } from "@/hooks/useMyState";
 import BaseMap from "@/components/Map/Map";
 import "@amap/amap-jsapi-types";
 import { getLocation } from "@/utils/getLocation";
 import Logger from "@/utils/logger";
-import "./SelectMap.scss";
-import { pinia, useStreamStore } from "@/stores/pinia";
-import { MockVideo, ReqRecords, ReqVideoList } from "@/api/mock";
+import { useMapZustandStore } from "@/stores/zustand/map";
+import { useShallow } from "zustand/react/shallow";
 
 const TrackMap: FC<object> = () => {
-  const streamStore = useStreamStore(pinia);
+  const { videoList, anomalousCount } = useMapZustandStore(
+    useShallow((state) => ({
+      videoList: state.videoList,
+      anomalousCount: state.anomalousCount
+    }))
+  );
   const map = useMyState<AMap.Map | null>(null);
   const amap = useMyState<typeof window.AMap | null>(null);
   const loca = useMyState<typeof Loca | null>(null);
   const markersRef = useRef<Array<AMap.Marker>>([]);
   const heatmapLayerRef = useRef<any>(null);
-  const timerRef = useRef<number | null>(null);
-
-  const [videoStreams, setVideoStreams] = useState<VideoStreamInfo[]>([]);
-  const [anomalyStats, setAnomalyStats] = useState<Map<number, number[]>>(new Map());
-  // 更新异常记录统计
-  const updateAnomalyRecords = useCallback(() => {
-    // 获取新的异常记录
-    const newRecords = ReqRecords();
-    // 更新异常统计
-    setAnomalyStats((prevStats) => {
-      const newStats = new Map(prevStats);
-      newRecords.forEach((record) => {
-        const streamId = record.streamId;
-        const actionId = record.actionId;
-        if (newStats.has(streamId)) {
-          const stats = [...newStats.get(streamId)!];
-          stats[actionId]++;
-          newStats.set(streamId, stats);
-        }
-      });
-      return newStats;
-    });
-  }, []);
   // 获取摄像头的异常总数
   const getAnomalyCount = useCallback(
-    (streamId: number): number => {
-      if (!anomalyStats.has(streamId)) return 0;
-      // 计算除了正常行为(index 0)外的所有行为数量总和
-      return anomalyStats
-        .get(streamId)!
-        .reduce((sum, count, index) => (index === 0 ? sum : sum + count), 0);
-    },
-    [anomalyStats]
+    (streamId: number) => anomalousCount.get(streamId) || 0,
+    [anomalousCount]
   );
-  // 加载摄像头数据
-  useEffect(() => {
-    // 直接从mock获取摄像头列表
-    setVideoStreams(ReqVideoList());
-    // 初始化异常统计数据
-    const initialStats = new Map<number, number[]>();
-    MockVideo.forEach((stream) => {
-      initialStats.set(stream.streamId, Array(streamStore.ActionsEnum.length).fill(0));
-    });
-    setAnomalyStats(initialStats);
-    // 开始定期获取异常记录
-    updateAnomalyRecords();
-    // 设置定时器定期更新异常记录（每3秒更新一次）
-    timerRef.current = window.setInterval(updateAnomalyRecords, 3000);
-    // 组件卸载时清除定时器
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [streamStore.ActionsEnum.length, updateAnomalyRecords]);
   //使用插件
   useEffect(() => {
     const currentAMap = amap.get();
@@ -111,22 +64,19 @@ const TrackMap: FC<object> = () => {
       );
     }
   }, [loca, map]);
+  //TODO 优化更新
   //显示摄像头标记
   useEffect(() => {
     const currentMap = map.get();
     const currentAMap = amap.get();
-
-    if (currentMap && currentAMap && videoStreams.length > 0) {
-      console.log("初始化地图视图和摄像头标记...");
-
+    if (currentMap && currentAMap && videoList.length > 0) {
       // 清除之前的标记
       if (markersRef.current.length > 0) {
         currentMap.remove(markersRef.current);
         markersRef.current = [];
       }
-
       // 为每个视频流创建标记
-      markersRef.current = videoStreams.map((stream) => {
+      markersRef.current = videoList.map((stream) => {
         // 获取该摄像头的异常行为数量
         const anomalyCount = getAnomalyCount(stream.streamId);
         // 创建标记
@@ -194,22 +144,22 @@ const TrackMap: FC<object> = () => {
           });
       }
     }
-  }, [amap, getAnomalyCount, map, videoStreams]);
+  }, [amap, getAnomalyCount, map, videoList]);
   // 热力图
   useEffect(() => {
     const currentLoca = loca.get();
     const currentMap = map.get();
-    if (currentLoca && currentMap && videoStreams.length > 0) {
-      console.log("创建热力图...");
+    if (currentLoca && currentMap && videoList.length > 0) {
       // 清除现有热力图层
       if (heatmapLayerRef.current) {
         currentLoca.remove(heatmapLayerRef.current);
         heatmapLayerRef.current = null;
       }
       // 准备热力图数据 - 转换为GeoJSON格式
+      //TODO calculate heatmapData
       const heatmapData = {
         type: "FeatureCollection",
-        features: videoStreams
+        features: videoList
           .map((camera) => {
             const anomalyCount = getAnomalyCount(camera.streamId);
             if (anomalyCount > 0) {
@@ -230,7 +180,6 @@ const TrackMap: FC<object> = () => {
       };
       // 确保有数据点
       if (heatmapData.features.length > 0) {
-        console.log("热力图数据点:", heatmapData.features.length, heatmapData);
         try {
           // 创建热力图数据源 - 使用GeoJSONSource而不是LocalSource
           const dataSource = new Loca.GeoJSONSource({
@@ -294,7 +243,7 @@ const TrackMap: FC<object> = () => {
           // 如果Loca热力图创建失败，回退到使用AMap.HeatMap
           try {
             console.log("尝试使用AMap.HeatMap...");
-            const aMapHeatmapData = videoStreams
+            const aMapHeatmapData = videoList
               .map((camera) => {
                 const anomalyCount = getAnomalyCount(camera.streamId);
                 if (anomalyCount > 0) {
@@ -336,7 +285,7 @@ const TrackMap: FC<object> = () => {
         }
       }
     }
-  }, [getAnomalyCount, loca, map, videoStreams]);
+  }, [getAnomalyCount, loca, map, videoList]);
 
   return (
     <BaseMap

@@ -10,3 +10,8 @@ interface TrackList {
   time: records.time;
   track: Track[];
 }
+
+interface AnomalyCountResult {
+  count: number;
+  streamId: number;
+}

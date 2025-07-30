@@ -21,6 +21,8 @@ func managerVideos(app *gin.RouterGroup, version Version) {
 		app.POST("/v1/videos", controller.AddVideos)
 		// 删除视频流信息 query: streamId | streamName
 		app.DELETE("/v1/videos", controller.DelVideos)
+		// 更新视频列表 param: {streamId streamName? addr? latitude? longitude?}[]
+		app.POST("/v1/videos/settings", controller.SettingsVideos)
 	}
 }
 func managerActions(app *gin.RouterGroup, version Version) {

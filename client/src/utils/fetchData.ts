@@ -28,11 +28,11 @@ type PromiseData<T> = T extends Promise<infer U> ? U : T;
 
 export const fetchDataAsync = async <K extends keyof API, R = PromiseData<ReturnType<API[K]>>>(
   reqFn: K,
-  reqData: Parameters<API[K]>
+  reqData?: Parameters<API[K]>
 ): Promise<R> => {
   try {
     const func: Function = API[reqFn];
-    const data = await Promise.resolve(func(...reqData));
+    const data = await Promise.resolve(func(...(reqData || [])));
     return ResponseDataFrom(data) as R;
   } catch (fetchDataErr) {
     Logger.Echo({ fetchDataErr });

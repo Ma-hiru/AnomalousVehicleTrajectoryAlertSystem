@@ -1,17 +1,36 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useCallback, useEffect, useLayoutEffect } from "react";
 import { Typography } from "antd";
 import SettingsIcon from "@/components/Settings/SettingsIcon";
 import SelectMap from "@/components/Map/SelectMap";
-import { useMyState } from "@/hooks/useMyState";
 import { useDarkModeReact } from "@/hooks/useDarkMode";
 import AppSettings from "@/settings";
+import { useImmer } from "use-immer";
+import { useShallow } from "zustand/react/shallow";
+import { useSettingsZustandStore } from "@/stores/zustand/settings";
 
 type props = {
   children?: ReactNode;
+  streamName: string;
 };
 
-const StreamSettings: FC<props> = ({ children }) => {
-  const StreamPosition = useMyState<StreamPosition>({ name: "", latitude: 0, longitude: 0 });
+const StreamSettings: FC<props> = ({ children, streamName }) => {
+  const [position, setPosition] = useImmer<StreamPosition>({
+    name: "",
+    latitude: 0,
+    longitude: 0
+  });
+  const { modifiedVideos } = useSettingsZustandStore(
+    useShallow((state) => ({
+      modifiedVideos: state.modifiedVideos
+    }))
+  );
+  useEffect(() => {
+    setPosition({
+      name: streamName,
+      latitude: modifiedVideos.get(streamName)?.latitude || 0,
+      longitude: modifiedVideos.get(streamName)?.longitude || 0
+    });
+  }, [modifiedVideos, setPosition, streamName]);
   const { isDark } = useDarkModeReact();
   return (
     <>
@@ -52,18 +71,18 @@ const StreamSettings: FC<props> = ({ children }) => {
               style={{ color: "var(--settings-content-text-color)" }}>
               <pre data-prefix={1}>
                 <code>
-                  <span>经度：{StreamPosition.get().longitude}</span>
+                  <span>经度：{position.longitude}</span>
                 </code>
               </pre>
               <pre data-prefix={2}>
                 <code>
-                  <span>纬度：{StreamPosition.get().latitude}</span>
+                  <span>纬度：{position.latitude}</span>
                 </code>
               </pre>
             </div>
           </div>
         </section>
-        <SelectMap position={StreamPosition} />
+        <SelectMap position={position} />
       </div>
     </>
   );

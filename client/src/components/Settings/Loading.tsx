@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
 import { createStyleSheet } from "@/utils/createStyleSheet";
 
@@ -8,7 +8,7 @@ type props = {
 };
 
 const Loading: FC<props> = ({ loading, result }) => {
-  const render = () => {
+  const render = useMemo(() => {
     if (loading) {
       return <LoadingOutlined style={styles.loadingIcon} />;
     } else {
@@ -17,10 +17,10 @@ const Loading: FC<props> = ({ loading, result }) => {
         return <span>加载失败！请检查网络或者重新登录</span>;
       }
     }
-  };
+  }, [loading, result]);
   return (
     <>
-      <div className="flex justify-center items-center w-full h-full">{render()}</div>
+      <div className="flex justify-center items-center w-full h-full">{render}</div>
     </>
   );
 };

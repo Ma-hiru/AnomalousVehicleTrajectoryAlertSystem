@@ -1,5 +1,4 @@
 import { FC, memo } from "react";
-import { MyState } from "@/hooks/useMyState";
 import { Typography, Divider, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme";
 import "./Content.scss";
@@ -7,17 +6,18 @@ import { FormOutlined } from "@ant-design/icons";
 import SettingsIcon from "@/components/Settings/SettingsIcon";
 import StreamSettings from "@/components/Settings/StreamSettings";
 import { useDarkModeReact } from "@/hooks/useDarkMode";
+import { Updater } from "use-immer";
 
 interface props {
   currentContent: string | string[];
   currentIndex: string[];
-  config: MyState<Go2rtcConfigYaml | undefined>;
+  setConfig: Updater<Go2rtcConfigYaml | undefined>;
 }
 
 const STREAMS = "streams";
-const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
+const Content: FC<props> = ({ currentContent, currentIndex, setConfig }) => {
   const updateConfig = (newContent: string | string[]) => {
-    config.set((draft) => {
+    setConfig((draft) => {
       if (draft) {
         if (draft) {
           const level1 = currentIndex[0];
@@ -104,9 +104,6 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
   return (
     <>
       <div
-        onClick={() => {
-          updateConfig(currentContent);
-        }}
         id="settings-content"
         className="grid grid-cols-1 grid-rows-[auto_minmax(0,1fr)] h-full ">
         <section>
@@ -127,7 +124,7 @@ const Content: FC<props> = ({ currentContent, currentIndex, config }) => {
         </section>
         <section>
           {currentIndex[0] === STREAMS && (
-            <StreamSettings>
+            <StreamSettings streamName={currentIndex[1]}>
               <div className="mockup-code bg-transparent text-black">{render()}</div>
             </StreamSettings>
           )}

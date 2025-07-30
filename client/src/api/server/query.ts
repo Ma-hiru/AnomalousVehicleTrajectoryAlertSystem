@@ -37,6 +37,17 @@ export const req_videos_post = (
 };
 
 /**
+ * @desc `批量修改视频流信息`
+ * @param param Array{streamName addr? latitude? longitude?}
+ * @return QueryInfo
+ * */
+export const req_videos_settings = (
+  param: PartialField<Omit<videos, "streamId">, "addr">[]
+): Promise<ReqResponse<QueryInfo>> => {
+  return request.post(V1.video_settings, param);
+};
+
+/**
  * @desc `删除视频流信息`
  * @param query streamId | streamName
  * @return QueryInfo

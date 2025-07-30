@@ -1,7 +1,7 @@
 import { getWeather } from "@/utils/getWeather";
 import logger from "@/utils/logger";
 import { useEffect } from "react";
-import { useMyState } from "@/hooks/useMyState.ts";
+import { useImmer } from "use-immer";
 
 type ReturnType = {
   weather: WeatherData | null;
@@ -9,32 +9,32 @@ type ReturnType = {
   err: any;
 };
 export const useWeather = () => {
-  const status = useMyState<ReturnType>({
+  const [status, setStatus] = useImmer<ReturnType>({
     weather: null,
     loading: false,
     err: null
   });
   useEffect(() => {
-    status.set((draft) => {
+    setStatus((draft) => {
       draft.loading = true;
     });
     getWeather()
       .then((weather) => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.weather = weather;
         });
       })
       .catch((error) => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.err = error;
         });
         logger.Message.Error("获取天气失败！");
       })
       .finally(() => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.loading = false;
         });
       });
-  }, [status]);
+  }, [setStatus]);
   return status;
 };

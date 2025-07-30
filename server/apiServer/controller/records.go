@@ -102,7 +102,7 @@ func RecordStatus(actionID int64) bool {
 		idStr          string
 	)
 	if err != nil {
-		NormalActionId = getNormalActionId(getActions())
+		NormalActionId = getNormalActionId()
 		err = redis.Set(context.Background(), TempKey, NormalActionId, TempTime)
 		if err != nil {
 			logger.New("redis").Println(err.Error())
@@ -115,11 +115,12 @@ func RecordStatus(actionID int64) bool {
 		}
 	}
 	if !ok {
-		NormalActionId = getNormalActionId(getActions())
+		NormalActionId = getNormalActionId()
 	}
 	return actionID == NormalActionId
 }
-func getNormalActionId(actions []*model.Action) int64 {
+func getNormalActionId() int64 {
+	actions := getActions()
 	return functional.SliceReduce(
 		actions,
 		func(pre int64, curValue *model.Action, curIndex int) int64 {

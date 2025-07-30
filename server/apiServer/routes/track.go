@@ -8,5 +8,6 @@ import (
 func trackRoutes(app *gin.RouterGroup, version Version) {
 	if version == V1 {
 		app.GET("/v1/tracks", controller.GetTrackList)
+		app.GET("/v1/anomaly", controller.GetAnomalyCount)
 	}
 }

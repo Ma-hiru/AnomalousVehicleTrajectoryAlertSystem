@@ -29,8 +29,7 @@ type TrackList struct {
 
 // GetTrackList 获取异常轨迹列表 query: (from & to)| keywords
 func GetTrackList(ctx *gin.Context) {
-	actions := getActions()
-	normalId := getNormalActionId(actions)
+	normalId := getNormalActionId()
 	keywords := ctx.Query("keywords")
 	from, ok := utils.ParseInt64(ctx.Query("from"))
 	if !ok {
@@ -117,4 +116,41 @@ func calculateTrackItem(records []*model.Record) []*TrackList {
 		},
 		make([]*TrackList, 0),
 	)
+}
+
+// GetAnomalyCount 获取各个视频流的异常数 query: from & to
+func GetAnomalyCount(ctx *gin.Context) {
+	normalId := getNormalActionId()
+	from, ok := utils.ParseInt64(ctx.Query("from"))
+	if !ok {
+		utils.FailResponse(ctx, 201, "参数from错误")
+		return
+	}
+	to, ok := utils.ParseInt64(ctx.Query("to"))
+	if !ok {
+		utils.FailResponse(ctx, 201, "参数to错误")
+		return
+	}
+	query := service.Record
+	results := make([]*AnomalyCountResult, 0)
+	err := query.WithContext(context.Background()).
+		Select(
+			query.StreamID,
+			query.StreamID.Count().As("count"),
+		).
+		Where(
+			query.ActionID.Neq(normalId),
+			query.Time.Between(from, to),
+		).
+		Group(query.StreamID).
+		Scan(&results)
+	if err != nil {
+		utils.FailResponse(ctx, 201, "查询失败")
+	}
+	utils.SuccessResponse(ctx, "查询成功", results)
+}
+
+type AnomalyCountResult struct {
+	StreamID int `gorm:"column:streamId;not null" json:"streamId"`
+	Count    int `gorm:"column:count" json:"count"`
 }

@@ -107,7 +107,7 @@ const BarMenu: FC<props> = ({ setActiveTitle }) => {
         </ConfigProvider>
       </MenuContainer>
       <MyModal title={"设置"} open={ShowModal.settings} onCancel={closeSettingsModal}>
-        <SettingsLayout refresh={() => {}} />
+        <SettingsLayout />
       </MyModal>
       <MyModal title={"异常追踪"} width={"80vw"} open={ShowModal.track} onCancel={closeTrackModal}>
         <Track />

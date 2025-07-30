@@ -27,15 +27,24 @@ func GetVideos(ctx *gin.Context) {
 	utils.SuccessResponse(ctx, "查询成功", resultArr)
 }
 
+type VideosParams struct {
+	StreamId   int     `json:"streamId" binding:"required" form:"streamId"`
+	StreamName string  `json:"streamName,omitempty" form:"streamName"`
+	Addr       string  `json:"addr,omitempty" form:"addr"`
+	Latitude   float64 `json:"latitude,omitempty"  form:"latitude"`
+	Longitude  float64 `json:"longitude,omitempty"  form:"longitude"`
+}
+
 // PatchVideos 更新视频列表 param: streamId streamName? addr? latitude? longitude?
 func PatchVideos(ctx *gin.Context) {
-	params := struct {
+	type VideosParams struct {
 		StreamId   int     `json:"streamId" binding:"required" form:"streamId"`
 		StreamName string  `json:"streamName,omitempty" form:"streamName"`
 		Addr       string  `json:"addr,omitempty" form:"addr"`
 		Latitude   float64 `json:"latitude,omitempty"  form:"latitude"`
 		Longitude  float64 `json:"longitude,omitempty"  form:"longitude"`
-	}{}
+	}
+	params := VideosParams{}
 	if err := ctx.ShouldBind(&params); err != nil {
 		utils.FailResponse(ctx, 201, "参数错误")
 	} else {
@@ -62,6 +71,74 @@ func PatchVideos(ctx *gin.Context) {
 				"rowsAffected": info.RowsAffected,
 			})
 		}
+	}
+}
+
+type SettingsVideosParams struct {
+	StreamName string  `json:"streamName" binding:"required" form:"streamName"`
+	Addr       string  `json:"addr,omitempty" form:"addr"`
+	Latitude   float64 `json:"latitude" binding:"required" form:"latitude"`
+	Longitude  float64 `json:"longitude" binding:"required" form:"longitude"`
+}
+
+// SettingsVideos param: {streamName addr? latitude longitude}[]
+func SettingsVideos(ctx *gin.Context) {
+	var params = make([]SettingsVideosParams, 0)
+	if err := ctx.ShouldBind(&params); err != nil {
+		utils.FailResponse(ctx, 201, "参数错误")
+	} else {
+		var count int64
+		for _, query := range params {
+			res, _ := service.Stream.WithContext(context.Background()).
+				Where(service.Stream.StreamName.Eq(query.StreamName)).
+				Find()
+			if len(res) > 0 {
+				info, err := service.Stream.WithContext(context.Background()).
+					Where(service.Stream.StreamName.Eq(query.StreamName)).
+					Updates(model.Stream{
+						StreamName: query.StreamName,
+						Addr:       query.Addr,
+						Latitude:   query.Latitude,
+						Longitude:  query.Longitude,
+					})
+				count += info.RowsAffected
+				if err != nil {
+					utils.CustomResponse(ctx, &utils.Response{
+						Code:    201,
+						Message: "修改失败",
+						Ok:      false,
+						Data: gin.H{
+							"rowsAffected": count,
+							"err":          err.Error(),
+						},
+					})
+					return
+				}
+			} else {
+				err := service.Stream.WithContext(context.Background()).Create(&model.Stream{
+					StreamName: query.StreamName,
+					Addr:       query.Addr,
+					Latitude:   query.Latitude,
+					Longitude:  query.Longitude,
+				})
+				if err != nil {
+					utils.CustomResponse(ctx, &utils.Response{
+						Code:    201,
+						Message: "修改失败",
+						Ok:      false,
+						Data: gin.H{
+							"rowsAffected": count,
+							"err":          err.Error(),
+						},
+					})
+					return
+				}
+				count++
+			}
+		}
+		utils.SuccessResponse(ctx, "修改成功", gin.H{
+			"rowsAffected": count,
+		})
 	}
 }
 

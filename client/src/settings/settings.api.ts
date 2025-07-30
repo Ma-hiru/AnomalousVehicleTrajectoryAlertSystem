@@ -25,11 +25,13 @@ export enum Go2rtcAPI {
 export const GinAPI = {
   V1: {
     video_stream: "/api/gin/v1/videos",
+    video_settings: "/api/gin/v1/videos/settings",
     actions_enum: "/api/gin/v1/actions",
     records: "/api/gin/v1/records",
     category: "/api/gin/v1/category",
     category_minute: "/api/gin/v1/category/minute",
-    tracks: "/api/gin/v1/tracks"
+    tracks: "/api/gin/v1/tracks",
+    anomaly_count: "/api/gin/v1/anomaly"
   },
   restart: "/api/gin/restart"
 } as const;

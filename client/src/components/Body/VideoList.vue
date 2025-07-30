@@ -20,6 +20,7 @@
   import VideoInfo from "@/components/Body/VideoInfo.vue";
   import { onMounted, onUnmounted } from "vue";
   import { useStreamStore } from "@/stores/pinia";
+  import { UPDATE_RECORDS_INTERVAL } from "@/settings/settings.streams";
 
   const streamStore = useStreamStore();
   const startTime = new Date().getTime();
@@ -32,20 +33,23 @@
         return ok;
       })
       .then((ok) => {
-        ok && (timer = UpdateRecord());
+        ok && (timer = StartUpdate());
       });
   });
   onUnmounted(() => {
-    clearInterval(timer);
+    timer && clearInterval(timer);
   });
 
-  function UpdateRecord() {
+  function StartUpdate() {
     timer && clearInterval(timer);
-    return setInterval(() => {
-      streamStore.GetTotalRecords();
-      streamStore.GetTotalCategory();
-      streamStore.GetTotalCategoryByTime(1, startTime);
-    }, 3000);
+    return setInterval(Update, UPDATE_RECORDS_INTERVAL);
+  }
+
+  function Update() {
+    streamStore.GetTotalRecords();
+    streamStore.GetTotalCategory();
+    streamStore.GetTotalCategoryByTime(1, startTime);
+    streamStore.GetAnomalousCount();
   }
 </script>
 

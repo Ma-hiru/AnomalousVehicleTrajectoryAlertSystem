@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"server/core/ffmpeg"
 	"strconv"
 	"strings"
@@ -16,10 +17,7 @@ import (
 )
 
 func SimulateStreams(options ffmpeg.SimulateStreamsOptions) error {
-	rtsp := exec.Command(options.RtspServerConfig.FilePath, options.RtspServerConfig.ConfigPath)
-	rtsp.Stdout = os.Stdout
-	rtsp.Stderr = os.Stderr
-	if err := rtsp.Start(); err != nil {
+	if err := startRTSP(options.RtspServerConfig.FilePath, options.RtspServerConfig.ConfigPath); err != nil {
 		return err
 	}
 	cmd := ffmpeggo.Input(options.FilePath,
@@ -160,4 +158,26 @@ func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.Extract
 		}
 	}()
 	return frameChannel, nil
+}
+
+func startRTSP(file, config string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		shellCmd := "pwsh"
+		psCommand := fmt.Sprintf("& '%s' '%s'",
+			filepath.Join(file),
+			filepath.Join(config),
+		)
+		if _, err := exec.LookPath(shellCmd); err != nil {
+			shellCmd = "powershell"
+		}
+		cmd = exec.Command("cmd.exe", "/C", "start", "", shellCmd, "-Command", psCommand)
+	default:
+		cmd = exec.Command(filepath.Join(file), filepath.Join(config))
+	}
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("启动RTSP服务失败: %w", err)
+	}
+	return nil
 }

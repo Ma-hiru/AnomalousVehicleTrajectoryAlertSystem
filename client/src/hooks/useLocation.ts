@@ -1,7 +1,7 @@
 import { getLocation } from "@/utils/getLocation";
 import logger from "@/utils/logger";
 import { useEffect } from "react";
-import { useMyState } from "@/hooks/useMyState.ts";
+import { useImmer } from "use-immer";
 
 type ReturnType = {
   location: GeolocationPosition | null;
@@ -9,32 +9,32 @@ type ReturnType = {
   err: any;
 };
 export const useLocation = () => {
-  const status = useMyState<ReturnType>({
+  const [status, setStatus] = useImmer<ReturnType>({
     location: null,
     loading: false,
     err: null
   });
   useEffect(() => {
-    status.set((draft) => {
+    setStatus((draft) => {
       draft.loading = true;
     });
     getLocation()
       .then((location) => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.location = location;
         });
       })
       .catch((error) => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.err = error;
         });
         logger.Message.Error("获取位置失败！");
       })
       .finally(() => {
-        status.set((draft) => {
+        setStatus((draft) => {
           draft.loading = false;
         });
       });
-  }, [status]);
+  }, [setStatus]);
   return status;
 };
