@@ -1,117 +1,150 @@
-import { io, Socket } from "@/my_socketio-client";
+import { io, Socket } from "@/my_socketio";
 import { getURLSearchParam } from "@/utils/getURLSearchParam";
 
-const WebSocketInstance = {
-  stream: null as WebSocket | null,
-  info: null as Socket | null,
-  url: { stream: "", frame: "" },
-  ready: false
-};
-const handlerMessage = (workerEvent: WebSocketMSEWorkerEV) => {
-  if (workerEvent.data.type === "init") {
-    WebSocketInstance.url.stream = workerEvent.data.stream;
-    WebSocketInstance.url.frame = workerEvent.data.frame;
-    try {
-      init();
-    } catch (e) {
-      self.postMessage({
-        type: "error",
-        error: JSON.stringify(e)
-      } as WebSocketMSE);
-      terminate();
-    }
-  } else if (workerEvent.data.type === "terminate") terminate();
-};
+class WebsocketWorker {
+  private stream_instance: Nullable<WebSocket>;
+  private frame_instance: Nullable<Socket>;
+  private ready;
+  private meta;
+  private self;
 
-const init = () => {
-  WebSocketInstance.stream = new WebSocket(WebSocketInstance.url.stream);
-  WebSocketInstance.info = io(WebSocketInstance.url.frame, {
-    retry: 5,
-    name: getURLSearchParam(WebSocketInstance.url.frame, "name")[0] || WebSocketInstance.url.frame,
-    reconnectionInterval: 100
-  });
-  WebSocketInstance.info.on("frame", (data) => {
-    self.postMessage({
-      type: "frame",
-      data: data
-    } satisfies WebSocketMSE);
-  });
-  WebSocketInstance.info.on("meta", (data) => {
-    self.postMessage({
-      type: "meta",
-      data: data
-    } satisfies WebSocketMSE);
-  });
-  // 设置接收二进制数据类型为ArrayBuffer
-  WebSocketInstance.stream.binaryType = "arraybuffer";
-  WebSocketInstance.stream.onmessage = (ev) => {
-    if (typeof ev.data === "string") {
-      // 接收到字符串消息，一般是初始化信息
-      const msg = JSON.parse(ev.data);
-      if (msg.type === "error") {
-        self.postMessage({
-          type: "error",
-          error: msg
-        } as WebSocketMSE);
-        return;
-      }
-      self.postMessage({
-        type: "sdp",
-        sdp: msg
-      } satisfies WebSocketMSE);
-    } else {
-      // 接收到二进制数据，添加到媒体源
-      // 使用transferable对象加速二进制数据传输
-      self.postMessage(
-        {
-          type: "new-packet",
-          packet: ev.data
-        },
-        [ev.data]
-      ); // 使用transferable对象
-    }
-  };
-  WebSocketInstance.stream.onopen = () => {
-    WebSocketInstance.ready = true;
-    WebSocketInstance.stream!.send(
-      JSON.stringify({
-        type: "mse",
-        // 支持的编解码器列表
-        value: "avc1.640029,avc1.64002A,avc1.640033,hvc1.1.6.L153.B0,mp4a.40.2,mp4a.40.5,flac,opus"
-      })
-    );
-  };
-  WebSocketInstance.stream.onerror = (ev) => {
-    self.postMessage({
-      type: "error",
-      error: JSON.stringify(ev)
-    } as WebSocketMSE);
-  };
-  WebSocketInstance.stream.onclose = (ev) => {
-    WebSocketInstance.ready &&
-      self.postMessage({
-        type: "close",
-        reason: {
-          code: ev.code,
-          reason: ev.reason,
-          wasClean: ev.wasClean
-        }
-      } as WebSocketMSE);
-  };
-};
-
-const terminate = () => {
-  if (WebSocketInstance.stream) {
-    WebSocketInstance.stream.onopen = null;
-    WebSocketInstance.stream.onmessage = null;
-    WebSocketInstance.stream.onerror = null;
-    WebSocketInstance.stream.onclose = null;
-    WebSocketInstance.ready && WebSocketInstance.stream.close();
-    WebSocketInstance.stream = null;
+  constructor(self: Window & typeof globalThis) {
+    this.ready = false;
+    this.meta = {
+      stream: "",
+      frame: ""
+    };
+    this.self = self;
   }
-  WebSocketInstance.info?.disconnect();
-  WebSocketInstance.info = null;
-  self.removeEventListener("message", handlerMessage);
-};
 
-self.addEventListener("message", handlerMessage, { passive: true });
+  handlerMessage(workerEvent: WebSocketMSE) {
+    switch (workerEvent.type) {
+      case "init": {
+        this.meta.stream = workerEvent.stream;
+        this.meta.frame = workerEvent.frame;
+        this.init();
+        break;
+      }
+      case "terminate": {
+        this.terminate();
+        break;
+      }
+    }
+  }
+
+  private post_message(msg: WebSocketMSE) {
+    this.self.postMessage(msg);
+  }
+
+  private init() {
+    try {
+      this.create_frame_socket();
+      this.create_stream_socket();
+    } catch (err) {
+      this.post_message({
+        type: "error",
+        error: err
+      });
+    }
+  }
+
+  private create_stream_socket() {
+    this.stream_instance = new WebSocket(this.meta.stream);
+    this.stream_instance.binaryType = "arraybuffer";
+    this.stream_instance.onmessage = (ev) => {
+      switch (typeof ev.data) {
+        case "string": {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === "error") {
+            return this.post_message({
+              type: "error",
+              error: msg
+            });
+          }
+          this.post_message({
+            type: "sdp",
+            sdp: msg
+          });
+          break;
+        }
+        default: {
+          this.self.postMessage(
+            {
+              type: "new-packet",
+              packet: ev.data
+            },
+            // 直接移交所有权，避免数据复制
+            [ev.data]
+          );
+        }
+      }
+    };
+    this.stream_instance.onopen = () => {
+      this.ready = true;
+      this.stream_instance && this.stream_instance.send(SDP_MESSAGE);
+    };
+    this.stream_instance.onerror = (ev) => {
+      this.post_message({
+        type: "error",
+        error: JSON.stringify(ev)
+      });
+    };
+    this.stream_instance.onclose = (ev) => {
+      this.ready &&
+        this.post_message({
+          type: "close",
+          reason: {
+            code: ev.code,
+            reason: ev.reason,
+            wasClean: ev.wasClean
+          }
+        });
+    };
+  }
+
+  private create_frame_socket() {
+    this.frame_instance = io(this.meta.frame, {
+      retry: 5,
+      name: getURLSearchParam(this.meta.frame, "name")[0] || this.meta.frame,
+      reconnectionInterval: 100
+    });
+    this.frame_instance.on("frame", (data) => {
+      this.post_message({
+        type: "frame",
+        data: data
+      });
+    });
+    this.frame_instance.on("meta", (data) => {
+      this.post_message({
+        type: "meta",
+        data: data
+      });
+    });
+  }
+
+  private terminate() {
+    if (this.stream_instance) {
+      this.stream_instance.onopen = null;
+      this.stream_instance.onmessage = null;
+      this.stream_instance.onerror = null;
+      this.stream_instance.onclose = null;
+      this.ready && this.stream_instance.close();
+      this.stream_instance = null;
+    }
+    this.frame_instance?.disconnect();
+    this.frame_instance = null;
+    this.self = null as unknown as any;
+  }
+}
+
+const Instance = new WebsocketWorker(self);
+const handler = (ev: WebSocketMSEWorkerEV) => {
+  Instance.handlerMessage(ev.data);
+};
+self.addEventListener("message", handler, { passive: true });
+
+const SDP_MESSAGE = JSON.stringify({
+  type: "mse",
+  // 支持的编解码器列表
+  value: "avc1.640029,avc1.64002A,avc1.640033,hvc1.1.6.L153.B0,mp4a.40.2,mp4a.40.5,flac,opus"
+});

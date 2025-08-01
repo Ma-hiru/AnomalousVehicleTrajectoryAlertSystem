@@ -25,7 +25,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 		utils.Logger("StreamServer").Println("抽帧失败")
 	} else {
 		utils.Logger("StreamServer").Println("开始处理视频帧")
-		go readIMG(imgFrame, streamName)
+		readIMG(imgFrame, streamName)
 		//readMETA(metaData, streamName)
 	}
 }
@@ -33,6 +33,7 @@ func readIMG(imgFrame chan *ffmpeg.FrameData, StreamName string) {
 	defer utils.Logger("StreamServer").Println("读取图片结束")
 	for img := range imgFrame {
 		//TODO yolo
+		utils.Logger("StreamServer").Println("FrameMsg=>", img.Index, img.Timestamp)
 		if msg, err := json.Marshal(socketServer.FrameMsg{
 			StreamName: StreamName,
 			Timestamp:  img.Timestamp,

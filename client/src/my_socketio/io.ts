@@ -2,11 +2,12 @@ import { Options, EventType, Socket, Message } from "./types";
 
 export const io = (uri: string, options?: Options | string): Socket => {
   let retry: number;
-  let instance: WebSocket | null;
+  let instance: Nullable<WebSocket>;
   let maxRetry: number;
   let name: string;
   let reconnectionInterval: number;
   let ready = false;
+  const handler = new Map<EventType, (data?: any) => any>();
   if (options && typeof options === "string") {
     name = options;
     maxRetry = 10;
@@ -16,7 +17,6 @@ export const io = (uri: string, options?: Options | string): Socket => {
     maxRetry = options.retry || 0;
     reconnectionInterval = options.reconnectionInterval || 500;
   }
-  const handler = new Map<EventType, (data?: any) => any>();
 
   async function executeHandler(event: EventType, data?: any) {
     const fn = handler.get(event);
@@ -30,20 +30,13 @@ export const io = (uri: string, options?: Options | string): Socket => {
   }
 
   async function onmessage(res: MessageEvent) {
-    const msg: Message = JSON.parse(res.data);
-    const event = msg.event;
-    let data = msg.data;
+    const { event, data } = JSON.parse(res.data) as Message;
     try {
-      if (typeof data === "string") {
-        data = JSON.parse(data) as object;
-      }
-      await executeHandler(event, data);
-    } catch (err: unknown) {
-      if (err instanceof SyntaxError) {
-        console.error("JSON解析错误：", err);
-      } else {
-        console.error("未知错误（executeHandler）：", err);
-      }
+      if (typeof data === "string") await executeHandler(event, JSON.parse(data));
+      else await executeHandler(event, data);
+    } catch (err) {
+      if (err instanceof SyntaxError) console.error("JSON解析错误：", err);
+      else console.error("未知错误（executeHandler）：", err);
     }
   }
 
@@ -69,9 +62,9 @@ export const io = (uri: string, options?: Options | string): Socket => {
     instance!.addEventListener("error", onerror, { passive: true });
     instance!.removeEventListener("open", openConnect);
     instance!.removeEventListener("error", errConnect);
-    await onopen(ev);
     retry = 0;
     ready = true;
+    await onopen(ev);
   }
 
   function errConnect() {
@@ -108,8 +101,8 @@ export const io = (uri: string, options?: Options | string): Socket => {
 
   function reconnect() {
     if (++retry <= maxRetry) {
-      setTimeout(connect, reconnectionInterval);
       console.log(`WebSocket[${name}]第${retry}次重连`);
+      setTimeout(connect, reconnectionInterval);
     }
   }
 

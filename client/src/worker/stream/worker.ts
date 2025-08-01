@@ -1,6 +1,6 @@
 export class WorkerManager<T> {
   private instance: Worker;
-  private callback: ((ev: MessageEvent<T>) => void) | undefined;
+  private callback: Nullable<(ev: MessageEvent<T>) => void>;
 
   constructor() {
     this.instance = new Worker(new URL("@/worker/stream/websocket.worker.ts", import.meta.url), {

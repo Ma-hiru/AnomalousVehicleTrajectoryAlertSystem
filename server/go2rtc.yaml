@@ -8,9 +8,7 @@ rtsp:
 streams:
     ffmpeg:
         - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
-        - rtsp://127.0.0.1:8554/live?
     test:
         - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
-        - test://test
 webrtc:
     listen: :3002

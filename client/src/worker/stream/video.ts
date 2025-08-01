@@ -1,11 +1,11 @@
 export class VideoManager {
-  private media_source: MediaSource;
   private video: HTMLVideoElement;
-  private source_buffer: SourceBuffer | null = null;
-  private updated_callback: (() => void) | null = null;
-  private auto_play: (() => void) | null = null;
+  private media_source: MediaSource;
+  private source_buffer: Nullable<SourceBuffer>;
+  private updated_callback: Nullable<NormalFunc>;
+  private auto_play: Nullable<NormalFunc>;
 
-  constructor(video: HTMLVideoElement, sourceopen: () => void) {
+  constructor(video: HTMLVideoElement, sourceopen: NormalFunc) {
     this.video = video;
     this.media_source = new MediaSource();
     this.media_source.addEventListener("sourceopen", sourceopen, { passive: true });
@@ -18,7 +18,7 @@ export class VideoManager {
     this.source_buffer.mode = mode;
   }
 
-  public on_updated(callback: () => void) {
+  public on_updated(callback: NormalFunc) {
     if (this.source_buffer) {
       this.updated_callback &&
         this.source_buffer.removeEventListener("updateend", this.updated_callback);
@@ -92,10 +92,14 @@ export class VideoManager {
   }
 
   private _next_turn_clear(start: number, end: number) {
-    this.source_buffer?.addEventListener("updateend", () => this.remove_source_buffer(start, end), {
-      once: true,
-      passive: true
-    });
+    this.source_buffer?.addEventListener(
+      "updateend",
+      this.remove_source_buffer.bind(this, start, end),
+      {
+        once: true,
+        passive: true
+      }
+    );
   }
 
   private set_auto_play() {

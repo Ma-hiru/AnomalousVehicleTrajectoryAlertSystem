@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	ffmpeggo "github.com/u2takey/ffmpeg-go"
 	"io"
 	"os/exec"
 	"path/filepath"
@@ -11,9 +12,6 @@ import (
 	"server/core/ffmpeg"
 	"strconv"
 	"strings"
-	"time"
-
-	ffmpeggo "github.com/u2takey/ffmpeg-go"
 )
 
 func SimulateStreams(options ffmpeg.SimulateStreamsOptions) error {
@@ -55,16 +53,15 @@ func SimulateStreams(options ffmpeg.SimulateStreamsOptions) error {
 }
 
 func ExtractVideoFrames(streams *io.PipeReader, options ffmpeg.ExtractFramesOptions) ([]string, error) {
-	var NewFFmpeg ffmpeg.FFmpeg
-	var err error
-	if err = NewFFmpeg.AddSource(streams, options.InputPath); err != nil {
+	NewFFmpeg, err := ffmpeg.NewFFmpeg(options.Name, streams, options.InputPath)
+	if err != nil {
 		return nil, err
 	}
 	if err = ffmpeg.Mkdir(options.OutputDir); err != nil {
 		return nil, err
 	}
 	//输入参数
-	NewFFmpeg.AddInputMap(ffmpeg.ArgsMap{
+	NewFFmpeg.AddInputOptMap(ffmpeg.ArgsMap{
 		"c:v":      options.InputOpt.CV,
 		"loglevel": options.InputOpt.Loglevel,
 		"f":        options.InputOpt.InputFormat,
@@ -88,13 +85,13 @@ func ExtractVideoFrames(streams *io.PipeReader, options ffmpeg.ExtractFramesOpti
 		NewFFmpeg.AddOutputOpt("vf", strings.Join(vfArgs, ","))
 	}
 	// 输出参数
-	NewFFmpeg.AddOutputMap(ffmpeg.ArgsMap{
+	NewFFmpeg.AddOutputOptMap(ffmpeg.ArgsMap{
 		"qscale:v": fmt.Sprintf("%d", options.OutputOpt.Quality),
 		"f":        options.OutputOpt.OutputFormat,
 		"fps_mode": options.OutputOpt.FpsMode,
 	})
-	NewFFmpeg.AddOutput(options.OutputDir, options.OutputTemplate)
-	if err = NewFFmpeg.Build().AddTimeStamp().AddClearStamp(time.Second*5, 45).Run(); err != nil {
+
+	if err = NewFFmpeg.Build(filepath.Join(options.OutputDir, options.OutputTemplate)).Run(); err != nil {
 		return nil, err
 	}
 	return nil, nil
@@ -102,14 +99,12 @@ func ExtractVideoFrames(streams *io.PipeReader, options ffmpeg.ExtractFramesOpti
 
 // ExtractVideoFramesWithStream 从视频流中提取帧并通过channel返回帧数据
 func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.ExtractFramesOptions) (chan *ffmpeg.FrameData, error) {
-	var NewFFmpeg ffmpeg.FFmpeg
-	NewFFmpeg.Name = options.Name
-	var err error
-	if err = NewFFmpeg.AddSource(streams, options.InputPath); err != nil {
+	NewFFmpeg, err := ffmpeg.NewFFmpeg(options.Name, streams, options.InputPath)
+	if err != nil {
 		return nil, err
 	}
 	// 输入参数
-	NewFFmpeg.AddInputMap(ffmpeg.ArgsMap{
+	NewFFmpeg.AddInputOptMap(ffmpeg.ArgsMap{
 		"c:v":      options.InputOpt.CV,
 		"loglevel": options.InputOpt.Loglevel,
 		"f":        options.InputOpt.InputFormat,
@@ -145,18 +140,16 @@ func ExtractVideoFramesWithStream(streams *io.PipeReader, options ffmpeg.Extract
 	NewFFmpeg.AddOutputOpt("c:v", "mjpeg")
 
 	// 输出参数
-	NewFFmpeg.AddOutputMap(ffmpeg.ArgsMap{
+	NewFFmpeg.AddOutputOptMap(ffmpeg.ArgsMap{
 		"qscale:v": fmt.Sprintf("%d", options.OutputOpt.Quality),
 		"fps_mode": options.OutputOpt.FpsMode,
 	})
 
 	frameChannel := make(chan *ffmpeg.FrameData, 1000)
 	//metaChannel := make(chan *ffmpeg.MetaData, 100)
-	go func() {
-		if err := NewFFmpeg.BuildForStream().AddTimeStamp().RunForStream(frameChannel); err != nil {
-			fmt.Println(err)
-		}
-	}()
+	if err := NewFFmpeg.AddPlugin(ffmpeg.StreamPlugin(frameChannel)).Build("-").Run(); err != nil {
+		fmt.Println(err)
+	}
 	return frameChannel, nil
 }
 

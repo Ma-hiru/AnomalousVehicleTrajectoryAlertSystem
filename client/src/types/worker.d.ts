@@ -37,7 +37,7 @@ type WebSocketMSE =
     }
   | {
       type: "close";
-      reason: CloseEvent;
+      reason: Partial<CloseEvent>;
     };
 /** worker传递事件数据类型 */
 type WebSocketMSEWorkerEV = MessageEvent<WebSocketMSE>;

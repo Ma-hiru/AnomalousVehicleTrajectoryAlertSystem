@@ -20,15 +20,16 @@ interface Meta {
 
 /** VideoStream powered by websocket */
 export class VideoStreamByWS {
-  private worker_manager: WorkerManager<WebSocketMSE> | null = null;
+  public readonly meta;
   private readonly buffer_manager;
   private readonly video_manager;
-  private clear_manager: ClearManager | null = null;
-  private ready = false;
+  private worker_manager: Nullable<WorkerManager<WebSocketMSE>>;
+  private clear_manager: Nullable<ClearManager>;
+  private ready;
   private onDestroy;
-  public readonly meta: Meta;
 
-  constructor(video: HTMLVideoElement, meta: Meta, onDestroy?: () => void) {
+  constructor(video: HTMLVideoElement, meta: Meta, onDestroy?: NormalFunc) {
+    this.ready = false;
     this.video_manager = new VideoManager(video, this.sourceopen.bind(this));
     this.buffer_manager = new BufferManager(AppSettings.MAX_QUEUE_LENGTH);
     this.meta = { ...meta };
@@ -58,6 +59,7 @@ export class VideoStreamByWS {
         break;
       }
       case "frame": {
+        console.log(ev);
         const target = sync_manager.calculate_taget_time(
           ev.data.timestamp,
           this.video_manager.get_video_current_time(),
@@ -119,7 +121,7 @@ export class VideoStreamByWS {
       //worker
       this.worker_manager?.send({ type: "terminate" });
       this.worker_manager?.destroy();
-      this.buffer_manager.free();
+      this.buffer_manager.destroy();
       this.clear_manager?.destroy();
       this.video_manager.destroy();
     } catch (err) {

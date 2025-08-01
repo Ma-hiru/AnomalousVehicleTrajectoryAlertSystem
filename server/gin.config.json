@@ -1,6 +1,6 @@
 {
   "port": 824,
-  "mode": "debug",
+  "mode": "release",
   "stack": true,
   "ssl": false,
   "key": "./key.pem",

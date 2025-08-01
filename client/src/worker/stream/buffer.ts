@@ -33,7 +33,7 @@ export class BufferManager {
     return this.queue.length > 0;
   }
 
-  free() {
+  destroy() {
     this.queue = [];
   }
 }
