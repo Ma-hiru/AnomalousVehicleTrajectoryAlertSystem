@@ -66,7 +66,7 @@ const Settings: FC<object> = () => {
         status.loading = false;
       });
     //add refreshId
-  }, [addModifiedVideos, clearModifiedVideos, getPosition, setConfig, status]);
+  }, [addModifiedVideos, clearModifiedVideos, getPosition, setConfig, status, refreshId]);
   useLayoutEffect(() => {
     if (currentIndex[0] !== "" && currentIndex[1] !== "" && config && config.data) {
       setCurrentContent(config.data[currentIndex[0]][currentIndex[1]]);
@@ -94,7 +94,7 @@ const Settings: FC<object> = () => {
     if (config && config.data) {
       try {
         const yaml = JsonToYaml(config.data);
-        await fetchDataAsync("reqPatchGo2rtcConfig", [yaml]);
+        await fetchDataAsync("req_update_go2rtc_yaml", [yaml]);
         const ok = await saveStream();
         if (ok) {
           Logger.Message.Success("保存成功！");

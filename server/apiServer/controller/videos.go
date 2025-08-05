@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"server/apiServer/model"
 	"server/apiServer/service"
+	"server/core/functional"
 	"server/utils"
 	"strings"
 )
@@ -84,6 +85,23 @@ type SettingsVideosParams struct {
 // SettingsVideos param: {streamName addr? latitude longitude}[]
 func SettingsVideos(ctx *gin.Context) {
 	var params = make([]SettingsVideosParams, 0)
+	var all, err = service.Stream.WithContext(context.Background()).Find()
+	if err != nil {
+		utils.FailResponse(ctx, 201, err.Error())
+	}
+	var del = functional.SliceReduce(
+		all,
+		func(pre []*model.Stream, curValue *model.Stream, curIndex int) []*model.Stream {
+			for _, item := range params {
+				if item.StreamName == curValue.StreamName {
+					return pre
+				}
+			}
+			pre = append(pre, curValue)
+			return pre
+		},
+		make([]*model.Stream, 0),
+	)
 	if err := ctx.ShouldBind(&params); err != nil {
 		utils.FailResponse(ctx, 201, "参数错误")
 	} else {
@@ -135,6 +153,25 @@ func SettingsVideos(ctx *gin.Context) {
 				}
 				count++
 			}
+		}
+		for _, item := range del {
+			info, err := service.Stream.
+				WithContext(context.Background()).
+				Where(service.Stream.StreamID.Eq(item.StreamID)).
+				Delete()
+			if err != nil {
+				utils.CustomResponse(ctx, &utils.Response{
+					Code:    201,
+					Message: "删除失败",
+					Ok:      false,
+					Data: gin.H{
+						"rowsAffected": info.RowsAffected,
+						"err":          err.Error(),
+					},
+				})
+				return
+			}
+			count += info.RowsAffected
 		}
 		utils.SuccessResponse(ctx, "修改成功", gin.H{
 			"rowsAffected": count,

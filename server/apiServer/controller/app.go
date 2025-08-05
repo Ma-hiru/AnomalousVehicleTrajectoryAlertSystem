@@ -35,3 +35,18 @@ func AppStop(ctx *gin.Context) {
 	)
 	go control.Stop(time.Second * time.Duration(duration))
 }
+
+func UpdateYaml(ctx *gin.Context) {
+	var params struct {
+		Content string `json:"content" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		utils.FailResponse(ctx, 201, "参数错误")
+		return
+	}
+	if err := utils.UpdateYaml(params.Content); err != nil {
+		utils.FailResponse(ctx, 201, "更新配置失败: "+err.Error())
+		return
+	}
+	utils.SuccessResponse(ctx, "更新配置成功", nil)
+}

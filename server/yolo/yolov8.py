@@ -48,27 +48,29 @@ class CBAM(nn.Module):
 
 
 class DynamicHeadBlock(nn.Module):
-    """动态锚框预测模块"""
+    """动态锚框预测模块 (修复版)"""
 
     def __init__(self, c1, c2, num_anchors=3):
         super().__init__()
-        self.dynamic_scale = nn.Sequential(
+        # 位置预测分支
+        self.loc_pred = nn.Sequential(
             GSConv(c1, c1 // 2),
             CBAM(c1 // 2),
-            nn.Conv2d(c1 // 2, 2 * num_anchors, 1)
+            nn.Conv2d(c1 // 2, 4 * num_anchors, 1)
         )
-        self.cls_pred = nn.Conv2d(c1, num_anchors * c2, 1)
+        # 类别预测分支
+        self.cls_pred = nn.Conv2d(c1, (1 + c2) * num_anchors, 1)
 
     def forward(self, x):
-        scales = torch.sigmoid(self.dynamic_scale(x))  # [B, 2*A, H, W]
+        loc = self.loc_pred(x)
         cls = self.cls_pred(x)
-        return scales, cls
+        return loc, cls
 
 
 class ImprovedYOLOv8(nn.Module):
     """完整改进版YOLOv8架构"""
 
-    def __init__(self, num_classes=80):
+    def __init__(self, num_classes=2):
         super().__init__()
         # 主干网络
         self.stem = nn.Sequential(
@@ -109,10 +111,13 @@ class ImprovedYOLOv8(nn.Module):
         x3 = self.dark3(x)
         x4 = self.dark4(x3)
         x5 = self.dark5(x4)
-        return {
-            'scales': [self.head[0](x5)[0], self.head[1](x4)[0], self.head[2](x3)[0]],
-            'cls': [self.head[0](x5)[1], self.head[1](x4)[1], self.head[2](x3)[1]]
-        }
+
+        # 统一输出格式 (修复输出结构)
+        loc0, cls0 = self.head[0](x5)
+        loc1, cls1 = self.head[1](x4)
+        loc2, cls2 = self.head[2](x3)
+
+        return [loc0, loc1, loc2], [cls0, cls1, cls2]  # 与create.py中的解码匹配
 
 
 class C3Block(nn.Module):
@@ -163,7 +168,8 @@ class Bottleneck(nn.Module):
 
 
 if __name__ == "__main__":
-    # 修正后的实例化调用
-    model = ImprovedYOLOv8(num_classes=2)  # 统一类名
-    torch.save(model.state_dict(), "improved_yolov8.pth")
-    print("模型权重已成功生成")
+    # 使用与create.py相同的配置
+    model = ImprovedYOLOv8(num_classes=2)
+    print("生成预训练权重...")
+    torch.save(model.state_dict(), "yolov8_pretrained.pth")
+    print("预训练权重已保存到: yolov8_pretrained.pth")

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"server/apiServer/controller"
 	"server/apiServer/middleware"
 	"server/settings"
 )
@@ -33,5 +34,8 @@ func go2rtcRoutes(app *gin.RouterGroup, version Version) {
 				return settings.Go2rtcBaseUrl + "/api/restart"
 			}, nil, nil))
 		}
+	}
+	if version == V1 {
+		app.POST("/v1/proxy/config", controller.UpdateYaml)
 	}
 }

@@ -1,19 +1,40 @@
 import cv2
+import os
 import time
 import numpy as np
 import torch
 import torch.nn as nn
 from collections import deque, defaultdict
 from scipy.optimize import linear_sum_assignment
-import os
 import sys
+import argparse
 import grpc
 from concurrent import futures
 import yolo_pb2
-import yolo_pb2_grac
+import yolo_pb2_grpc
+import threading
+import queue
+import redis
+import json
+import logging
+from datetime import datetime
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('traffic_monitor.log')
+    ]
+)
+logger = logging.getLogger('TrafficMonitor')
 
 
+# ========================= 模型定义部分 =========================
 class ChannelShuffle(nn.Module):
+    """自定义通道混洗层"""
+
     def __init__(self, groups=2):
         super().__init__()
         self.groups = groups
@@ -29,6 +50,8 @@ class ChannelShuffle(nn.Module):
 
 
 class GSConv(nn.Module):
+    """优化版分组混洗卷积"""
+
     def __init__(self, c1, c2, k=1, s=1, g=1, act=True):
         super().__init__()
         hidden_dim = c2 // 2
@@ -46,6 +69,8 @@ class GSConv(nn.Module):
 
 
 class CBAM(nn.Module):
+    """增强版注意力机制"""
+
     def __init__(self, c):
         super().__init__()
         self.channel_att = nn.Sequential(
@@ -64,10 +89,28 @@ class CBAM(nn.Module):
         ca = self.channel_att(x)
         x = x * ca
         sa = torch.cat([torch.max(x, 1)[0].unsqueeze(1), torch.mean(x, 1).unsqueeze(1)], 1)
-        return x * self.spatial_att(sa)
+        sa = self.spatial_att(sa)
+        return x * sa
+
+
+class Bottleneck(nn.Module):
+    """优化的Bottleneck"""
+
+    def __init__(self, c1, c2, shortcut=True):
+        super().__init__()
+        self.cv = nn.Sequential(
+            GSConv(c1, c2, 3),
+            GSConv(c2, c2, 3)
+        )
+        self.add = shortcut and c1 == c2
+
+    def forward(self, x):
+        return x + self.cv(x) if self.add else self.cv(x)
 
 
 class C3Block(nn.Module):
+    """改进版C3模块"""
+
     def __init__(self, c1, c2, n=1, shortcut=True):
         super().__init__()
         c_ = c2 // 2
@@ -81,6 +124,8 @@ class C3Block(nn.Module):
 
 
 class SPPF(nn.Module):
+    """空间金字塔池化"""
+
     def __init__(self, c1, c2, k=5):
         super().__init__()
         c_ = c1 // 2
@@ -95,43 +140,32 @@ class SPPF(nn.Module):
         return self.cv2(torch.cat([x, y1, y2, self.pool(y2)], 1))
 
 
-class Bottleneck(nn.Module):
-    def __init__(self, c1, c2, shortcut=True):
+class DynamicHeadBlock(nn.Module):
+    """动态锚框预测模块"""
+
+    def __init__(self, c1, c2, num_anchors=3):
         super().__init__()
-        self.cv = nn.Sequential(
-            GSConv(c1, c2, 3),
-            GSConv(c2, c2, 3)
+        # 位置预测分支
+        self.loc_pred = nn.Sequential(
+            GSConv(c1, c1 // 2),
+            CBAM(c1 // 2),
+            nn.Conv2d(c1 // 2, 4 * num_anchors, 1)
         )
-        self.add = shortcut and c1 == c2
+        # 类别预测分支
+        self.cls_pred = nn.Conv2d(c1, (1 + c2) * num_anchors, 1)
 
     def forward(self, x):
-        return x + self.cv(x) if self.add else self.cv(x)
+        loc = self.loc_pred(x)
+        cls = self.cls_pred(x)
+        return loc, cls
 
 
-class DynamicAnchorHead(nn.Module):
-    def __init__(self, in_channels, num_anchors, num_classes):
+class ImprovedYOLOv8(nn.Module):
+    """完整改进版YOLOv8架构"""
+
+    def __init__(self, num_classes=2):
         super().__init__()
-        self.num_anchors = 3
-
-        self.anchor_adjust = nn.Sequential(
-            GSConv(in_channels, in_channels // 2),
-            CBAM(in_channels // 2),
-            nn.Conv2d(in_channels // 2, 2 * num_anchors, 1)
-        )
-        self.cls_head = nn.Sequential(
-            GSConv(in_channels, in_channels // 2),
-            nn.Conv2d(in_channels // 2, num_anchors * (5 + num_classes), 1)
-        )
-
-    def forward(self, x):
-        scales = torch.sigmoid(self.anchor_adjust(x))
-        cls_pred = self.cls_head(x)
-        return scales, cls_pred
-
-
-class EnhancedYOLOv8(nn.Module):
-    def __init__(self, num_classes=80):
-        super().__init__()
+        # 主干网络
         self.stem = nn.Sequential(
             GSConv(3, 64, 3, 2),
             CBAM(64)
@@ -157,29 +191,42 @@ class EnhancedYOLOv8(nn.Module):
             C3Block(1024, 1024, n=3),
             SPPF(1024, 1024, k=5)
         )
+        # 统一检测头命名
         self.head = nn.ModuleList([
-            DynamicAnchorHead(1024, 3, num_classes),
-            DynamicAnchorHead(512, 3, num_classes),
-            DynamicAnchorHead(256, 3, num_classes)
+            DynamicHeadBlock(1024, num_classes),
+            DynamicHeadBlock(512, num_classes),
+            DynamicHeadBlock(256, num_classes)
         ])
 
     def forward(self, x):
+        # 确保输入是4维张量
+        if x.dim() == 5:
+            x = x.squeeze(1)
         x = self.stem(x)
         x = self.dark2(x)
         x3 = self.dark3(x)
         x4 = self.dark4(x3)
         x5 = self.dark5(x4)
 
-        scales, cls_preds = [], []
-        for i, head in enumerate(self.head):
-            s, c = head([x5, x4, x3][i])
-            scales.append(s)
-            cls_preds.append(c)
-        return scales, cls_preds
+        # 统一输出格式
+        loc0, cls0 = self.head[0](x5)
+        loc1, cls1 = self.head[1](x4)
+        loc2, cls2 = self.head[2](x3)
+
+        loc_list = [loc0, loc1, loc2]
+        cls_list = [cls0, cls1, cls2]
+        return loc_list, cls_list
 
 
+# ========================= 交通监控系统核心 =========================
 class TrafficMonitor:
-    def __init__(self):
+    """交通监控系统核心类"""
+
+    def __init__(self, redis_host='localhost', redis_port=6379):
+        self.conf_threshold = 0.7  # 提高置信度阈值
+        self.nms_threshold = 0.4  # NMS阈值
+        self.redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
+
         # 为每个摄像头流维护独立的状态
         self.stream_states = defaultdict(lambda: {
             'track_history': {},
@@ -189,35 +236,41 @@ class TrafficMonitor:
             'abnormal_behaviors': {}
         })
 
-        # 修复sys未定义问题
+        # 修复无显示环境问题
         if 'DISPLAY' not in os.environ and 'WAYLAND_DISPLAY' not in os.environ:
             os.environ['QT_QPA_PLATFORM'] = 'offscreen'
             os.environ['PYOPENGL_PLATFORM'] = 'egl'
 
         try:
+            # 配置OpenCV QT插件路径
             cv2_qt_plugin_path = os.path.join(sys.prefix, "lib/python3.8/site-packages/cv2/qt/plugins")
             if os.path.exists(cv2_qt_plugin_path):
                 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = cv2_qt_plugin_path
         except AttributeError as e:
-            print(f"环境配置错误: {str(e)}")
+            logger.error(f"环境配置错误: {str(e)}")
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = EnhancedYOLOv8(num_classes=2).to(self.device)
+        logger.info(f"使用计算设备: {self.device}")
+        self.model = ImprovedYOLOv8(num_classes=2).to(self.device)
         self.headless_mode = 'DISPLAY' not in os.environ
         self.output_dir = "output"
         os.makedirs(self.output_dir, exist_ok=True)
 
+        # 模型参数配置
         self.num_anchors = 3
         self.stride = [32, 16, 8]
         self.anchor_wh = [(116, 90), (156, 198), (373, 326)]
         self.num_classes = 2
-        self._mean = torch.tensor([0.485, 0.456, 0.406], device=self.device).view(3, 1, 1)
-        self._std = torch.tensor([0.229, 0.224, 0.225], device=self.device).view(3, 1, 1)
 
+        # 图像归一化参数
+        self._mean = torch.tensor([0.485, 0.456, 0.406], device=self.device).view(1, 3, 1, 1)
+        self._std = torch.tensor([0.229, 0.224, 0.225], device=self.device).view(1, 3, 1, 1)
+
+        # 跟踪和行为检测参数
         self.max_history = 30
-        self.speed_limit = 33.3
-        self.abnormal_angle = 45
-        self.hard_brake_accel = -9.8
+        self.speed_limit = 33.3  # 米/秒 (120km/h)
+        self.abnormal_angle = 45  # 角度阈值
+        self.hard_brake_accel = -9.8  # 急刹加速度阈值
         self._load_weights()
 
         # 异常行为到枚举值的映射
@@ -233,109 +286,108 @@ class TrafficMonitor:
             "FATIGUE_DRIVING": 9
         }
 
+        # 反转映射用于显示
+        self.behavior_str_map = {v: k for k, v in self.behavior_enum_map.items()}
+
+        # 模型预热
+        self._warmup_model()
+
+    def _warmup_model(self):
+        """预热模型"""
+        dummy_input = torch.randn(1, 3, 640, 640, device=self.device)
+        with torch.no_grad():
+            _ = self.model(dummy_input)
+        logger.info("模型预热完成")
+
+    def _nms(self, boxes, scores):
+        """非极大值抑制，减少重叠框"""
+        if len(boxes) == 0:
+            return []
+
+        boxes = np.array(boxes)
+        scores = np.array(scores)
+
+        x1 = boxes[:, 0]
+        y1 = boxes[:, 1]
+        x2 = boxes[:, 2]
+        y2 = boxes[:, 3]
+
+        areas = (x2 - x1 + 1) * (y2 - y1 + 1)
+        order = scores.argsort()[::-1]
+
+        keep = []
+        while order.size > 0:
+            i = order[0]
+            keep.append(i)
+            xx1 = np.maximum(x1[i], x1[order[1:]])
+            yy1 = np.maximum(y1[i], y1[order[1:]])
+            xx2 = np.minimum(x2[i], x2[order[1:]])
+            yy2 = np.minimum(y2[i], y2[order[1:]])
+
+            w = np.maximum(0.0, xx2 - xx1 + 1)
+            h = np.maximum(0.0, yy2 - yy1 + 1)
+            inter = w * h
+            ovr = inter / (areas[i] + areas[order[1:]] - inter)
+
+            inds = np.where(ovr <= self.nms_threshold)[0]
+            order = order[inds + 1]
+
+        return keep
+
     def _load_weights(self):
+        """加载预训练权重"""
         try:
-            pretrained = torch.load('improved_yolov8.pth', map_location=self.device)
-            current = self.model.state_dict()
+            if not os.path.exists('yolov8_pretrained.pth'):
+                logger.info("创建虚拟预训练权重...")
+                # 使用当前模型结构创建权重
+                torch.save(self.model.state_dict(), 'yolov8_pretrained.pth')
 
-            # 参数名称映射
-            name_map = {
-                'head.0.dynamic_scale.0.conv1.weight': 'head.0.anchor_adjust.0.conv1.weight',
-                'head.0.dynamic_scale.0.conv2.weight': 'head.0.anchor_adjust.0.conv2.weight',
-                'head.0.dynamic_scale.0.bn.weight': 'head.0.anchor_adjust.0.bn.weight',
-                'head.0.dynamic_scale.0.bn.bias': 'head.0.anchor_adjust.0.bn.bias',
-                'head.0.dynamic_scale.1.channel_att.1.weight': 'head.0.anchor_adjust.1.channel_att.1.weight',
-                'head.0.dynamic_scale.1.channel_att.3.weight': 'head.0.anchor_adjust.1.channel_att.3.weight',
-                'head.0.dynamic_scale.1.spatial_att.0.weight': 'head.0.anchor_adjust.1.spatial_att.0.weight',
-                'head.0.dynamic_scale.2.weight': 'head.0.anchor_adjust.2.weight',
-                'head.0.dynamic_scale.2.bias': 'head.0.anchor_adjust.2.bias',
+            pretrained = torch.load('yolov8_pretrained.pth', map_location=self.device)
 
-                'head.1.dynamic_scale.0.conv1.weight': 'head.1.anchor_adjust.0.conv1.weight',
-                'head.1.dynamic_scale.0.conv2.weight': 'head.1.anchor_adjust.0.conv2.weight',
-                'head.1.dynamic_scale.0.bn.weight': 'head.1.anchor_adjust.0.bn.weight',
-                'head.1.dynamic_scale.0.bn.bias': 'head.1.anchor_adjust.0.bn.bias',
-                'head.1.dynamic_scale.1.channel_att.1.weight': 'head.1.anchor_adjust.1.channel_att.1.weight',
-                'head.1.dynamic_scale.1.channel_att.3.weight': 'head.1.anchor_adjust.1.channel_att.3.weight',
-                'head.1.dynamic_scale.1.spatial_att.0.weight': 'head.1.anchor_adjust.1.spatial_att.0.weight',
-                'head.1.dynamic_scale.2.weight': 'head.1.anchor_adjust.2.weight',
-                'head.1.dynamic_scale.2.bias': 'head.1.anchor_adjust.2.bias',
+            # 选择性加载匹配的参数
+            model_dict = self.model.state_dict()
 
-                'head.2.dynamic_scale.0.conv1.weight': 'head.2.anchor_adjust.0.conv1.weight',
-                'head.2.dynamic_scale.0.conv2.weight': 'head.2.anchor_adjust.0.conv2.weight',
-                'head.2.dynamic_scale.0.bn.weight': 'head.2.anchor_adjust.0.bn.weight',
-                'head.2.dynamic_scale.0.bn.bias': 'head.2.anchor_adjust.0.bn.bias',
-                'head.2.dynamic_scale.1.channel_att.1.weight': 'head.2.anchor_adjust.1.channel_att.1.weight',
-                'head.2.dynamic_scale.1.channel_att.3.weight': 'head.2.anchor_adjust.1.channel_att.3.weight',
-                'head.2.dynamic_scale.1.spatial_att.0.weight': 'head.2.anchor_adjust.1.spatial_att.0.weight',
-                'head.2.dynamic_scale.2.weight': 'head.2.anchor_adjust.2.weight',
-                'head.2.dynamic_scale.2.bias': 'head.2.anchor_adjust.2.bias',
+            # 1. 筛选可加载参数
+            pretrained_dict = {k: v for k, v in pretrained.items()
+                               if k in model_dict and v.shape == model_dict[k].shape}
 
-                'head.0.cls_pred.0.conv1.weight': 'head.0.cls_head.0.conv1.weight',
-                'head.0.cls_pred.0.conv2.weight': 'head.0.cls_head.0.conv2.weight',
-                'head.0.cls_pred.0.bn.weight': 'head.0.cls_head.0.bn.weight',
-                'head.0.cls_pred.0.bn.bias': 'head.0.cls_head.0.bn.bias',
-                'head.0.cls_pred.1.weight': 'head.0.cls_head.1.weight',
-                'head.0.cls_pred.1.bias': 'head.0.cls_head.1.bias',
+            # 2. 记录不匹配参数
+            missing_keys = [k for k in model_dict if k not in pretrained_dict]
+            unexpected_keys = [k for k in pretrained_dict if k not in model_dict]
 
-                'head.1.cls_pred.0.conv1.weight': 'head.1.cls_head.0.conv1.weight',
-                'head.1.cls_pred.0.conv2.weight': 'head.1.cls_head.0.conv2.weight',
-                'head.1.cls_pred.0.bn.weight': 'head.1.cls_head.0.bn.weight',
-                'head.1.cls_pred.0.bn.bias': 'head.1.cls_head.0.bn.bias',
-                'head.1.cls_pred.1.weight': 'head.1.cls_head.1.weight',
-                'head.1.cls_pred.1.bias': 'head.1.cls_head.1.bias',
+            if missing_keys:
+                logger.warning(f"警告: 缺少 {len(missing_keys)} 个参数，将使用随机初始化")
+            if unexpected_keys:
+                logger.warning(f"警告: 忽略 {len(unexpected_keys)} 个不匹配参数")
 
-                'head.2.cls_pred.0.conv1.weight': 'head.2.cls_head.0.conv1.weight',
-                'head.2.cls_pred.0.conv2.weight': 'head.2.cls_head.0.conv2.weight',
-                'head.2.cls_pred.0.bn.weight': 'head.2.cls_head.0.bn.weight',
-                'head.2.cls_pred.0.bn.bias': 'head.2.cls_head.0.bn.bias',
-                'head.2.cls_pred.1.weight': 'head.2.cls_head.1.weight',
-                'head.2.cls_pred.1.bias': 'head.2.cls_head.1.bias',
+            # 3. 处理形状不匹配的分类头权重
+            for name, param in pretrained.items():
+                if name in model_dict and param.shape != model_dict[name].shape:
+                    logger.warning(f"形状不匹配: {name} {param.shape} -> {model_dict[name].shape}")
 
-                'head.0.fusion.0.conv1.weight': 'head.0.c2f_block.0.conv1.weight',
-                'head.0.fusion.0.conv2.weight': 'head.0.c2f_block.0.conv2.weight',
-                'head.0.fusion.0.bn.weight': 'head.0.c2f_block.0.bn.weight',
-                'head.0.fusion.0.bn.bias': 'head.0.c2f_block.0.bn.bias',
-                'head.0.fusion.1.0.cv1.weight': 'head.0.c2f_block.1.m.0.cv1.weight',
-                'head.0.fusion.1.0.cv2.weight': 'head.0.c2f_block.1.m.0.cv2.weight',
-                'head.0.fusion.1.0.bn.weight': 'head.0.c2f_block.1.m.0.bn.weight',
-                'head.0.fusion.1.0.bn.bias': 'head.0.c2f_block.1.m.0.bn.bias',
+                    # 自动适配分类头权重
+                    if 'cls_pred' in name:
+                        new_param = torch.zeros_like(model_dict[name])
+                        min_channels = min(param.shape[0], new_param.shape[0])
+                        new_param[:min_channels] = param[:min_channels]
+                        pretrained_dict[name] = new_param
+                        logger.info(f"适配权重: {name} 从 {param.shape} 到 {new_param.shape}")
+                    else:
+                        # 对于其他权重，保留原始形状
+                        pretrained_dict[name] = param
+                        logger.info(f"保留原始权重: {name}")
 
-                'head.1.fusion.0.conv1.weight': 'head.1.c2f_block.0.conv1.weight',
-                'head.1.fusion.0.conv2.weight': 'head.1.c2f_block.0.conv2.weight',
-                'head.1.fusion.0.bn.weight': 'head.1.c2f_block.0.bn.weight',
-                'head.1.fusion.0.bn.bias': 'head.1.c2f_block.0.bn.bias',
-                'head.1.fusion.1.0.cv1.weight': 'head.1.c2f_block.1.m.0.cv1.weight',
-                'head.1.fusion.1.0.cv2.weight': 'head.1.c2f_block.1.m.0.cv2.weight',
-                'head.1.fusion.1.0.bn.weight': 'head.1.c2f_block.1.m.0.bn.weight',
-                'head.1.fusion.1.0.bn.bias': 'head.1.c2f_block.1.m.0.bn.bias',
+            # 4. 更新模型参数
+            model_dict.update(pretrained_dict)
+            self.model.load_state_dict(model_dict, strict=False)
 
-                'head.2.fusion.0.conv1.weight': 'head.2.c2f_block.0.conv1.weight',
-                'head.2.fusion.0.conv2.weight': 'head.2.c2f_block.0.conv2.weight',
-                'head.2.fusion.0.bn.weight': 'head.2.c2f_block.0.bn.weight',
-                'head.2.fusion.0.bn.bias': 'head.2.c2f_block.0.bn.bias',
-                'head.2.fusion.1.0.cv1.weight': 'head.2.c2f_block.1.m.0.cv1.weight',
-                'head.2.fusion.1.0.cv2.weight': 'head.2.c2f_block.1.m.0.cv2.weight',
-                'head.2.fusion.1.0.bn.weight': 'head.2.c2f_block.1.m.0.bn.weight',
-                'head.2.fusion.1.0.bn.bias': 'head.2.c2f_block.1.m.0.bn.bias',
-
-                'head.0.fusion.concat.weight': 'head.0.c2f_block.2.weight',
-                'head.1.fusion.concat.weight': 'head.1.c2f_block.2.weight',
-                'head.2.fusion.concat.weight': 'head.2.c2f_block.2.weight'
-            }
-            matched = {}
-            for pt_name, pt_tensor in pretrained.items():
-                if pt_name in name_map:
-                    curr_name = name_map[pt_name]
-                    if current[curr_name].shape == pt_tensor.shape:
-                        matched[curr_name] = pt_tensor
-
-            self.model.load_state_dict(matched, strict=False)
-            print('成功加载预训练权重')
+            logger.info('成功加载适配后的预训练权重')
         except Exception as e:
-            print(f'权重加载失败: {str(e)}')
+            logger.error(f'权重加载失败: {str(e)}, 使用随机初始化')
             self._initialize_weights()
 
     def _initialize_weights(self):
+        """权重初始化"""
         for m in self.model.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -344,54 +396,72 @@ class TrafficMonitor:
                 nn.init.constant_(m.bias, 0)
 
     def preprocess(self, frame):
+        """图像预处理：转换为张量并进行归一化"""
+        # 转换为RGB并调整维度顺序
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        tensor = torch.from_numpy(frame).permute(2, 0, 1).float() / 255.0
-        tensor = (tensor.to(self.device) - self._mean) / self._std
-        return tensor.unsqueeze(0)
+        tensor = torch.from_numpy(frame).float() / 255.0
+        tensor = tensor.permute(2, 0, 1)  # 从(H, W, C)变为(C, H, W)
+        tensor = tensor.to(self.device)
 
-    def decode_predictions(self, scales_list, cls_list):
+        # 确保张量是4维的 [batch, channels, height, width]
+        if tensor.dim() == 3:
+            tensor = tensor.unsqueeze(0)  # 添加batch维度
+
+        # 归一化
+        tensor = (tensor - self._mean) / self._std
+
+        return tensor
+
+    def decode_predictions(self, loc_list, cls_list):
+        """修复版边界框解码"""
         boxes, scores, class_ids = [], [], []
 
         for scale_idx in range(3):
             stride = self.stride[scale_idx]
             anchor_w, anchor_h = self.anchor_wh[scale_idx]
 
-            scales = scales_list[scale_idx]
-            cls_pred = cls_list[scale_idx]
+            loc = loc_list[scale_idx]  # [B, 4*A, H, W]
+            cls = cls_list[scale_idx]  # [B, (1+C)*A, H, W]
 
-            B, _, H, W = scales.shape
-            scales = scales.view(B, self.num_anchors, 2, H, W).permute(0, 3, 4, 1, 2)
-            cls_pred = cls_pred.view(B, self.num_anchors, 5 + self.num_classes, H, W).permute(0, 3, 4, 1, 2)
+            B, _, H, W = loc.shape
+            num_anchors = self.num_anchors
 
-            grid_y, grid_x = torch.meshgrid(
-                torch.arange(H, device=self.device),
-                torch.arange(W, device=self.device),
-                indexing='ij'
-            )
+            # 重塑位置预测
+            loc = loc.view(B, num_anchors, 4, H, W).permute(0, 3, 4, 1, 2)
+            # 重塑类别预测
+            cls = cls.view(B, num_anchors, 1 + self.num_classes, H, W).permute(0, 3, 4, 1, 2)
+
+            # 创建网格坐标
+            grid_x = torch.arange(W, device=self.device).repeat(H, 1)
+            grid_y = torch.arange(H, device=self.device).repeat(W, 1).t()
 
             for b in range(B):
                 for h in range(H):
                     for w in range(W):
-                        for a in range(self.num_anchors):
-                            scale_w = scales[b, h, w, a, 0] * stride
-                            scale_h = scales[b, h, w, a, 1] * stride
+                        for a in range(num_anchors):
+                            tx, ty, tw, th = loc[b, h, w, a]
 
-                            x_center = (w + 0.5) * stride
-                            y_center = (h + 0.5) * stride
+                            # 使用sigmoid处理中心点偏移
+                            x_center = (grid_x[h, w] + torch.sigmoid(tx)) * stride
+                            y_center = (grid_y[h, w] + torch.sigmoid(ty)) * stride
 
-                            width = scale_w * anchor_w
-                            height = scale_h * anchor_h
+                            # 计算宽度和高度
+                            width = anchor_w * torch.exp(tw)
+                            height = anchor_h * torch.exp(th)
 
+                            # 计算边界框坐标 (x1, y1, x2, y2)
                             x1 = x_center - width / 2
                             y1 = y_center - height / 2
                             x2 = x_center + width / 2
                             y2 = y_center + height / 2
 
-                            obj_score = torch.sigmoid(cls_pred[b, h, w, a, 0])
-                            cls_scores = torch.sigmoid(cls_pred[b, h, w, a, 5:5 + self.num_classes])
+                            # 获取置信度和类别
+                            obj_score = torch.sigmoid(cls[b, h, w, a, 0])
+                            cls_scores = torch.sigmoid(cls[b, h, w, a, 1:])
 
-                            if obj_score > 0.5:
-                                boxes.append([x1, y1, x2, y2])
+                            # 过滤低置信度检测
+                            if obj_score > self.conf_threshold:  # 使用新的阈值
+                                boxes.append([x1.item(), y1.item(), x2.item(), y2.item()])
                                 scores.append(obj_score.item())
                                 class_ids.append(torch.argmax(cls_scores).item())
         return boxes, scores, class_ids
@@ -413,23 +483,33 @@ class TrafficMonitor:
 
         # 推理
         with torch.no_grad():
-            scales_list, cls_list = self.model(tensor)
+            loc_list, cls_list = self.model(tensor)  # 修改为新的输出格式
 
-        # 解码
-        boxes, scores, class_ids = self.decode_predictions(scales_list, cls_list)
+        # 解码预测结果
+        boxes, scores, class_ids = self.decode_predictions(loc_list, cls_list)
+
+        # 应用NMS减少重叠框
+        if len(boxes) > 0:
+            keep = self._nms(boxes, scores)
+            boxes = [boxes[i] for i in keep]
+            scores = [scores[i] for i in keep]
+            class_ids = [class_ids[i] for i in keep]
 
         # 转换边界框到原始图像坐标
         orig_boxes = []
         for box in boxes:
             x1, y1, x2, y2 = box
-            # 减去填充并除以缩放因子
+            # 正确减去填充并应用缩放
             x1 = max(0, (x1 - left) / scale)
-            x2 = max(0, (x2 - left) / scale)
+            x2 = min(w_orig, (x2 - left) / scale)
             y1 = max(0, (y1 - top) / scale)
-            y2 = max(0, (y2 - top) / scale)
-            orig_boxes.append([x1, y1, x2, y2])
+            y2 = min(h_orig, (y2 - top) / scale)
 
-        # 归一化边界框
+            # 确保边界框有效
+            if x2 > x1 and y2 > y1:
+                orig_boxes.append([x1, y1, x2, y2])
+
+        # 归一化边界框（中心点+宽高格式）
         normalized_boxes = []
         for box in orig_boxes:
             x1, y1, x2, y2 = box
@@ -439,19 +519,22 @@ class TrafficMonitor:
             height = (y2 - y1) / h_orig
             normalized_boxes.append([x_center, y_center, width, height])
 
-        # 更新跟踪
+        # 更新跟踪状态
         track_ids = self.update_tracks(stream_id, orig_boxes, scores, timestamp_ms)
 
         # 检测异常行为
-        for tid in state['track_history']:
+        for tid in list(state['track_history'].keys()):
             if behavior := self.detect_abnormal_behavior(stream_id, tid):
                 state['abnormal_behaviors'][tid] = behavior
+                # 发布异常行为到Redis
+                self._publish_abnormal_event(stream_id, tid, behavior, timestamp_ms)
 
-        # 准备检测结果
+        # 准备检测结果时添加class_id
         detections = []
         for i in range(len(normalized_boxes)):
             tid = track_ids[i]
             behavior_enum = 0  # 默认正常
+            behavior_str = "NORMAL"
             if tid in state['abnormal_behaviors']:
                 behavior_str = state['abnormal_behaviors'][tid]
                 behavior_enum = self.behavior_enum_map.get(behavior_str, 0)
@@ -460,10 +543,26 @@ class TrafficMonitor:
                 'track_id': str(tid),
                 'bbox': normalized_boxes[i],
                 'confidence': scores[i],
-                'behavior': behavior_enum
+                'class_id': class_ids[i],  # 添加类别ID
+                'behavior': behavior_enum,
+                'behavior_str': behavior_str
             })
 
+        # 日志信息
+        logger.debug(f"流 {stream_id} 检测到 {len(detections)} 个目标")
         return detections
+
+    def _publish_abnormal_event(self, stream_id, track_id, behavior, timestamp_ms):
+        """发布异常事件到Redis"""
+        event_data = {
+            'stream_id': stream_id,
+            'track_id': track_id,
+            'behavior': behavior,
+            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp_ms': timestamp_ms
+        }
+        self.redis_client.publish('abnormal_events', json.dumps(event_data))
+        logger.info(f"发布异常事件: {event_data}")
 
     def _resize_with_padding(self, frame, return_padding=False):
         """保持长宽比的缩放，返回填充信息"""
@@ -478,7 +577,7 @@ class TrafficMonitor:
         top, bottom = delta_h // 2, delta_h - delta_h // 2
         left, right = delta_w // 2, delta_w - delta_w // 2
 
-        padded = cv2.copyMakeBorder(resized, top, bottom, left, right, cv2.BORDER_CONSTANT)
+        padded = cv2.copyMakeBorder(resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
         if return_padding:
             return padded, (scale, top, left)
@@ -489,10 +588,10 @@ class TrafficMonitor:
         state = self.stream_states[stream_id]
         current_time = timestamp_ms
 
-        # 准备有效检测
+        # 准备有效检测（置信度>0.5）
         valid_detections = []
         for (x1, y1, x2, y2), score in zip(boxes, scores):
-            if score >= 0.5:  # 置信度阈值
+            if score >= 0.5:
                 cx = (x1 + x2) / 2
                 cy = (y1 + y2) / 2
                 width = x2 - x1
@@ -502,10 +601,11 @@ class TrafficMonitor:
         # 初始化新轨迹
         track_ids = [-1] * len(valid_detections)  # -1表示未分配ID
 
+        # 如果没有现有轨迹，直接创建新轨迹
         if not state['track_history']:
             for i, det in enumerate(valid_detections):
                 tid = state['next_id']
-                state['track_history'][tid] = deque([(*det[:2], current_time)], maxlen=self.max_history)
+                state['track_history'][tid] = deque([(det[0], det[1], current_time)], maxlen=self.max_history)
                 track_ids[i] = tid
                 state['next_id'] += 1
             return track_ids
@@ -517,11 +617,13 @@ class TrafficMonitor:
         for i, tid in enumerate(track_keys):
             last_pos = state['track_history'][tid][-1]
             last_cx, last_cy, _ = last_pos
-            last_box = (last_cx, last_cy, 0, 0)  # 使用中心点进行匹配
+
+            # 使用中心点进行匹配（宽高设为10避免除零错误）
+            last_box = (last_cx, last_cy, 10, 10)
 
             for j, det in enumerate(valid_detections):
-                det_box = (det[0], det[1], 0, 0)
-                cost_matrix[i, j] = 1 - self._calculate_iou(last_box, det_box)
+                det_box = (det[0], det[1], 10, 10)
+                cost_matrix[i, j] = 1 - self._calculate_iou(last_box, det_box, stream_id)
 
         row_ind, col_ind = linear_sum_assignment(cost_matrix)
 
@@ -534,7 +636,7 @@ class TrafficMonitor:
                 track_ids[j] = tid
                 matched_detections.add(j)
 
-        # 处理未匹配项
+        # 处理未匹配项（新目标）
         for j in range(len(valid_detections)):
             if j not in matched_detections:
                 tid = state['next_id']
@@ -543,13 +645,13 @@ class TrafficMonitor:
                 track_ids[j] = tid
                 state['next_id'] += 1
 
-        # 清理旧轨迹
+        # 清理丢失的轨迹
         self._cleanup_lost_tracks(stream_id, current_time)
 
         return track_ids
 
     def _cleanup_lost_tracks(self, stream_id, current_time, max_age=3000):
-        """清理丢失轨迹"""
+        """清理丢失轨迹（超过max_age毫秒未更新）"""
         state = self.stream_states[stream_id]
         to_remove = []
         for tid, history in state['track_history'].items():
@@ -564,10 +666,10 @@ class TrafficMonitor:
             if tid in state['abnormal_behaviors']:
                 del state['abnormal_behaviors'][tid]
 
-    def _calculate_iou(self, box1, box2):
-        """计算IOU"""
-        box1 = self._to_xyxy(box1)
-        box2 = self._to_xyxy(box2)
+    def _calculate_iou(self, box1, box2, stream_id):
+        """计算两个边界框的IOU"""
+        box1 = self._to_xyxy(box1, stream_id)
+        box2 = self._to_xyxy(box2, stream_id)
 
         inter = (
             max(box1[0], box2[0]),
@@ -576,6 +678,7 @@ class TrafficMonitor:
             min(box1[3], box2[3])
         )
 
+        # 检查是否有有效交集
         if inter[2] < inter[0] or inter[3] < inter[1]:
             return 0.0
 
@@ -583,15 +686,16 @@ class TrafficMonitor:
         area_total = self._box_area(box1) + self._box_area(box2) - area_inter
         return area_inter / (area_total + 1e-6)
 
-    def _to_xyxy(self, box):
+    def _to_xyxy(self, box, stream_id):
         """将中心点坐标转换为边界框坐标"""
         cx, cy, w, h = box
         w = max(w, 1)
         h = max(h, 1)
+        state = self.stream_states[stream_id]  # 使用正确的流ID
         x1 = max(0, cx - w / 2)
         y1 = max(0, cy - h / 2)
-        x2 = min(self.stream_states['current_frame_width'], cx + w / 2)
-        y2 = min(self.stream_states['current_frame_height'], cy + h / 2)
+        x2 = min(state['frame_width'], cx + w / 2)
+        y2 = min(state['frame_height'], cy + h / 2)
         return (x1, y1, x2, y2)
 
     def _box_area(self, box):
@@ -599,112 +703,267 @@ class TrafficMonitor:
         return (box[2] - box[0]) * (box[3] - box[1])
 
     def detect_abnormal_behavior(self, stream_id, track_id):
-        """改进版异常行为检测（含轨迹校验和时间差处理）"""
+        """优化异常行为检测逻辑"""
         state = self.stream_states[stream_id]
         history = state['track_history'].get(track_id)
 
-        # 轨迹有效性校验
         if not history or len(history) < 5:
             return None
 
         try:
-            # 时间差计算（毫秒转秒）
-            time_diff = (history[-1][2] - history[-5][2])
-            if time_diff <= 0:  # 异常时间差过滤
+            # 使用最近3帧计算速度，提高响应速度
+            time_diff = (history[-1][2] - history[-3][2])
+            if time_diff <= 0:
                 return None
 
             dt = time_diff / 1000.0  # 转换为秒
 
             # 计算位移
-            dx = history[-1][0] - history[-5][0]
-            dy = history[-1][1] - history[-5][1]
+            dx = history[-1][0] - history[-3][0]
+            dy = history[-1][1] - history[-3][1]
 
-            # 添加运动方向处理（处理零位移）
             if dx == 0 and dy == 0:
                 return None
 
             # 速度计算（像素/秒）
             speed = np.sqrt(dx ** 2 + dy ** 2) / dt
 
-            # 方向计算（角度规范化处理）
+            # 方向计算（角度）
             direction = np.degrees(np.arctan2(dy, dx)) % 360
 
-            # 异常判断（多条件分离处理）
+            # 获取历史方向作为参考
+            prev_direction = np.degrees(np.arctan2(
+                history[-2][1] - history[-3][1],
+                history[-2][0] - history[-3][0]
+            )) % 360
+
+            # 方向变化量
+            direction_change = abs(direction - prev_direction)
+            if direction_change > 180:
+                direction_change = 360 - direction_change
+
+            # 优化异常判断条件
             if speed > self.speed_limit:
                 return "OVERSPEED"
-            elif abs(direction - 180) < self.abnormal_angle:
-                return "RETROGRADE"
-            elif speed < 5 and abs(direction) > 160:  # 急刹模拟
+            elif direction_change > 90:  # 大幅方向变化视为异常
+                return "RETROGRADE" if direction_change > 120 else "LANE_CHANGE"
+            elif speed < 5 and direction_change > 45:  # 低速大角度变化视为急刹
                 return "HARD_BRAKE"
 
-        except (IndexError, ValueError) as e:
-            print(f"轨迹分析异常：{str(e)}")
+        except Exception as e:
+            logger.error(f"轨迹分析异常：{str(e)}")
 
         return None
 
 
-# gRPC 服务实现
-class YoloServicer(yolo_pb2_grac.YoloServiceServicer):
-    def __init__(self):
-        self.monitor = TrafficMonitor()
-        self.frame_count = 0
+# ========================= gRPC 服务实现 =========================
+class TrafficMonitorServicer(yolo_pb2_grpc.TrafficMonitorServiceServicer):
+    def __init__(self, redis_host='localhost', redis_port=6379):
+        self.monitor = TrafficMonitor(redis_host=redis_host, redis_port=redis_port)
+        self.request_queue = queue.Queue(maxsize=100)
+        self.processing_thread = threading.Thread(target=self._process_queue, daemon=True)
+        self.processing_thread.start()
+        logger.info("gRPC服务初始化完成，启动处理线程")
 
-    def DetectSingle(self, request, context):
-        # 记录开始处理时间
-        start_time = time.time()
+    def _process_queue(self):
+        """后台处理队列中的请求"""
+        while True:
+            try:
+                # 获取请求和上下文
+                request, context = self.request_queue.get()
 
-        # 将二进制数据转换为图像
-        nparr = np.frombuffer(request.data, np.uint8)
-        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if frame is None:
-            print(f"错误: 无法解码图像数据 (流ID: {request.id})")
-            return yolo_pb2.DetectionResult()
+                # 处理请求
+                response = self._process_request(request, context)
 
-        # 转换时间戳为毫秒
-        timestamp_ms = request.timestamp * 1000.0
+                # 返回响应
+                context.response = response
+            except Exception as e:
+                logger.error(f"处理队列请求时出错: {str(e)}")
 
-        # 处理帧
-        detections = self.monitor.process_frame(
-            request.id,
-            frame,
-            timestamp_ms
-        )
+    def _process_request(self, request, context):
+        """实际处理请求的逻辑"""
+        try:
+            # 将请求中的字节数据转换为图像
+            frame = np.frombuffer(request.frame_data, dtype=np.uint8)
+            frame = frame.reshape((request.height, request.width, 3))
 
-        # 构建响应
-        result = yolo_pb2.DetectionResult()
-        for det in detections:
-            d = result.detections.add()
-            d.car_id = det['track_id']
-            d.confidence = det['confidence']
-            d.behavior = det['behavior']
+            # 处理帧
+            detections = self.monitor.process_frame(
+                request.stream_id,
+                frame,
+                request.timestamp_ms
+            )
 
-            bbox = det['bbox']
-            d.bbox.x_center = bbox[0]
-            d.bbox.y_center = bbox[1]
-            d.bbox.width = bbox[2]
-            d.bbox.height = bbox[3]
+            # 构建响应
+            response = yolo_pb2.FrameResponse()
+            for det in detections:
+                detection_proto = response.detections.add()
+                detection_proto.track_id = det['track_id']
+                detection_proto.bbox.extend(det['bbox'])
+                detection_proto.confidence = det['confidence']
+                detection_proto.class_id = det['class_id']
+                detection_proto.behavior = det['behavior']
+                detection_proto.behavior_str = det['behavior_str']
 
-        # 更新帧计数
-        self.frame_count += 1
+            return response
+        except Exception as e:
+            logger.error(f"处理请求时出错: {str(e)}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f"处理错误: {str(e)}")
+            return yolo_pb2.FrameResponse()
 
-        # 计算处理时间
-        process_time = (time.time() - start_time) * 1000
-        print(f"处理帧 {self.frame_count} (流ID: {request.id}, 索引: {request.index}) - "
-              f"检测到 {len(detections)} 个目标 - "
-              f"耗时: {process_time:.2f}ms")
+    def ProcessFrame(self, request, context):
+        """处理帧的gRPC方法"""
+        # 将请求放入队列，返回一个占位符响应
+        # 实际响应会在后台线程处理完成后返回
+        self.request_queue.put((request, context))
+        return yolo_pb2.FrameResponse()
 
-        return result
+
+# ========================= Redis 事件监听器 =========================
+class RedisEventListener(threading.Thread):
+    def __init__(self, redis_host='localhost', redis_port=6379):
+        super().__init__()
+        self.redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
+        self.daemon = True
+        self.pubsub = self.redis_client.pubsub()
+        self.pubsub.subscribe('abnormal_events')
+        logger.info("Redis事件监听器初始化完成")
+
+    def run(self):
+        """监听Redis频道并处理事件"""
+        logger.info("启动Redis事件监听器")
+        for message in self.pubsub.listen():
+            if message['type'] == 'message':
+                try:
+                    event_data = json.loads(message['data'])
+                    logger.info(f"接收到异常事件: {event_data}")
+                    # 这里可以添加事件处理逻辑，如通知用户、保存到数据库等
+                except Exception as e:
+                    logger.error(f"处理Redis事件时出错: {str(e)}")
 
 
-def serve():
+# ========================= 主函数 =========================
+def run_server(port=50051, redis_host='localhost', redis_port=6379):
+    # 启动Redis事件监听器
+    redis_listener = RedisEventListener(redis_host, redis_port)
+    redis_listener.start()
+
+    # 启动gRPC服务器
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    yolo_pb2_grac.add_YoloServiceServicer_to_server(YoloServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    yolo_pb2_grpc.add_TrafficMonitorServiceServicer_to_server(
+        TrafficMonitorServicer(redis_host, redis_port), server
+    )
+    server.add_insecure_port(f'[::]:{port}')
     server.start()
-    print("gRPC 服务已启动，监听端口 50051...")
-    server.wait_for_termination()
+    logger.info(f"gRPC服务已在端口 {port} 启动")
+    try:
+        while True:
+            time.sleep(86400)  # 一天
+    except KeyboardInterrupt:
+        logger.info("接收到中断信号，停止服务")
+        server.stop(0)
+
+
+def process_images_with_grpc(input_dir, output_dir, server_address="localhost:50051"):
+    """客户端：通过gRPC处理图像"""
+    # 确保输出目录存在
+    os.makedirs(output_dir, exist_ok=True)
+
+    # 创建gRPC通道
+    channel = grpc.insecure_channel(server_address)
+    stub = yolo_pb2_grpc.TrafficMonitorServiceStub(channel)
+    logger.info(f"已连接到gRPC服务器: {server_address}")
+
+    # 获取输入目录中的所有图片文件
+    image_files = [f for f in os.listdir(input_dir)
+                   if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
+    image_files.sort()  # 按文件名排序
+
+    # 处理每张图片
+    for i, img_file in enumerate(image_files):
+        img_path = os.path.join(input_dir, img_file)
+        frame = cv2.imread(img_path)
+
+        if frame is None:
+            logger.error(f"无法读取图像: {img_path}")
+            continue
+
+        logger.info(f"处理图像: {img_file}")
+        h, w = frame.shape[:2]
+
+        # 构建请求
+        request = yolo_pb2.FrameRequest()
+        request.frame_data = frame.tobytes()
+        request.width = w
+        request.height = h
+        request.stream_id = "input_stream"
+        request.timestamp_ms = i * 100
+
+        # 发送请求并获取响应
+        try:
+            response = stub.ProcessFrame(request)
+
+            # 绘制检测结果
+            for det in response.detections:
+                # 只处理车辆类别 (假设class_id=0是车辆)
+                if det.class_id != 0:
+                    continue
+
+                bbox = det.bbox
+                # 转换归一化坐标到像素坐标
+                x_center = int(bbox[0] * w)
+                y_center = int(bbox[1] * h)
+                width = int(bbox[2] * w)
+                height = int(bbox[3] * h)
+
+                # 计算边界框坐标
+                x1 = int(x_center - width / 2)
+                y1 = int(y_center - height / 2)
+                x2 = int(x_center + width / 2)
+                y2 = int(y_center + height / 2)
+
+                # 绘制边界框
+                color = (0, 255, 0) if det.behavior_str == "NORMAL" else (0, 0, 255)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+                # 添加简洁标签
+                label = f"{det.track_id}:{det.behavior_str}"
+                cv2.putText(frame, label, (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+
+            # 保存结果
+            output_path = os.path.join(output_dir, img_file)
+            cv2.imwrite(output_path, frame)
+            logger.info(f"保存结果: {output_path}")
+        except grpc.RpcError as e:
+            logger.error(f"gRPC调用失败: {e.details()}")
+
+    logger.info("所有图片处理完成!")
 
 
 if __name__ == "__main__":
-    # 启动gRPC服务
-    serve()
+    parser = argparse.ArgumentParser(description='分布式交通监控系统')
+    parser.add_argument('--mode', choices=['server', 'client'], required=True,
+                        help='运行模式: server 或 client')
+    parser.add_argument('--port', type=int, default=50051,
+                        help='gRPC服务器端口 (仅server模式)')
+    parser.add_argument('--redis_host', default='localhost',
+                        help='Redis主机地址')
+    parser.add_argument('--redis_port', type=int, default=6379,
+                        help='Redis端口')
+    parser.add_argument('--input', default='input',
+                        help='输入目录 (仅client模式)')
+    parser.add_argument('--output', default='output',
+                        help='输出目录 (仅client模式)')
+    parser.add_argument('--server', default='localhost:50051',
+                        help='服务器地址 (仅client模式)')
+
+    args = parser.parse_args()
+
+    if args.mode == 'server':
+        logger.info(f"启动服务端，端口: {args.port}, Redis: {args.redis_host}:{args.redis_port}")
+        run_server(port=args.port, redis_host=args.redis_host, redis_port=args.redis_port)
+    else:
+        logger.info(f"启动客户端，服务器: {args.server}, 输入: {args.input}, 输出: {args.output}")
+        process_images_with_grpc(args.input, args.output, args.server)

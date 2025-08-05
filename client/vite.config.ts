@@ -11,7 +11,6 @@ import MyViteAliases from "./plugins/MyViteAliases";
 import MyHtmlPlugin from "./plugins/MyHtmlPlugin";
 import Logger from "./plugins/Logger";
 import { fileURLToPath } from "node:url";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
 import Components from "unplugin-vue-components/vite";
 import MotionResolver from "motion-v/resolver";
 import tailwindConfig from "./tailwind.config";
@@ -23,9 +22,6 @@ export default defineConfig(({ mode }) => {
     base: env.VITE_BASE,
     plugins: [
       Logger(),
-      nodePolyfills({
-        include: ["buffer"]
-      }),
       react({
         babel: {
           plugins: [["babel-plugin-react-compiler", { target: "19" }]]
@@ -58,7 +54,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       postcss: {
-        plugins: [tailwindcss(tailwindConfig), autoprefixer()]
+        plugins: [tailwindcss(tailwindConfig), autoprefixer()] as any
       }
     },
     build: {
@@ -83,8 +79,6 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
-    },
-    test: {},
-    isWatching: true
+    }
   };
 });
