@@ -8,7 +8,7 @@
         </div>
       </dv-border-box7>
       <dv-border-box7 style="margin-top: 20px" v-else>
-        <div class="tips">No Streams</div>
+        <Tips tips="No Videos" />
       </dv-border-box7>
     </div>
   </OnEnter>
@@ -21,6 +21,7 @@
   import { onMounted, onUnmounted } from "vue";
   import { useStreamStore } from "@/stores/pinia";
   import { UPDATE_RECORDS_INTERVAL } from "@/settings/settings.streams";
+  import Tips from "@/components/Tips.vue";
 
   const streamStore = useStreamStore();
   const startTime = new Date().getTime();
@@ -47,7 +48,10 @@
 
   function Update() {
     streamStore.GetTotalRecords();
+    streamStore.GetSingleRecords(streamStore.ActiveStream.streamId);
+    streamStore.GetTotalExceptionsCount();
     streamStore.GetTotalCategory();
+    streamStore.GetSingleCategory(streamStore.ActiveStream.streamId);
     streamStore.GetTotalCategoryByTime(1, startTime);
     streamStore.GetAnomalousCount();
   }
@@ -77,17 +81,6 @@
       overflow-x: hidden;
       gap: 15px;
       padding: 10px;
-    }
-
-    .tips {
-      font-size: 24px;
-      height: 100px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: title, sans-serif;
-      text-align: center;
-      color: white;
     }
   }
 </style>

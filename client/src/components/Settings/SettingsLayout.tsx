@@ -20,7 +20,6 @@ const Settings: FC<object> = () => {
     loading: false,
     result: false
   });
-  const [refreshId, setRefreshId] = useState(0);
   const [config, setConfig] = useImmer<Go2rtcConfigYaml | undefined>(undefined);
   const [currentContent, setCurrentContent] = useImmer<string | string[]>("");
   const [currentIndex, setCurrentIndex] = useImmer<[level1: string, level2: string]>(["", ""]);
@@ -65,15 +64,14 @@ const Settings: FC<object> = () => {
       .finally(() => {
         status.loading = false;
       });
-    //add refreshId
-  }, [addModifiedVideos, clearModifiedVideos, getPosition, setConfig, status, refreshId]);
+  }, [addModifiedVideos, clearModifiedVideos, getPosition, setConfig, status]);
   useLayoutEffect(() => {
     if (currentIndex[0] !== "" && currentIndex[1] !== "" && config && config.data) {
       setCurrentContent(config.data[currentIndex[0]][currentIndex[1]]);
     }
   }, [config, currentIndex, setCurrentContent]);
   const refresh = useCallback(() => {
-    setRefreshId((id) => id + 1);
+    window.location.reload();
   }, []);
   const saveStream = useCallback(async () => {
     const newStream: {
@@ -111,7 +109,7 @@ const Settings: FC<object> = () => {
 
   return (
     <>
-      <Container key={refreshId}>
+      <Container>
         {config && (
           <>
             <ContentBody>

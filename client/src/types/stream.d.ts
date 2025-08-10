@@ -22,7 +22,7 @@ interface actions {
 
 /** 记录数据库类型 */
 interface records {
-  recordId: string;
+  recordId: number;
   carId: cars.carId;
   streamId: videos.streamId;
   actionId: actions.actionId;

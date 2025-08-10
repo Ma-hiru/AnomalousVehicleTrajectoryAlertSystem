@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"server/core/enum"
 	"strings"
 )
 
@@ -37,8 +38,11 @@ type FFmpeg struct {
 	plugin  []func(ffmpeg *FFmpeg)
 }
 
-func NewFFmpeg(name string, originStream *io.PipeReader, originPath string) (*FFmpeg, error) {
-	ctx, cancel := context.WithCancel(context.Background())
+func NewFFmpeg(name string, originStream *io.PipeReader, originPath string, ctx context.Context) (*FFmpeg, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ctx, cancel := context.WithCancel(ctx)
 	f := &FFmpeg{
 		Name:      name,
 		inputOpt:  []string{},
@@ -60,12 +64,14 @@ func NewFFmpeg(name string, originStream *io.PipeReader, originPath string) (*FF
 	}
 	return f, nil
 }
+
 func (f *FFmpeg) AddInputOptMap(args map[string]string) *FFmpeg {
 	for key, value := range args {
 		f.AddInputOpt(key, value)
 	}
 	return f
 }
+
 func (f *FFmpeg) AddInputOpt(key string, value string) *FFmpeg {
 	if key != "" && value != "" {
 		if strings.HasPrefix(key, "-") {
@@ -76,12 +82,14 @@ func (f *FFmpeg) AddInputOpt(key string, value string) *FFmpeg {
 	}
 	return f
 }
+
 func (f *FFmpeg) AddOutputOptMap(args map[string]string) *FFmpeg {
 	for key, value := range args {
 		f.AddOutputOpt(key, value)
 	}
 	return f
 }
+
 func (f *FFmpeg) AddOutputOpt(key string, value string) *FFmpeg {
 	if key != "" && value != "" {
 		if strings.HasPrefix(key, "-") {
@@ -92,10 +100,12 @@ func (f *FFmpeg) AddOutputOpt(key string, value string) *FFmpeg {
 	}
 	return f
 }
+
 func (f *FFmpeg) AddPlugin(plugin func(ffmpeg *FFmpeg)) *FFmpeg {
 	f.plugin = append(f.plugin, plugin)
 	return f
 }
+
 func (f *FFmpeg) Build(out string) *FFmpeg {
 	// build args
 	f.finalArgs = append(f.finalArgs, f.inputOpt...)
@@ -115,19 +125,20 @@ func (f *FFmpeg) Build(out string) *FFmpeg {
 	f.log = &errPipe
 	return f
 }
-func (f *FFmpeg) Run() error {
+
+func (f *FFmpeg) Run() *enum.Result[bool] {
 	if f.cmd == nil {
-		return errors.New("未构建命令")
+		return enum.Err[bool](errors.New("未构建命令"))
 	}
 	if f.mode == NULL {
-		return errors.New("未指定输入源")
+		return enum.Err[bool](errors.New("未指定输入源"))
 	}
 	for _, plugin := range f.plugin {
 		go plugin(f)
 	}
 	if err := f.cmd.Start(); err != nil {
 		f.cancel()
-		return fmt.Errorf("启动ffmpeg失败: %w", err)
+		return enum.Err[bool](fmt.Errorf("启动ffmpeg失败: %w", err))
 	}
 	go func() {
 		defer f.cancel()
@@ -135,5 +146,5 @@ func (f *FFmpeg) Run() error {
 			fmt.Printf("抽帧出错: %s", err.Error())
 		}
 	}()
-	return nil
+	return enum.Ok(true)
 }

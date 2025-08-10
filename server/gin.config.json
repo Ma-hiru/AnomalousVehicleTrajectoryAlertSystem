@@ -1,7 +1,7 @@
 {
   "port": 824,
   "mode": "release",
-  "stack": true,
+  "stack": false,
   "ssl": false,
   "key": "./key.pem",
   "chain": "./chain.pem",

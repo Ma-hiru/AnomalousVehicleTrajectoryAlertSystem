@@ -1,10 +1,14 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
 	"server/apiServer/model"
+	"server/apiServer/service"
+	"server/core/enum"
 	"server/core/functional"
 	"server/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetCategory 获取行为分类统计 (streamId or streamName) & from & to | null(all)
@@ -34,7 +38,12 @@ func GetCategoryMinute(ctx *gin.Context) {
 		return
 	}
 	gap := NewGap(startTime, endTime, gapTime)
+	maxActionId := getActionsMaxId()
 	Category := make([][]int, gap.gapLen+1)
+	// 初始化每个时间段的行为统计数组
+	for i := range Category {
+		Category[i] = make([]int, maxActionId+1)
+	}
 	recordsForEach(
 		ctx.Query("streamId"),
 		ctx.Query("streamName"),
@@ -78,5 +87,43 @@ func NewGap(start, end, gap int64) *Gap {
 		end:    end,
 		gap:    gap,
 		gapLen: (end - start) / 1000 / 60 / gap,
+	}
+}
+
+// GetExceptionCount 获取异常行为总数 query: from & to | null(all)
+func GetExceptionCount(ctx *gin.Context) {
+	startTime, okFrom := utils.ParseInt64(ctx.Query("from"))
+	endTime, okTo := utils.ParseInt64(ctx.Query("to"))
+	if okFrom && okTo {
+		if startTime < endTime {
+			normalId := getNormalActionId()
+			enum.NewResultFrom(service.Record.
+				WithContext(context.Background()).
+				Where(
+					service.Record.Time.Gte(startTime),
+					service.Record.Time.Lte(endTime),
+				).
+				Where(service.Record.ActionID.Neq(normalId)).
+				Count,
+			).OnOk(func(count int64) {
+				utils.SuccessResponse(ctx, "获取成功", count)
+			}).OnErrPure(func() {
+				utils.FailResponse(ctx, 201, "获取异常行为总数失败")
+			})
+		} else {
+			utils.FailResponse(ctx, 201, "时间参数错误")
+			return
+		}
+	} else {
+		normalId := getNormalActionId()
+		enum.NewResultFrom(service.Record.
+			WithContext(context.Background()).
+			Where(service.Record.ActionID.Neq(normalId)).
+			Count,
+		).OnOk(func(count int64) {
+			utils.SuccessResponse(ctx, "获取成功", count)
+		}).OnErrPure(func() {
+			utils.FailResponse(ctx, 201, "获取异常行为总数失败")
+		})
 	}
 }

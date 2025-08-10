@@ -7,12 +7,12 @@ type (
 		Threads             string `json:"threads"`             // 全局线程数
 		Async               string `json:"async"`               // 音频同步阈值 (example "1" )
 		Vsync               string `json:"vsync"`               // 视频同步方法 (example "1" )
-		Hwaccel             string `json:"hwaccel"`             // CUDA硬件加速 (example "cuda" )
-		HwaccelOutputFormat string `json:"hwaccelOutputFormat"` // 显存输出格式 (example "cuda" )
+		Hwaccel             string `json:"hwaccel"`             // CUDA硬件加速 (example "cuda"/"qsv" )
+		HwaccelOutputFormat string `json:"hwaccelOutputFormat"` // 显存输出格式 (example "cuda"/"qsv" )
 	}
 	SimulateOutputOption struct {
-		CV            string `json:"c:v"`            // NVIDIA编码器 (example "h264_nvenc")
-		Preset        string `json:"preset"`         // 编码预设档 (example "p6")
+		CV            string `json:"c:v"`            // NVIDIA编码器 (example "h264_nvenc"/"h264_qsv")
+		Preset        string `json:"preset"`         // 编码预设档 (example "p6"/"veryfast")
 		BV            string `json:"b:v"`            // 视频码率 (example "1500k")
 		Maxrate       string `json:"maxrate"`        // 最大码率 (example "3000k")
 		Bufsize       string `json:"bufsize"`        // 码率缓冲区 (example "6000k")

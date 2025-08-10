@@ -40,6 +40,7 @@ func UpdateYaml(ctx *gin.Context) {
 	var params struct {
 		Content string `json:"content" binding:"required"`
 	}
+	utils.Logger("UpdateYaml").Println(ctx.Param("content"))
 	if err := ctx.ShouldBindJSON(&params); err != nil {
 		utils.FailResponse(ctx, 201, "参数错误")
 		return

@@ -99,6 +99,20 @@ export const req_category_minute_get = (
 };
 
 /**
+ * @desc `获取异常行为总数`
+ * @param query  from & to | null(all)
+ * @return number(count)
+ * */
+export const req_exceptions_count_get = (
+  query: Partial<{
+    from: string;
+    to: string;
+  }>
+): Promise<ReqResponse<number>> => {
+  return request.get(buildQuery(V1.exceptions_count, query));
+};
+
+/**
  * @desc `Records Param`
  * @define (streamId or streamName) & from & to | null
  * */

@@ -30,6 +30,7 @@ export const GinAPI = {
     records: "/api/gin/v1/records",
     category: "/api/gin/v1/category",
     category_minute: "/api/gin/v1/category/minute",
+    exceptions_count: "/api/gin/v1/category/exceptions",
     tracks: "/api/gin/v1/tracks",
     anomaly_count: "/api/gin/v1/anomaly",
     go2rtc_yaml: "/api/gin/v1/proxy/config"

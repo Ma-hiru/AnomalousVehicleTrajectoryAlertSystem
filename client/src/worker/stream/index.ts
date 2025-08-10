@@ -59,7 +59,7 @@ export class VideoStreamByWS {
         break;
       }
       case "frame": {
-        console.log(ev);
+        import.meta.env.DEV && console.log("frame", ev);
         const target = sync_manager.calculate_taget_time(
           ev.data.timestamp,
           this.video_manager.get_video_current_time(),

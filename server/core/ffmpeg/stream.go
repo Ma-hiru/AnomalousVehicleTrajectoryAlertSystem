@@ -29,6 +29,7 @@ func StreamPlugin(out chan<- *FrameData) func(f *FFmpeg) {
 			}()
 			select {
 			case <-f.context.Done():
+				fmt.Println("StreamPlugin get close sign")
 				close(internal)
 				close(out)
 				if f.cmd != nil && f.cmd.Process != nil {
@@ -77,7 +78,7 @@ func timeStamp(ffmpeg *FFmpeg, internal chan<- *FrameData) {
 				matches := frameRegex.FindStringSubmatch(line)
 				if len(matches) > 1 {
 					timestamp := matches[1]
-					//fmt.Printf("Original frame %d: PTS = %s秒\n", frameIndex, timestamp)
+					fmt.Printf("Original frame %d: PTS = %s秒\n", frameIndex, timestamp)
 					float, _ := strconv.ParseFloat(timestamp, 64)
 					internal <- &FrameData{
 						Data:      nil,

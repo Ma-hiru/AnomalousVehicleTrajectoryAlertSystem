@@ -8,7 +8,7 @@ const TableNameRecord = "records"
 
 // Record mapped from table <records>
 type Record struct {
-	RecordID string `gorm:"column:recordId;primaryKey" json:"recordId"`
+	RecordID int64  `gorm:"column:recordId;primaryKey;autoIncrement:true" json:"recordId"`
 	CarID    string `gorm:"column:carId;not null" json:"carId"`
 	StreamID int32  `gorm:"column:streamId;not null" json:"streamId"`
 	ActionID int64  `gorm:"column:actionId" json:"actionId"`

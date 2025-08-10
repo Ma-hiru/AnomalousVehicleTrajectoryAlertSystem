@@ -14,7 +14,7 @@ import (
 )
 
 type RecordsWithStatus struct {
-	RecordID string `gorm:"column:recordId;primaryKey" json:"recordId"`
+	RecordID int64  `gorm:"column:recordId;primaryKey" json:"recordId"`
 	CarID    string `gorm:"column:carId;not null" json:"carId"`
 	StreamID int32  `gorm:"column:streamId;not null" json:"streamId"`
 	ActionID int64  `gorm:"column:actionId" json:"actionId"`

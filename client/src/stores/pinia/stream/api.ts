@@ -44,6 +44,18 @@ export const api = (states: StateType, actions: ActionType) => {
     return ok;
   }
 
+  async function GetTotalExceptionsCount() {
+    const today = new Date().setHours(0, 0, 0, 0);
+    const { ok, data } = await fetchDataAsync("req_exceptions_count_get", [
+      {
+        from: today.toString(),
+        to: new Date().getTime().toString()
+      }
+    ]);
+    ok && Number.isInteger(data) && (states.TotalCarExceptionsCount.value = data);
+    return ok;
+  }
+
   async function GetTotalCategory() {
     const today = new Date().setHours(0, 0, 0, 0);
     const { ok, data } = await fetchDataAsync("req_category_get", [
@@ -52,7 +64,9 @@ export const api = (states: StateType, actions: ActionType) => {
         to: new Date().getTime().toString()
       }
     ]);
-    ok && data.length && set_total_action_category(data);
+    if (ok && data && Array.isArray(data)) {
+      set_total_action_category(data);
+    }
     return ok;
   }
 
@@ -64,7 +78,9 @@ export const api = (states: StateType, actions: ActionType) => {
         gap: minute.toString()
       }
     ]);
-    ok && data.length && set_total_action_category_by_time(data, minute, start);
+    if (ok && data && Array.isArray(data)) {
+      set_total_action_category_by_time(data, minute, start);
+    }
     return ok;
   }
 
@@ -95,7 +111,9 @@ export const api = (states: StateType, actions: ActionType) => {
         to: new Date().getTime().toString()
       }
     ]);
-    ok && set_single_action_category(streamId, data);
+    if (ok && data && Array.isArray(data)) {
+      set_single_action_category(streamId, data);
+    }
     return ok;
   }
 
@@ -115,7 +133,8 @@ export const api = (states: StateType, actions: ActionType) => {
     GetTotalCategoryByTime,
     GetSingleRecords,
     GetSingleCategory,
-    GetAnomalousCount
+    GetAnomalousCount,
+    GetTotalExceptionsCount
   };
 };
 

@@ -28,7 +28,7 @@ func newRecord(db *gorm.DB, opts ...gen.DOOption) record {
 
 	tableName := _record.recordDo.TableName()
 	_record.ALL = field.NewAsterisk(tableName)
-	_record.RecordID = field.NewString(tableName, "recordId")
+	_record.RecordID = field.NewInt64(tableName, "recordId")
 	_record.CarID = field.NewString(tableName, "carId")
 	_record.StreamID = field.NewInt32(tableName, "streamId")
 	_record.ActionID = field.NewInt64(tableName, "actionId")
@@ -43,7 +43,7 @@ type record struct {
 	recordDo recordDo
 
 	ALL      field.Asterisk
-	RecordID field.String
+	RecordID field.Int64
 	CarID    field.String
 	StreamID field.Int32
 	ActionID field.Int64
@@ -64,7 +64,7 @@ func (r record) As(alias string) *record {
 
 func (r *record) updateTableName(table string) *record {
 	r.ALL = field.NewAsterisk(table)
-	r.RecordID = field.NewString(table, "recordId")
+	r.RecordID = field.NewInt64(table, "recordId")
 	r.CarID = field.NewString(table, "carId")
 	r.StreamID = field.NewInt32(table, "streamId")
 	r.ActionID = field.NewInt64(table, "actionId")

@@ -96,4 +96,7 @@ require (
 	gorm.io/plugin/dbresolver v1.6.1 // indirect
 )
 
-replace shiina-mahiru.cn/gin_server => ./core/gin_server
+replace (
+	shiina-mahiru.cn/gin_server => ./core/gin_server
+	shiina-mahiru.cn/preload => ../temp
+)

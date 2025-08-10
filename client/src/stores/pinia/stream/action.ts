@@ -41,7 +41,9 @@ export const action = (state: StateType) => {
 
   function update_total_records(records: CarRecord[]) {
     state.TotalCarRecordList.unshift(...records);
+    state.TotalCarExceptionsRecordList.unshift(...records.filter((r) => !r.status));
     checkArraySize(state.TotalCarRecordList);
+    checkArraySize(state.TotalCarExceptionsRecordList);
   }
 
   function set_total_action_category(total_action_category: number[]) {
@@ -57,7 +59,11 @@ export const action = (state: StateType) => {
     //ms
     const gap_time = gap_minute * 1000 * 60;
     category_by_time.forEach((category, gap) => {
-      state.TotalActionCategoryGroupByTime[gap * gap_time + start_time] = category;
+      const timeKey = gap * gap_time + start_time;
+      // 确保category是有效的数组
+      if (Array.isArray(category)) {
+        state.TotalActionCategoryGroupByTime[timeKey] = category;
+      }
     });
   }
 

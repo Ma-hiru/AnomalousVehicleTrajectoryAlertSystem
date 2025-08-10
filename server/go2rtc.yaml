@@ -1,14 +1,12 @@
 api:
-    listen: :3001
-    origin: '*'
+  listen: ':3001'
+  origin: '*'
 log:
-    level: info
+  level: info
 rtsp:
-    listen: :3000
+  listen: ':3000'
 streams:
-    ffmpeg:
-        - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
-    test:
-        - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
+  ffmpeg:
+    - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
 webrtc:
-    listen: :3002
+  listen: ':3002'

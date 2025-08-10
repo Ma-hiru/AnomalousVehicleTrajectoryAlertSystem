@@ -8,7 +8,8 @@ import {
   TitleComponent,
   TooltipComponent,
   DatasetComponent,
-  TransformComponent
+  TransformComponent,
+  LegendComponent
 } from "echarts/components";
 import { LabelLayout, UniversalTransition } from "echarts/features";
 
@@ -23,7 +24,8 @@ echarts.use([
   TransformComponent,
   LineChart,
   LabelLayout,
-  UniversalTransition
+  UniversalTransition,
+  LegendComponent
 ]);
 
 export const useEcharts = <T extends echarts.EChartsCoreOption>(

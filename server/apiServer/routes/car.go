@@ -11,6 +11,7 @@ func carRoutes(app *gin.RouterGroup, version Version) {
 	managerActions(app, version)
 	managerCategory(app, version)
 }
+
 func managerVideos(app *gin.RouterGroup, version Version) {
 	if version == V1 {
 		// 获取视频列表 query: streamId or streamName(like) | null(all)
@@ -25,23 +26,28 @@ func managerVideos(app *gin.RouterGroup, version Version) {
 		app.POST("/v1/videos/settings", controller.SettingsVideos)
 	}
 }
+
 func managerActions(app *gin.RouterGroup, version Version) {
 	if version == V1 {
 		// 获取行为枚举 query: actionId or actionName | null
 		app.GET("/v1/actions", controller.GetActions)
 	}
 }
+
 func managerRecords(app *gin.RouterGroup, version Version) {
 	if version == V1 {
 		// 获取行为记录 query: (streamId or streamName) & from & to | null
 		app.GET("/v1/records", controller.GetRecords)
 	}
 }
+
 func managerCategory(app *gin.RouterGroup, version Version) {
 	if version == V1 {
 		// 获取行为分类统计 query: (streamId or streamName) & from & to | null(all)
 		app.GET("/v1/category", controller.GetCategory)
 		// 按分钟获取行为分类统计 query: (streamId or streamName or null) & from & to & gap(Minute)
 		app.GET("/v1/category/minute", controller.GetCategoryMinute)
+		// 获取异常行为总数 query: from & to | null(all)
+		app.GET("/v1/category/exceptions", controller.GetExceptionCount)
 	}
 }

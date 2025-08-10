@@ -15,53 +15,46 @@
 </template>
 
 <script setup lang="ts" name="VideoInfo">
-  import { computed, ref } from "vue";
+  import { reactive, watch } from "vue";
   import OnHover from "@/components/Ani/OnHover.vue";
   import { useStreamStore } from "@/stores/pinia";
   import dayjs from "dayjs";
   import CustomScrollBoard from "@/components/Charts/CustomScrollBoard/CustomScrollBoard.vue";
 
-  const streamStore =useStreamStore();
-
-  // const streamStore = useStreamStore();
-  const total = ref(0);
-
-  // 更改变量名，避免与dv-digital-flop的config冲突
-  const flopConfig = computed(() => ({
-    number: [total.value],
+  const streamStore = useStreamStore();
+  const flopConfig = reactive({
+    number: [streamStore.TotalCarExceptionsCount],
     content: "{nt}",
     formatter: Intl.NumberFormat("zh-CN").format
-  }));
-
-  // 更改变量名，避免与dv-scroll-board的config冲突
-  const tableConfig = computed(() => {
-    let count = 0;
-
-    // 筛选出异常记录
-    //TODO 需要总体记录，且实现滚动流；需要基于此筛选异常滚动记录
-    const exceptionRecords = streamStore.TotalCarRecordList.filter((cur) => !cur.status);
-    count = exceptionRecords.length;
-
-    const data = {
-      header: ["标识", "行为", "时间", "视频id"],
-      data: exceptionRecords.map((cur) => [
-        cur.carId,
-        streamStore.ActionsEnum[cur.actionId],
-        dayjs(cur.time).format("HH:mm:ss"),
-        cur.streamId
-      ]),
-      index: false,
-      align: ["center", "center", "center", "center"],
-      rowNum: 2,
-      headerBGC: "transparent",
-      headerHeight: 30,
-      oddRowBGC: "rgba(0,0,0,0.2)",
-      evenRowBGC: "rgba(0,0,0,0.1)"
-    };
-
-    total.value = count;
-    return data;
   });
+  const tableConfig = reactive({
+    header: ["标识", "行为", "时间", "视频id"],
+    data: <string[][]>[],
+    index: false,
+    align: ["center", "center", "center", "center"],
+    rowNum: 2,
+    headerBGC: "transparent",
+    headerHeight: 30,
+    oddRowBGC: "rgba(0,0,0,0.2)",
+    evenRowBGC: "rgba(0,0,0,0.1)"
+  } satisfies ScrollBoardConfig);
+  watch(() => streamStore.TotalCarExceptionsRecordList, updateConfig, {
+    immediate: true
+  });
+  watch(() => streamStore.TotalCarExceptionsCount, updateCount, { immediate: true });
+
+  function updateCount() {
+    flopConfig.number = [streamStore.TotalCarExceptionsCount];
+  }
+
+  function updateConfig() {
+    const exceptions = streamStore.TotalCarExceptionsRecordList || [];
+    tableConfig.data = exceptions.map(newRow);
+  }
+
+  function newRow({ carId, actionId, time, streamId }: CarRecord): string[] {
+    return [carId, streamStore.ActionsEnum[actionId], dayjs(time).format("HH:mm:ss"), streamId];
+  }
 </script>
 
 <style scoped lang="scss">

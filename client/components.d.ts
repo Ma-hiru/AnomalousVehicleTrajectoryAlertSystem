@@ -22,6 +22,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScreenLoading: typeof import('./src/components/Loading/ScreenLoading.vue')['default']
+    Tips: typeof import('./src/components/Tips.vue')['default']
     Title: typeof import('./src/components/TopBar/Title.vue')['default']
     TotalCharts: typeof import('./src/components/Body/TotalCharts.vue')['default']
     TotalTendency: typeof import('./src/components/Charts/TotalTendency/TotalTendency.vue')['default']

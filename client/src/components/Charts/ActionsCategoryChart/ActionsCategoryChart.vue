@@ -1,39 +1,47 @@
 <template>
   <OnHover class="actions-category-container" :scale="1.1">
-    <span class="title">视频（{{ streamStore.ActiveStream.streamName }}）的行为分布</span>
+    <span class="title">
+      视频（{{ streamStore.ActiveStream.streamName || "No Data" }}）的行为分布
+    </span>
     <dv-conical-column-chart
-      v-if="config.data.length"
+      v-show="config.data.length"
       :config="config"
       style="width: 400px; height: 200px" />
-    <div v-else class="tips">No Data</div>
+    <Tips :show="!config.data.length" tips="No Data" />
   </OnHover>
 </template>
 
 <script setup lang="ts" name="ActionsCategoryChart">
-  import { computed } from "vue";
+  import Tips from "@/components/Tips.vue";
   import OnHover from "@/components/Ani/OnHover.vue";
+  import { reactive, ref, watch } from "vue";
   import { useStreamStore } from "@/stores/pinia";
   import { ActionsIcons } from "@/assets/actions/actions";
 
   const streamStore = useStreamStore();
-
-  const config = computed(() => {
-    //TODO 单个视频流行为数据统计
-    const dataArr =
-      streamStore.SingleActionCategoryComputed.get(streamStore.ActiveStream.streamId) || [];
-    return {
-      data: dataArr.map((number, index) => {
-        return {
-          name: streamStore.ActionsEnum[index],
-          value: number
-        };
-      }),
-      img: ActionsIcons,
-      imgSideLength: 30,
-      showValue: true,
-      columnColor: "rgba(43,95,244,0.4)"
-    };
+  const config = reactive({
+    data: <{ name: string; value: number }[]>[],
+    img: ActionsIcons,
+    imgSideLength: 30,
+    showValue: true,
+    columnColor: "rgba(43,95,244,0.4)",
+    sort: false
   });
+  watch(() => streamStore.ActiveStream.streamId, updateConfig, { immediate: true });
+  watch(() => streamStore.SingleActionCategoryComputed, updateConfig);
+
+  function updateConfig() {
+    const single_action_category =
+      streamStore.SingleActionCategoryComputed.get(streamStore.ActiveStream.streamId) || [];
+    config.data = single_action_category.reduce(
+      (pre, value, actionId) => {
+        const name = streamStore.ActionsEnum[actionId];
+        name && pre.push({ name, value });
+        return pre;
+      },
+      <{ name: string; value: number }[]>[]
+    );
+  }
 </script>
 
 <style scoped lang="scss">
@@ -50,17 +58,6 @@
       margin-bottom: 10px;
       font-family: title, sans-serif;
       text-align: center;
-    }
-
-    .tips {
-      font-size: 24px;
-      height: 200px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: title, sans-serif;
-      text-align: center;
-      color: white;
     }
   }
 </style>

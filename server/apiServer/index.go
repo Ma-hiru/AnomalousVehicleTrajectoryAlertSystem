@@ -14,8 +14,9 @@ func Init() {
 	routes.Init()
 	static.Init()
 	socketServer.FramesSocketInit()
+	PrintStack := false
 	err := gin_server.InitWithInject(
-		conf.Options{InternalErrMsg: settings.ErrMsg},
+		conf.Options{InternalErrMsg: settings.ErrMsg, PrintStack: &PrintStack},
 		settings.AppName,
 		settings.AppVersion,
 	)

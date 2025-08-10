@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"server/mock"
 )
 
 // YoloClient YoloService通信的客户端
@@ -45,13 +46,15 @@ func (c *YoloClient) DetectSingle(ctx context.Context, request *ImageRequest) (*
 var yolo *YoloClient
 
 func Init() {
-	var err error
-	yolo, err = newClient(":50051")
-	if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("Yolo client initialized")
-	}
+	//var err error
+	//yolo, err = newClient(":50051")
+	//if err != nil {
+	//	panic(err)
+	//} else {
+	//	fmt.Println("Yolo client initialized")
+	//}
+	mock.ClearAll()
+	fmt.Println("Yolo client initialized")
 }
 func GetClient() *YoloClient {
 	return yolo

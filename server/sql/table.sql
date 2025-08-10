@@ -4,7 +4,7 @@ create database if not exists avtas
 use avtas;
 create table if not exists cars
 (
-    carId varchar(10) primary key
+    carId varchar(15) primary key
 );
 create table if not exists streams
 (
@@ -21,8 +21,8 @@ create table if not exists actions
 );
 create table if not exists records
 (
-    recordId varchar(15) primary key,
-    carId    varchar(10) not null,
+    recordId bigint primary key auto_increment,
+    carId    varchar(15) not null,
     streamId int         not null,
     actionId int8,
     time     bigint      not null

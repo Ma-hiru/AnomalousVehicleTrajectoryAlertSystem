@@ -8,6 +8,8 @@ export const state = () => {
   // 数据缓存
   //获取后，还需要手动初始化、更新后，需要手动更新，最新数据在数组开头
   const TotalCarRecordList = reactive<CarRecord[]>([]);
+  const TotalCarExceptionsRecordList = reactive<CarRecord[]>([]);
+  const TotalCarExceptionsCount = ref(0);
   // 直接从后端获取数据（v1.0后端插入数据库时就可以统计 后续可以使用数据库保存）
   const TotalActionCategoryComputed = ref<number[]>([]);
   // 直接从后端获取数据（v1.0后端插入数据库时就可以统计 后续可以使用数据库保存）
@@ -26,7 +28,9 @@ export const state = () => {
     TotalActionCategoryComputed,
     TotalActionCategoryGroupByTime,
     SingleCarRecordList,
-    SingleActionCategoryComputed
+    SingleActionCategoryComputed,
+    TotalCarExceptionsRecordList,
+    TotalCarExceptionsCount
   };
 };
 

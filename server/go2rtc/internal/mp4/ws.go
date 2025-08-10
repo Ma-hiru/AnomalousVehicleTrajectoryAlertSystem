@@ -1,6 +1,7 @@
 package mp4
 
 import (
+	"context"
 	"errors"
 	"io"
 	"server/go2rtc/internal/api"
@@ -37,8 +38,9 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	tr.Write(&ws.Message{Type: "mse", Value: mp4.ContentType(cons.Codecs())})
 
 	pr, pw := io.Pipe()
+	ctx, cancel := context.WithCancel(context.Background())
 	//复制MSE流以便处理
-	go streamServer.HandleStreamWithMSE(pr, query)
+	go streamServer.HandleStreamWithMSE(pr, query, ctx)
 	go func() {
 		_, _ = cons.WriteTo(tr.MultiWriter(pw))
 	}()
@@ -46,7 +48,8 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	tr.OnClose(func() {
 		stream.RemoveConsumer(cons)
 		_ = pw.Close()
-		//streamServer.CloseStreamFFmpeg(streamName)
+		_ = pr.Close()
+		cancel()
 	})
 
 	return nil

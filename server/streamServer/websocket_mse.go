@@ -1,25 +1,30 @@
 package streamServer
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
 	"server/core/ffmpeg"
+	"server/mock"
 	"server/settings"
 	"server/socketServer"
 	"server/utils"
 	"strconv"
 )
 
-func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
+func HandleStreamWithMSE(pr *io.PipeReader, query url.Values, ctx context.Context) {
 	defer pr.Close()
 	defer utils.Logger("StreamServer").Println("视频帧处理结束")
 	streamName := query.Get("src")
+	// 模拟录像数据
+	go mock.Records(streamName, ctx, 0.5)
 	imgFrame, err := ExtractVideoFramesWithStream(
 		pr,
 		settings.ExtractOptions(streamName),
+		ctx,
 	)
 	if err != nil {
 		utils.Logger("StreamServer").Println("抽帧失败")
@@ -29,6 +34,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values) {
 		//readMETA(metaData, streamName)
 	}
 }
+
 func readIMG(imgFrame chan *ffmpeg.FrameData, StreamName string) {
 	defer utils.Logger("StreamServer").Println("读取图片结束")
 	for img := range imgFrame {
@@ -47,6 +53,7 @@ func readIMG(imgFrame chan *ffmpeg.FrameData, StreamName string) {
 		}
 	}
 }
+
 func readMETA(metaData chan *ffmpeg.MetaData, StreamName string) {
 	for meta := range metaData {
 		utils.Logger("StreamServer").Println("MetaMsg=>", meta.Index, meta.Timestamp)
@@ -63,6 +70,7 @@ func readMETA(metaData chan *ffmpeg.MetaData, StreamName string) {
 		}
 	}
 }
+
 func saveIMG(img *ffmpeg.FrameData, index int) {
 	utils.Logger("StreamServer").Println("FrameMsg=>", img.Index, img.Timestamp)
 	file, _ := os.Create(
