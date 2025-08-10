@@ -64,11 +64,10 @@ const Detail: FC<props> = ({ track }) => {
                 title="行为"
                 dataIndex="actionId"
                 key="actionId"
-                render={(actionId) => (
-                  <Tag color={actionId === 0 ? "green" : "red"}>
-                    {streamStore.ActionsEnum[actionId]}
-                  </Tag>
-                )}
+                render={(actionId) => {
+                  const actionName = streamStore.ActionsEnum[actionId] || "未知行为";
+                  return <Tag color={actionId === 0 ? "green" : "red"}>{actionName}</Tag>;
+                }}
               />
               <Table.Column
                 title="状态"

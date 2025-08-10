@@ -209,10 +209,10 @@ const getTimePoints = computed(() => {
 });
 // 监听数据变化，更新图表
 watch(
-  () => [streamStore.TotalActionCategoryGroupByTime, getTimePoints.value.length],
+  () => [streamStore.TotalActionCategoryGroupByTime, getTimePoints.value.length, streamStore.ActionsEnum],
   () => {
-    // 如果没有数据，不进行处理
-    if (getTimePoints.value.length === 0) return;
+    // 如果没有数据或ActionsEnum未初始化，不进行处理
+    if (getTimePoints.value.length === 0 || streamStore.ActionsEnum.length === 0) return;
 
     // 获取原始时间戳数组（已排序）
     const originalTimeStamps = Object.keys(streamStore.TotalActionCategoryGroupByTime)
@@ -233,8 +233,12 @@ watch(
     originalTimeStamps.forEach((timeStamp, timeIndex) => {
       const stats = streamStore.TotalActionCategoryGroupByTime[timeStamp] || [];
       stats.forEach((count, actionIndex) => {
+        // 添加更严格的检查：确保actionIndex有效且对应的action存在
         if (actionIndex < streamStore.ActionsEnum.length) {
-          seriesData[streamStore.ActionsEnum[actionIndex]][timeIndex] = count;
+          const actionName = streamStore.ActionsEnum[actionIndex];
+          if (actionName && seriesData[actionName]) {
+            seriesData[actionName][timeIndex] = count;
+          }
         }
       });
     });

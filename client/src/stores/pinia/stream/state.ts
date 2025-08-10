@@ -20,6 +20,8 @@ export const state = () => {
   const SingleActionCategoryComputed = reactive<Map<VideoStreamInfo["streamId"], number[]>>(
     new Map()
   );
+  // 添加更新触发器用于强制响应式更新
+  const updateTrigger = ref(0);
   return {
     StreamList,
     ActiveStream,
@@ -30,7 +32,8 @@ export const state = () => {
     SingleCarRecordList,
     SingleActionCategoryComputed,
     TotalCarExceptionsRecordList,
-    TotalCarExceptionsCount
+    TotalCarExceptionsCount,
+    updateTrigger
   };
 };
 

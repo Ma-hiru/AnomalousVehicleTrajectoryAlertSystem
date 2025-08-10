@@ -44,6 +44,8 @@ export const action = (state: StateType) => {
     state.TotalCarExceptionsRecordList.unshift(...records.filter((r) => !r.status));
     checkArraySize(state.TotalCarRecordList);
     checkArraySize(state.TotalCarExceptionsRecordList);
+    // 触发响应式更新
+    state.updateTrigger.value++;
   }
 
   function set_total_action_category(total_action_category: number[]) {
@@ -76,10 +78,14 @@ export const action = (state: StateType) => {
       state.SingleCarRecordList.set(streamId, records);
       checkArraySize(state.SingleCarRecordList.get(streamId));
     }
+    // 触发响应式更新
+    state.updateTrigger.value++;
   }
 
   function set_single_action_category(streamId: number, action_category: number[]) {
     state.SingleActionCategoryComputed.set(streamId, action_category);
+    // 触发响应式更新
+    state.updateTrigger.value++;
   }
 
   function set_active_stream(active: VideoStreamInfo) {

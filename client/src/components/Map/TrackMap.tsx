@@ -149,19 +149,22 @@ const TrackMap: FC<object> = () => {
   useEffect(() => {
     const currentLoca = loca.get();
     const currentMap = map.get();
+    console.log("热力图更新触发 - videoList:", videoList.length, "loca:", !!currentLoca, "map:", !!currentMap);
+    
     if (currentLoca && currentMap && videoList.length > 0) {
       // 清除现有热力图层
       if (heatmapLayerRef.current) {
         currentLoca.remove(heatmapLayerRef.current);
         heatmapLayerRef.current = null;
       }
+      
       // 准备热力图数据 - 转换为GeoJSON格式
-      //TODO calculate heatmapData
       const heatmapData = {
         type: "FeatureCollection",
         features: videoList
           .map((camera) => {
             const anomalyCount = getAnomalyCount(camera.streamId);
+            console.log(`摄像头 ${camera.streamId} 异常数量:`, anomalyCount);
             if (anomalyCount > 0) {
               return {
                 type: "Feature",
@@ -178,6 +181,10 @@ const TrackMap: FC<object> = () => {
           })
           .filter((item) => item !== null)
       };
+      
+      console.log("热力图数据点数量:", heatmapData.features.length);
+      console.log("热力图数据:", heatmapData);
+      
       // 确保有数据点
       if (heatmapData.features.length > 0) {
         try {

@@ -1,6 +1,6 @@
 /** seconds */
-export const BUFFER_MAX_DURATION = 10;
-export const MAX_QUEUE_LENGTH = 100;
+export const BUFFER_MAX_DURATION = 15; // 增加缓冲区最大持续时间
+export const MAX_QUEUE_LENGTH = 50; // 减少队列长度以防止内存过多占用
 export const STREAMS_CONF_NAME = "streams";
 export const UPDATE_RECORDS_INTERVAL = 3000;
 

@@ -125,9 +125,10 @@ const Track: FC<object> = () => {
                 align="center"
                 render={(_, row: TrackList) => {
                   return row.actionIds.map((type) => {
+                    const actionName = streamStore.ActionsEnum[type] || "未知行为";
                     return (
                       <Tag key={type} color={"red"}>
-                        {streamStore.ActionsEnum[type]}
+                        {actionName}
                       </Tag>
                     );
                   });

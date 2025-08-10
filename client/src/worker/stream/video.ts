@@ -44,13 +44,21 @@ export class VideoManager {
   }
 
   public remove_source_buffer(start: number, end: number) {
-    if (this.source_buffer) {
+    if (this.source_buffer && this.media_source.readyState === "open") {
       try {
-        if (!this.source_buffer.updating) this.source_buffer.remove(start, end);
-        else this._next_turn_clear(start, end);
-      } catch {
+        if (!this.source_buffer.updating) {
+          console.log(`移除缓冲区: ${start.toFixed(2)}s - ${end.toFixed(2)}s`);
+          this.source_buffer.remove(start, end);
+        } else {
+          console.log("SourceBuffer正在更新，延迟清理");
+          this._next_turn_clear(start, end);
+        }
+      } catch (error) {
+        console.warn("移除缓冲区失败:", error);
         this._next_turn_clear(start, end);
       }
+    } else {
+      console.warn("无法移除缓冲区 - MediaSource状态:", this.media_source?.readyState);
     }
   }
 

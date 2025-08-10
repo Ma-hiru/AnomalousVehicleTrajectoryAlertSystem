@@ -76,29 +76,33 @@ func insertRecords(
 		OnErrPure(cancel).
 		Expect("获取模拟行为数据失败")
 
+	var shouldInsertCars = make([]*model.Car, 0)
+	var shouldInsertRecords = make([]*model.Record, 0)
 	for _, Detection := range records.Detections {
 		if Detection.Confidence < confidence {
 			continue
 		}
-		_ = service.Car.
-			WithContext(context.Background()).
-			Clauses(clause.OnConflict{DoNothing: true}).
-			Create(
-				&model.Car{CarID: Detection.CarID},
-			)
-		enum.
-			ErrToResult(service.Record.
-				WithContext(context.Background()).
-				Create(&model.Record{
-					CarID:    Detection.CarID,
-					StreamID: streamId,
-					ActionID: int64(Detection.Behavior.ActionID),
-					Time:     time.Now().UnixMilli(),
-				}),
-			).
-			OnErrPure(cancel).
-			Expect("插入行为记录失败")
+		shouldInsertCars = append(shouldInsertCars, &model.Car{
+			CarID: Detection.CarID,
+		})
+		shouldInsertRecords = append(shouldInsertRecords, &model.Record{
+			CarID:    Detection.CarID,
+			StreamID: streamId,
+			ActionID: int64(Detection.Behavior.ActionID),
+			Time:     time.Now().UnixMilli(),
+		})
 	}
+	_ = service.Car.
+		WithContext(context.Background()).
+		Clauses(clause.OnConflict{DoNothing: true}).
+		Create(shouldInsertCars...)
+	enum.
+		ErrToResult(service.Record.
+			WithContext(context.Background()).
+			Create(shouldInsertRecords...),
+		).
+		OnErrPure(cancel).
+		Expect("插入行为记录失败")
 }
 
 func clearRecords(streamId int32) *enum.Result[int] {
