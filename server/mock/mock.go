@@ -3,18 +3,24 @@ package mock
 import (
 	"context"
 	"fmt"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"path/filepath"
 	"server/apiServer/model"
 	"server/apiServer/service"
 	"server/core/enum"
 	"server/core/functional"
-	"shiina-mahiru.cn/preload"
 	"time"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"shiina-mahiru.cn/preload"
 )
 
 func Records(streamName string, ctx context.Context, confidence float64) {
+	recordsWithLicensePlateType(streamName, ctx, confidence, true)
+}
+
+// recordsWithLicensePlateType 内部函数，支持选择车牌类型
+func recordsWithLicensePlateType(streamName string, ctx context.Context, confidence float64, useNingbo bool) {
 	baseTime := time.Now()
 	streamId := enum.
 		NewResultFrom(
@@ -55,7 +61,7 @@ func Records(streamName string, ctx context.Context, confidence float64) {
 						cancel()
 						return
 					default:
-						insertRecords(temp, streamId, baseTime, cancel, confidence)
+						insertRecordsWithLicensePlateType(temp, streamId, baseTime, cancel, confidence, useNingbo)
 					}
 				},
 				time.Second,
@@ -63,12 +69,13 @@ func Records(streamName string, ctx context.Context, confidence float64) {
 		})
 }
 
-func insertRecords(
+func insertRecordsWithLicensePlateType(
 	temp *preload.DetectionProcessor,
 	streamId int32,
 	baseTime time.Time,
 	cancel context.CancelFunc,
 	confidence float64,
+	useNingbo bool,
 ) {
 	var records = enum.
 		NewResultFromWithValue(
@@ -80,15 +87,28 @@ func insertRecords(
 
 	var shouldInsertCars = make([]*model.Car, 0)
 	var shouldInsertRecords = make([]*model.Record, 0)
+
+	// 获取车牌管理器
+	plateManager := GetLicensePlateManager()
+
 	for _, Detection := range records.Detections {
 		if Detection.Confidence < confidence {
 			continue
 		}
+
+		// 根据选择生成车牌号
+		var licensePlate string
+		if useNingbo {
+			licensePlate = plateManager.GetOrCreateNingboLicensePlate(Detection.CarID)
+		} else {
+			licensePlate = plateManager.GetOrCreateLicensePlate(Detection.CarID)
+		}
+
 		shouldInsertCars = append(shouldInsertCars, &model.Car{
-			CarID: Detection.CarID,
+			CarID: licensePlate, // 直接使用车牌号作为CarID
 		})
 		shouldInsertRecords = append(shouldInsertRecords, &model.Record{
-			CarID:    Detection.CarID,
+			CarID:    licensePlate, // 使用车牌号作为CarID
 			StreamID: streamId,
 			ActionID: int64(Detection.Behavior.ActionID),
 			Time:     time.Now().UnixMilli(),
