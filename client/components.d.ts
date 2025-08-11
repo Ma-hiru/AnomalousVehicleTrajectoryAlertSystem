@@ -16,6 +16,7 @@ declare module 'vue' {
     BasicCard: typeof import('./src/components/BasicCard.vue')['default']
     CustomScrollBoard: typeof import('./src/components/Charts/CustomScrollBoard/CustomScrollBoard.vue')['default']
     MapCharts: typeof import('./src/components/Charts/MapCharts.vue')['default']
+    MemoryDebugPanel: typeof import('./src/components/Debug/MemoryDebugPanel.vue')['default']
     OnEnter: typeof import('./src/components/Ani/OnEnter.vue')['default']
     OnHover: typeof import('./src/components/Ani/OnHover.vue')['default']
     PointCharts: typeof import('./src/components/Body/PointCharts.vue')['default']

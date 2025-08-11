@@ -23,6 +23,8 @@ export const action = (state: StateType) => {
 
   function set_stream_list(list: videos[]) {
     state.StreamList.value = list;
+    // 清理Map中不存在的streamId
+    cleanupInvalidStreamIds(list);
     init_map(state.StreamList.value);
   }
 
@@ -104,6 +106,61 @@ export const action = (state: StateType) => {
     state.showNormalBehavior.value = !state.showNormalBehavior.value;
   }
 
+  // 清理无效的streamId
+  function cleanupInvalidStreamIds(validStreams: videos[]) {
+    const validStreamIds = new Set(validStreams.map((stream) => stream.streamId));
+
+    // 清理SingleCarRecordList中无效的streamId
+    for (const [streamId] of state.SingleCarRecordList) {
+      if (!validStreamIds.has(streamId)) {
+        state.SingleCarRecordList.delete(streamId);
+      }
+    }
+
+    // 清理SingleActionCategoryComputed中无效的streamId
+    for (const [streamId] of state.SingleActionCategoryComputed) {
+      if (!validStreamIds.has(streamId)) {
+        state.SingleActionCategoryComputed.delete(streamId);
+      }
+    }
+  }
+
+  // 定期清理函数，清理所有可能造成内存泄漏的数据
+  function performPeriodicCleanup() {
+    // console.log("开始定期清理:");
+    // console.log(`- TotalCarRecordList长度: ${state.TotalCarRecordList.length}`);
+    // console.log(`- TotalCarExceptionsRecordList长度: ${state.TotalCarExceptionsRecordList.length}`);
+    // console.log(
+    //   `- TotalActionCategoryGroupByTime条目数: ${Object.keys(state.TotalActionCategoryGroupByTime).length}`
+    // );
+    // console.log(`- SingleCarRecordList Map大小: ${state.SingleCarRecordList.size}`);
+    // console.log(
+    //   `- SingleActionCategoryComputed Map大小: ${state.SingleActionCategoryComputed.size}`
+    // );
+
+    // 清理时间数据
+    cleanupTimeBasedData(state.TotalActionCategoryGroupByTime);
+
+    // 清理Map数据
+    cleanupMapData(state.SingleCarRecordList);
+    cleanupMapData(state.SingleActionCategoryComputed);
+
+    // 确保所有数组都在限制范围内
+    checkArraySize(state.TotalCarRecordList);
+    checkArraySize(state.TotalCarExceptionsRecordList);
+
+    // console.log("定期清理完成，清理后状态:");
+    // console.log(`- TotalCarRecordList长度: ${state.TotalCarRecordList.length}`);
+    // console.log(`- TotalCarExceptionsRecordList长度: ${state.TotalCarExceptionsRecordList.length}`);
+    // console.log(
+    //   `- TotalActionCategoryGroupByTime条目数: ${Object.keys(state.TotalActionCategoryGroupByTime).length}`
+    // );
+    // console.log(`- SingleCarRecordList Map大小: ${state.SingleCarRecordList.size}`);
+    // console.log(
+    //   `- SingleActionCategoryComputed Map大小: ${state.SingleActionCategoryComputed.size}`
+    // );
+  }
+
   return {
     init_map,
     set_stream_list,
@@ -115,15 +172,40 @@ export const action = (state: StateType) => {
     set_single_action_category,
     set_active_stream,
     getNormalBehaviorIndex,
-    toggleShowNormalBehavior
+    toggleShowNormalBehavior,
+    cleanupInvalidStreamIds,
+    performPeriodicCleanup
   };
 };
 
 export type ActionType = ReturnType<typeof action>;
 
 const MAX_RECORDS_SIZE = 50;
+// 限制Map中最大的streamId数量
+const MAX_MAP_SIZE = 20;
+// 限制时间数据的最大数量
+const MAX_TIME_RECORDS = 60;
 
 function checkArraySize(arr: any[] | undefined | null, maxSize: number = MAX_RECORDS_SIZE) {
   if (!Array.isArray(arr) || maxSize < 0 || !Number.isInteger(maxSize)) return;
   arr.length > maxSize && arr.splice(maxSize);
+}
+
+// 清理Map数据，限制Map的大小
+function cleanupMapData<T>(map: Map<number, T>) {
+  if (map.size <= MAX_MAP_SIZE) return;
+  const entries = Array.from(map.entries());
+  const keysToDelete = entries.slice(0, entries.length - MAX_MAP_SIZE).map(([key]) => key);
+  keysToDelete.forEach((key) => map.delete(key));
+}
+
+// 清理时间相关数据，只保留最近的时间段
+function cleanupTimeBasedData(timeData: Record<number, number[]>) {
+  const timeKeys = Object.keys(timeData)
+    .map(Number)
+    .sort((a, b) => b - a); // 按时间戳降序排列
+  if (timeKeys.length <= MAX_TIME_RECORDS) return;
+  // 删除最旧的数据，只保留最新的MAX_TIME_RECORDS个
+  const keysToDelete = timeKeys.slice(MAX_TIME_RECORDS);
+  keysToDelete.forEach((key) => delete timeData[key]);
 }

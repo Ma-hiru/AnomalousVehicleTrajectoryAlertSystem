@@ -22,6 +22,7 @@
   import { useStreamStore } from "@/stores/pinia";
   import { UPDATE_RECORDS_INTERVAL } from "@/settings/settings.streams";
   import Tips from "@/components/Tips.vue";
+  import { memoryMonitor } from "@/utils/memoryMonitor";
 
   const streamStore = useStreamStore();
   const startTime = new Date().getTime();
@@ -46,6 +47,9 @@
     return setInterval(Update, UPDATE_RECORDS_INTERVAL);
   }
 
+  // 清理计数器
+  let cleanupCounter = 0;
+
   function Update() {
     streamStore.GetTotalRecords();
     streamStore.GetSingleRecords(streamStore.ActiveStream.streamId);
@@ -54,6 +58,24 @@
     streamStore.GetSingleCategory(streamStore.ActiveStream.streamId);
     streamStore.GetTotalCategoryByTime(1, startTime);
     streamStore.GetAnomalousCount();
+
+    // 每10次更新执行一次内存清理和监控
+    cleanupCounter++;
+    if (cleanupCounter >= 10) {
+      streamStore.performPeriodicCleanup();
+
+      // 仅在开发环境记录内存信息
+      if (import.meta.env.DEV) {
+        const snapshot = memoryMonitor.takeSnapshot();
+        if (snapshot.memory) {
+          console.log(
+            `🧹 Memory cleanup - Current: ${(snapshot.memory.usedJSHeapSize / 1024 / 1024).toFixed(1)}MB, Total: ${(snapshot.memory.totalJSHeapSize / 1024 / 1024).toFixed(1)}MB`
+          );
+        }
+      }
+
+      cleanupCounter = 0;
+    }
   }
 </script>
 
