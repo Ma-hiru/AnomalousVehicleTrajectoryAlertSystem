@@ -1,6 +1,7 @@
-import { FC, memo, ReactNode } from "react";
+import { FC, memo, ReactNode, useMemo } from "react";
 import { Modal, ConfigProvider } from "antd";
 import { createAntdTheme } from "@/utils/createAntdTheme";
+import { CloseCircleOutlined } from "@ant-design/icons";
 
 type props = {
   open: boolean;
@@ -11,6 +12,7 @@ type props = {
 };
 
 const MyModal: FC<props> = ({ open, title, onCancel, children, width = "auto" }) => {
+  const closeIcon = useMemo(() => <CloseCircleOutlined style={{ color: "#ffffff" }} />, []);
   return (
     <>
       <ConfigProvider theme={themes.MyModal}>
@@ -21,6 +23,7 @@ const MyModal: FC<props> = ({ open, title, onCancel, children, width = "auto" })
           width={width === "unset" ? undefined : width}
           footer={null}
           children={children}
+          closeIcon={closeIcon}
         />
       </ConfigProvider>
     </>

@@ -45,14 +45,23 @@ const AddMenu: FC<props> = ({ open, change, update, config, setConfig }) => {
       }
     }
     change(false);
-  }, [change, config, input.name, input.stream, setConfig, update]);
+  }, [
+    addModifiedVideos,
+    change,
+    config,
+    input.name,
+    input.stream,
+    modifiedVideos,
+    setConfig,
+    update
+  ]);
   const onCancel = useCallback(() => {
     change(false);
   }, [change]);
   return (
     <>
       <MyModal width="unset" title="增加视频流" onCancel={onCancel} open={open}>
-        <Space direction={"vertical"} size={"middle"} style={{ width: "100%" }}>
+        <Space className="w-full" direction={"vertical"} size={"middle"}>
           <Space.Compact className="w-full">
             <Input
               prefix={<SettingsIcon name="streams" />}
@@ -75,8 +84,12 @@ const AddMenu: FC<props> = ({ open, change, update, config, setConfig }) => {
               }}
             />
           </Space.Compact>
+          <Space.Compact className="w-full justify-end">
+            <Button variant="solid" color="blue" onClick={addItem}>
+              添加
+            </Button>
+          </Space.Compact>
         </Space>
-        <Button onClick={addItem}>添加</Button>
       </MyModal>
     </>
   );

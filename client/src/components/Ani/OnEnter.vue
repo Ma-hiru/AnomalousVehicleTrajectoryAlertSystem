@@ -7,6 +7,7 @@
   </motion.div>
 </template>
 
+<!--suppress ES6UnusedImports -->
 <script setup lang="ts" name="onEnter">
   import { motion, VariantLabels } from "motion-v";
   import { TargetAndTransition } from "motion/react";

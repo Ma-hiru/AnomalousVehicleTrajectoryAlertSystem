@@ -149,42 +149,33 @@ const TrackMap: FC<object> = () => {
   useEffect(() => {
     const currentLoca = loca.get();
     const currentMap = map.get();
-    console.log("热力图更新触发 - videoList:", videoList.length, "loca:", !!currentLoca, "map:", !!currentMap);
-    
     if (currentLoca && currentMap && videoList.length > 0) {
       // 清除现有热力图层
       if (heatmapLayerRef.current) {
         currentLoca.remove(heatmapLayerRef.current);
         heatmapLayerRef.current = null;
       }
-      
+
       // 准备热力图数据 - 转换为GeoJSON格式
       const heatmapData = {
         type: "FeatureCollection",
-        features: videoList
-          .map((camera) => {
-            const anomalyCount = getAnomalyCount(camera.streamId);
-            console.log(`摄像头 ${camera.streamId} 异常数量:`, anomalyCount);
-            if (anomalyCount > 0) {
-              return {
-                type: "Feature",
-                properties: {
-                  count: anomalyCount
-                },
-                geometry: {
-                  type: "Point",
-                  coordinates: [camera.longitude, camera.latitude]
-                }
-              };
-            }
-            return null;
-          })
-          .filter((item) => item !== null)
+        features: videoList.reduce((pre, camera) => {
+          const anomalyCount = getAnomalyCount(camera.streamId);
+          if (anomalyCount >= 0) {
+            pre.push({
+              type: "Feature",
+              properties: {
+                count: anomalyCount
+              },
+              geometry: {
+                type: "Point",
+                coordinates: [camera.longitude, camera.latitude]
+              }
+            });
+          }
+          return pre;
+        }, [] as HeatmapFeature[])
       };
-      
-      console.log("热力图数据点数量:", heatmapData.features.length);
-      console.log("热力图数据:", heatmapData);
-      
       // 确保有数据点
       if (heatmapData.features.length > 0) {
         try {
@@ -215,7 +206,7 @@ const TrackMap: FC<object> = () => {
               1: "#D04343"
             },
             // 使用properties中的count属性作为热力值
-            value: (index: number, feature: any) => {
+            value: (index: number, feature: HeatmapFeature) => {
               return feature.properties.count;
             },
             heightBezier: [0, 0.53, 0.37, 0.98]
@@ -246,8 +237,8 @@ const TrackMap: FC<object> = () => {
             }
           });
         } catch (error) {
-          console.error("创建热力图出错:", error);
           // 如果Loca热力图创建失败，回退到使用AMap.HeatMap
+          console.error("创建热力图出错:", error);
           try {
             console.log("尝试使用AMap.HeatMap...");
             const aMapHeatmapData = videoList

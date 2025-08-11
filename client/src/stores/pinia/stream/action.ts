@@ -92,6 +92,18 @@ export const action = (state: StateType) => {
     state.ActiveStream.value = active;
   }
 
+  // 获取正常行为的索引（动态查找名称包含"正常"的行为）
+  function getNormalBehaviorIndex(): number {
+    return state.ActionsEnum.value.findIndex(
+      (action) => action && (action.includes("正常") || action.toLowerCase().includes("normal"))
+    );
+  }
+
+  // 切换是否显示正常行为
+  function toggleShowNormalBehavior() {
+    state.showNormalBehavior.value = !state.showNormalBehavior.value;
+  }
+
   return {
     init_map,
     set_stream_list,
@@ -101,7 +113,9 @@ export const action = (state: StateType) => {
     set_total_action_category_by_time,
     update_single_records,
     set_single_action_category,
-    set_active_stream
+    set_active_stream,
+    getNormalBehaviorIndex,
+    toggleShowNormalBehavior
   };
 };
 

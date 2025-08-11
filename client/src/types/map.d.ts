@@ -5,6 +5,18 @@ type StreamPosition = {
   /** 经度 */
   longitude: number;
 };
+
+interface HeatmapFeature {
+  type: "Feature";
+  properties: {
+    count: number;
+  };
+  geometry: {
+    type: "Point";
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+}
+
 declare namespace AMap {
   interface LoadOptions {
     key: string; // 申请好的Web端开发者Key，首次调用 load 时必填

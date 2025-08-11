@@ -17,27 +17,29 @@ import (
 func Records(streamName string, ctx context.Context, confidence float64) {
 	baseTime := time.Now()
 	streamId := enum.
-		NewResultFrom(service.Stream.
-			WithContext(context.Background()).
-			Where(service.Stream.StreamName.Eq(streamName)).
-			First,
+		NewResultFrom(
+			service.Stream.
+				WithContext(context.Background()).
+				Where(service.Stream.StreamName.Eq(streamName)).
+				First,
 		).
 		Expect("获取视频流不存在").
 		StreamID
 
-	clearRecords(streamId).
-		OnOk(func(value int) {
-			if value > 0 {
-				fmt.Printf("清除旧记录成功, 影响行数: %d\n", value)
-			} else {
-				fmt.Println("没有旧记录需要清除")
-			}
-		}).
-		Expect("清除旧记录失败")
+	//clearRecords(streamId).
+	//	OnOk(func(value int) {
+	//		if value > 0 {
+	//			fmt.Printf("清除旧记录成功, 影响行数: %d\n", value)
+	//		} else {
+	//			fmt.Println("没有旧记录需要清除")
+	//		}
+	//	}).
+	//	Expect("清除旧记录失败")
 
 	enum.
 		NewResultFromWithValue(
-			preload.NewDetectionProcessor, filepath.Join("./video/detection_data.json"),
+			preload.NewDetectionProcessor,
+			filepath.Join("./video/detection_data.json"),
 		).
 		OnOk(func(temp *preload.DetectionProcessor) {
 			functional.SetInterval(

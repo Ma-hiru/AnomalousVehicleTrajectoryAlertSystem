@@ -22,6 +22,9 @@ export const state = () => {
   );
   // 添加更新触发器用于强制响应式更新
   const updateTrigger = ref(0);
+  // 控制是否显示正常行为的开关
+  const showNormalBehavior = ref(false);
+
   return {
     StreamList,
     ActiveStream,
@@ -33,7 +36,8 @@ export const state = () => {
     SingleActionCategoryComputed,
     TotalCarExceptionsRecordList,
     TotalCarExceptionsCount,
-    updateTrigger
+    updateTrigger,
+    showNormalBehavior
   };
 };
 

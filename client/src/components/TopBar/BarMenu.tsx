@@ -5,7 +5,9 @@ import {
   SettingOutlined,
   ReloadOutlined,
   FullscreenOutlined,
-  WarningOutlined
+  WarningOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined
 } from "@ant-design/icons";
 import { createStyleSheet } from "@/utils/createStyleSheet";
 import { useFullScreenReact } from "@/hooks/useFullScreen";
@@ -16,6 +18,7 @@ import styled from "styled-components";
 import OnHover from "@/components/Ani/OnHover";
 import Track from "@/components/Track/Track";
 import { useReactive } from "ahooks";
+import { useStreamStore } from "@/stores/pinia";
 
 interface props {
   setActiveTitle?: (title: string) => void;
@@ -27,13 +30,16 @@ const BTN_SCALE_HOVER = 1.7;
 const HOVER_DUR = 0.3;
 const BarMenu: FC<props> = ({ setActiveTitle }) => {
   const [isFull, changeFullscreen] = useFullScreenReact();
+  const streamStore = useStreamStore();
   const reload = useCallback(() => {
     window.location.reload();
   }, []);
+
   const ShowModal = useReactive({
     settings: false,
     track: false
   });
+
   const openModal = useCallback(
     (type: "settings" | "track" | "history") => {
       switch (type) {
@@ -66,6 +72,24 @@ const BarMenu: FC<props> = ({ setActiveTitle }) => {
               icon={<WarningOutlined style={styles.iconColor} size={ICON_SIZE} />}
               onClick={openModal("track")}
               onMouseOver={setTitle("异常追踪")}
+            />
+          </OnHover>
+          <OnHover scale={BTN_SCALE_HOVER} defaultScale={BTN_SCALE_DEFAULT} duration={HOVER_DUR}>
+            <Button
+              type="text"
+              shape="circle"
+              size="large"
+              icon={
+                streamStore.showNormalBehavior ? (
+                  <EyeOutlined style={styles.iconColor} size={ICON_SIZE} />
+                ) : (
+                  <EyeInvisibleOutlined style={styles.iconColor} size={ICON_SIZE} />
+                )
+              }
+              onClick={() => streamStore.toggleShowNormalBehavior()}
+              onMouseOver={setTitle(
+                streamStore.showNormalBehavior ? "隐藏正常行为" : "显示正常行为"
+              )}
             />
           </OnHover>
           <OnHover scale={BTN_SCALE_HOVER} defaultScale={BTN_SCALE_DEFAULT} duration={HOVER_DUR}>

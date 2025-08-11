@@ -1,5 +1,6 @@
 import { FC, useMemo } from "react";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Space } from "antd";
+import { LoadingOutlined, StopOutlined } from "@ant-design/icons";
 import { createStyleSheet } from "@/utils/createStyleSheet";
 
 type props = {
@@ -13,8 +14,16 @@ const Loading: FC<props> = ({ loading, result }) => {
       return <LoadingOutlined style={styles.loadingIcon} />;
     } else {
       if (!result) {
-        //TODO 添加空状态
-        return <span>加载失败！请检查网络或者重新登录</span>;
+        return (
+          <Space>
+            <Space.Compact>
+              <StopOutlined style={{ color: "red" }} />
+            </Space.Compact>
+            <Space.Compact>
+              <span className={"text-white"}>请检查网络！</span>;
+            </Space.Compact>
+          </Space>
+        );
       }
     }
   }, [loading, result]);

@@ -1,7 +1,7 @@
 <template>
   <div class="total-tendency-container">
     <div class="chart-controls" v-if="showControls">
-      <el-switch v-model="showNormalBehavior" active-text="显示正常行为" inactive-text="隐藏正常行为"
+      <el-switch v-model="streamStore.showNormalBehavior" active-text="显示正常行为" inactive-text="隐藏正常行为"
         @change="updateChartVisibility" />
     </div>
     <div class="chart" ref="tendencyChart"></div>
@@ -29,30 +29,28 @@ type EChartsOption = ComposeOption<
   | LineSeriesOption
 >;
 
-// 配置项，控制是否显示控件和正常行为的曲线
+// 配置项，控制是否显示控件
 const props = withDefaults(
   defineProps<{
-    normalBehaviorIndex?: number; // 正常行为的索引，默认为0
     showControls?: boolean; // 是否显示控制开关
   }>(),
   {
-    normalBehaviorIndex: 0,
     showControls: true
   }
 );
 
 const streamStore = useStreamStore();
 const tendencyChart = useTemplateRef("tendencyChart");
-const showNormalBehavior = ref(false); // 默认不显示正常行为
 
 // 更新图表可见性的函数
 const updateChartVisibility = () => {
   if (!instance.value) return;
+  const normalIndex = streamStore.getNormalBehaviorIndex();
   const legendSelected: Record<string, boolean> = {};
   streamStore.ActionsEnum.forEach((action, index) => {
     // 如果是正常行为且不显示正常行为，则设为false
-    if (index === props.normalBehaviorIndex) {
-      legendSelected[action] = showNormalBehavior.value;
+    if (index === normalIndex) {
+      legendSelected[action] = streamStore.showNormalBehavior;
     } else {
       legendSelected[action] = true;
     }
@@ -132,7 +130,8 @@ const option = reactive({
     top: 30,
     selected: streamStore.ActionsEnum.reduce((acc: any, name, index) => {
       // 默认只显示异常行为，不显示正常行为
-      acc[name] = index !== props.normalBehaviorIndex || showNormalBehavior.value;
+      const normalIndex = streamStore.getNormalBehaviorIndex();
+      acc[name] = index !== normalIndex || streamStore.showNormalBehavior;
       return acc;
     }, {})
   },
@@ -298,6 +297,14 @@ watch(
     updateChartVisibility();
   },
   { immediate: true, deep: true }
+);
+
+// 监听全局开关变化，更新图表可见性
+watch(
+  () => streamStore.showNormalBehavior,
+  () => {
+    updateChartVisibility();
+  }
 );
 
 // 获取行为对应的颜色

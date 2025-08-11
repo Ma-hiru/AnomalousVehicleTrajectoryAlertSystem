@@ -41,7 +41,6 @@
   import { useStreamStore } from "@/stores/pinia";
 
   const streamStore = useStreamStore();
-  /* 组件属性定义 */
   const props = defineProps<{
     url: { stream: string; frame: string };
     meta: VideoStreamInfo;
@@ -49,20 +48,58 @@
   const showControls = ref(false);
   const videoMse = useTemplateRef("videoMse");
   const videoStream = ref<VideoStreamByWS>();
-  onMounted(() => {
+
+  function refresh() {
+    destroy();
+    init();
+  }
+
+  function init() {
     if (videoMse.value) {
-      videoStream.value = new VideoStreamByWS(videoMse.value, { ...props.url, ...props.meta });
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(() => {
+          videoMse.value &&
+            (videoStream.value = new VideoStreamByWS(videoMse.value, {
+              ...props.url,
+              ...props.meta
+            }));
+        });
+      } else {
+        videoStream.value = new VideoStreamByWS(videoMse.value, {
+          ...props.url,
+          ...props.meta
+        });
+      }
     }
-  });
-  onUnmounted(() => {
-    videoStream.value?.destroy();
-  });
-  const refresh = () => {
-    if (videoMse.value) {
-      videoStream.value?.destroy();
-      videoStream.value = new VideoStreamByWS(videoMse.value, { ...props.url, ...props.meta });
-    }
-  };
+  }
+
+  function destroy() {
+    videoStream.value && videoStream.value.destroy();
+    videoStream.value = undefined;
+  }
+
+  function listenPlaying() {
+    let lastTime = 0;
+    let timer: NodeJS.Timeout;
+    return [
+      () =>
+        (timer = setInterval(() => {
+          if (videoMse.value) {
+            const currentTime = videoMse.value.currentTime;
+            if (currentTime === lastTime) refresh();
+            else lastTime = currentTime;
+          }
+        }, 5000)),
+      () => clearInterval(timer)
+    ];
+  }
+
+  const [listener, clearListener] = listenPlaying();
+
+  onMounted(init);
+  onMounted(listener);
+  onUnmounted(destroy);
+  onUnmounted(clearListener);
   defineExpose({
     refresh
   });
