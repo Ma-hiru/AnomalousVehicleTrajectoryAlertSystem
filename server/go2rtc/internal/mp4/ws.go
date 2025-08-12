@@ -3,6 +3,7 @@ package mp4
 import (
 	"context"
 	"errors"
+	"fmt"
 	"server/go2rtc/internal/api"
 	"server/go2rtc/internal/api/ws"
 	"server/go2rtc/internal/streams"
@@ -39,7 +40,7 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	//复制MSE流以便处理
 	//pr, pw := io.Pipe()
 	ctx, cancel := context.WithCancel(context.Background())
-	go mock.RecordsMock(query.Get("src"), ctx)
+	go mock.RecordsMock(query.Get("src"), ctx, fmt.Sprintf("./video/detection_data_%v.json", query.Get("src")))
 	//go streamServer.HandleStreamWithMSE(pr, query, ctx)
 	go func() {
 		//_, _ = cons.WriteTo(tr.MultiWriter(pw))

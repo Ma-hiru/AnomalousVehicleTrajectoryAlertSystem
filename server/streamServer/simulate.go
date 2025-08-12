@@ -13,7 +13,7 @@ import (
 	"sync"
 )
 
-const defaultVideoPath = "./video/processed_video.mp4"
+const defaultVideoPath = "./video/奉化大桥.mp4"
 const defaultOutput = "rtsp://127.0.0.1:8554/live"
 const defaultRtspPath = "./mediamtx/mediamtx.exe"
 const defaultRtspCfg = "./mediamtx/mediamtx.yml"
@@ -31,7 +31,7 @@ func SimulateServer() {
 
 	go func() {
 		NewSimulate(
-			"./video/processed_video2.mp4", "rtsp://127.0.0.1:8554/live2",
+			"./video/路口.mp4", "rtsp://127.0.0.1:8554/live2",
 		).
 			Expect("启动RTSP服务失败")
 		wait.Done()

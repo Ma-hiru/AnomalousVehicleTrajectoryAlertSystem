@@ -6,9 +6,9 @@ log:
 rtsp:
   listen: ':3000'
 streams:
-  奉化大桥1:
+  奉化大桥:
     - ffmpeg:rtsp://127.0.0.1:8554/live#video=h264#audio=aac
-  奉化大桥2:
+  路口:
     - ffmpeg:rtsp://127.0.0.1:8554/live2#video=h264#audio=aac
 webrtc:
   listen: ':3002'

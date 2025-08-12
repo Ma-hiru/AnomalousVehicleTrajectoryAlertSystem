@@ -64,7 +64,6 @@ const TrackMap: FC<object> = () => {
       );
     }
   }, [loca, map]);
-  //TODO 优化更新
   //显示摄像头标记
   useEffect(() => {
     const currentMap = map.get();
@@ -147,143 +146,145 @@ const TrackMap: FC<object> = () => {
   }, [amap, getAnomalyCount, map, videoList]);
   // 热力图
   useEffect(() => {
-    const currentLoca = loca.get();
     const currentMap = map.get();
-    if (currentLoca && currentMap && videoList.length > 0) {
-      // 清除现有热力图层
+    const currentAMap = amap.get();
+    if (!currentMap || !currentAMap) return;
+
+    if (videoList.length === 0) {
       if (heatmapLayerRef.current) {
-        currentLoca.remove(heatmapLayerRef.current);
-        heatmapLayerRef.current = null;
-      }
-
-      // 准备热力图数据 - 转换为GeoJSON格式
-      const heatmapData = {
-        type: "FeatureCollection",
-        features: videoList.reduce((pre, camera) => {
-          const anomalyCount = getAnomalyCount(camera.streamId);
-          if (anomalyCount >= 0) {
-            pre.push({
-              type: "Feature",
-              properties: {
-                count: anomalyCount
-              },
-              geometry: {
-                type: "Point",
-                coordinates: [camera.longitude, camera.latitude]
-              }
-            });
-          }
-          return pre;
-        }, [] as HeatmapFeature[])
-      };
-      // 确保有数据点
-      if (heatmapData.features.length > 0) {
         try {
-          // 创建热力图数据源 - 使用GeoJSONSource而不是LocalSource
-          const dataSource = new Loca.GeoJSONSource({
-            data: heatmapData
-          });
-          // 创建热力图层
-          const heatmapLayer = new Loca.HeatMapLayer({
-            zIndex: 10,
-            opacity: 0.8,
-            visible: true,
-            zooms: [3, 20]
-          });
-          // 设置热力图样式
-          heatmapLayer.setSource(dataSource, {
-            radius: 35,
-            unit: "px",
-            height: 100,
-            gradient: {
-              0.1: "#2A85B8",
-              0.2: "#16B0A9",
-              0.3: "#29CF6F",
-              0.4: "#5CE182",
-              0.5: "#7DF675",
-              0.6: "#FFF100",
-              0.7: "#FAA53F",
-              1: "#D04343"
-            },
-            // 使用properties中的count属性作为热力值
-            value: (index: number, feature: HeatmapFeature) => {
-              return feature.properties.count;
-            },
-            heightBezier: [0, 0.53, 0.37, 0.98]
-          });
-          // 添加到Loca容器
-          currentLoca.add(heatmapLayer);
-          heatmapLayerRef.current = heatmapLayer;
-          // 添加动画效果
-          heatmapLayer.addAnimate({
-            key: "height",
-            value: [0, 1],
-            duration: 2000,
-            easing: "BackOut"
-          });
-          // 添加点击事件
-          currentMap.on("click", function (e: any) {
-            const feature = heatmapLayer.queryFeature(e.pixel.toArray());
-            if (feature) {
-              const infoWindow = new AMap.InfoWindow({
-                content: `<div style="padding: 10px;">
-                  <p>热力值: ${feature.value.toFixed(2)}</p>
-                  <p>位置: ${feature.lnglat[0].toFixed(6)}, ${feature.lnglat[1].toFixed(6)}</p>
-                </div>`,
-                offset: new AMap.Pixel(0, -30)
-              });
-
-              infoWindow.open(currentMap, new AMap.LngLat(feature.lnglat[0], feature.lnglat[1]));
-            }
-          });
-        } catch (error) {
-          // 如果Loca热力图创建失败，回退到使用AMap.HeatMap
-          console.error("创建热力图出错:", error);
-          try {
-            console.log("尝试使用AMap.HeatMap...");
-            const aMapHeatmapData = videoList
-              .map((camera) => {
-                const anomalyCount = getAnomalyCount(camera.streamId);
-                if (anomalyCount > 0) {
-                  return {
-                    lng: camera.longitude,
-                    lat: camera.latitude,
-                    count: anomalyCount * 5 // 增大权重使效果更明显
-                  };
-                }
-                return null;
-              })
-              .filter((item) => item !== null);
-            if (aMapHeatmapData.length > 0) {
-              window.AMap.plugin(["AMap.HeatMap"], function () {
-                const heatmap = new (AMap as any).HeatMap(currentMap, {
-                  radius: 25,
-                  opacity: [0, 0.8],
-                  gradient: {
-                    0.4: "#2A85B8",
-                    0.5: "#16B0A9",
-                    0.6: "#29CF6F",
-                    0.7: "#5CE182",
-                    0.8: "#7DF675",
-                    0.9: "#FFF100",
-                    1.0: "#D04343"
-                  },
-                  zooms: [3, 18]
-                });
-                heatmap.setDataSet({
-                  data: aMapHeatmapData,
-                  max: Math.max(...aMapHeatmapData.map((p) => p.count)) || 10
-                });
-                heatmapLayerRef.current = heatmap;
-              });
-            }
-          } catch (fallbackError) {
-            console.error("AMap.HeatMap 也创建失败:", fallbackError);
+          if (heatmapLayerRef.current.hide) {
+            heatmapLayerRef.current.hide();
           }
+        } catch (e) {
+          console.warn("隐藏热力图失败:", e);
         }
       }
+      return;
     }
-  }, [getAnomalyCount, loca, map, videoList]);
+
+    // 数据准备：包含所有摄像头点位
+    const rawData = videoList.map((v) => ({
+      lng: v.longitude,
+      lat: v.latitude,
+      count: getAnomalyCount(v.streamId)
+    }));
+
+    // 智能权重分布优化
+    const maxCount = rawData.reduce((max, p) => (p.count > max ? p.count : max), 0);
+    // 权重增强处理：提高对比度和视觉效果
+    const enhancedData = rawData.map((point) => {
+      let enhancedCount: number;
+      if (maxCount === 0) {
+        // 全0情况：设置基础热力值
+        enhancedCount = 50;
+      } else if (maxCount <= 5) {
+        // 低数值范围：大幅放大权重
+        enhancedCount = Math.pow(point.count + 1, 2.5) * 20;
+      } else if (maxCount <= 20) {
+        // 中等数值范围：适度放大权重
+        enhancedCount = Math.pow(point.count + 1, 1.8) * 10;
+      } else {
+        // 高数值范围：平滑权重分布
+        const normalizedRatio = point.count / maxCount;
+        enhancedCount = Math.pow(normalizedRatio, 0.7) * 100 + point.count * 2;
+      }
+
+      return {
+        ...point,
+        count: Math.round(Math.max(enhancedCount, 10)) // 确保最小权重为10
+      };
+    });
+    // 处理重叠点：为同一位置的后续点添加微小偏移
+    const positionSeen: Record<string, number> = {};
+    const heatmapData = enhancedData.map((point) => {
+      const posKey = `${point.lng.toFixed(6)},${point.lat.toFixed(6)}`;
+      const count = (positionSeen[posKey] = (positionSeen[posKey] || 0) + 1);
+
+      if (count > 1) {
+        const offset = (count - 1) * 0.00003; // 约3米偏移
+        return {
+          lng: point.lng + offset,
+          lat: point.lat + offset,
+          count: point.count
+        };
+      }
+      return point;
+    });
+
+    // 动态半径计算：更大的半径提升视觉效果
+    const zoom = currentMap.getZoom();
+    const dynamicRadius = Math.max(25, Math.min(80, 100 - zoom * 3));
+
+    // 优化渐变配置：更强烈的对比度和更丰富的色彩
+    const gradient = {
+      0.0: "#000080", // 深蓝色
+      0.15: "#0066CC", // 蓝色
+      0.3: "#00CCCC", // 青色
+      0.45: "#00FF00", // 绿色
+      0.6: "#FFFF00", // 黄色
+      0.75: "#FF8800", // 橙色
+      0.9: "#FF4400", // 红橙色
+      1.0: "#FF0000" // 纯红色
+    };
+
+    // 计算动态最大值：增强视觉效果
+    const enhancedMax = Math.max(...heatmapData.map((p) => p.count));
+    const visualMax = Math.max(enhancedMax * 1.2, 100); // 适当放大最大值范围
+
+    // 使用 AMap.HeatMap 插件
+    if (!heatmapLayerRef.current) {
+      currentAMap.plugin(["AMap.HeatMap"], () => {
+        const heatmap = new (currentAMap as any).HeatMap(currentMap, {
+          radius: dynamicRadius,
+          opacity: [0, 0.8], // 提高初始透明度
+          gradient: gradient,
+          zooms: [3, 20],
+          blur: 0.85 // 添加模糊效果增强视觉
+        });
+
+        heatmap.setDataSet({
+          data: heatmapData,
+          max: visualMax // 使用优化的最大值
+        });
+
+        heatmapLayerRef.current = heatmap;
+        heatmapLayerRef.current.__heatType = "amap";
+
+        // 缩放事件处理：同时更新半径和透明度
+        if (!(currentMap as any).__heatZoomBound) {
+          (currentMap as any).__heatZoomBound = true;
+          currentMap.on("zoomend", () => {
+            if (!heatmapLayerRef.current) return;
+
+            const newZoom = currentMap.getZoom();
+            const newRadius = Math.max(25, Math.min(80, 100 - newZoom * 3));
+            const newOpacity = Math.max(0.6, Math.min(0.9, 0.5 + newZoom * 0.05));
+
+            try {
+              heatmapLayerRef.current.setOptions({
+                radius: newRadius,
+                opacity: [0, newOpacity]
+              });
+            } catch (err) {
+              console.warn("更新热力图参数失败:", err);
+            }
+          });
+        }
+      });
+    } else {
+      // 更新现有热力图数据
+      try {
+        heatmapLayerRef.current.setDataSet({
+          data: heatmapData,
+          max: visualMax // 使用优化的最大值
+        });
+        heatmapLayerRef.current.show();
+      } catch (err) {
+        console.warn("更新热力图数据失败:", err);
+      }
+    }
+  }, [getAnomalyCount, map, amap, videoList]);
 
   return (
     <BaseMap

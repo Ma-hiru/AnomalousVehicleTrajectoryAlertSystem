@@ -15,7 +15,7 @@ import (
 	"shiina-mahiru.cn/preload"
 )
 
-func RecordsMock(streamName string, ctx context.Context) {
+func RecordsMock(streamName string, ctx context.Context, dataPath string) {
 	var provinces = []string{"浙"}
 	var regions = []string{"B", "U"}
 	var rate float32 = 0.6
@@ -26,6 +26,7 @@ func RecordsMock(streamName string, ctx context.Context) {
 		provinces,
 		regions,
 		rate,
+		dataPath,
 	)
 }
 
@@ -36,6 +37,7 @@ func records(
 	provinces []string,
 	letters []string,
 	rate float32,
+	dataPath string,
 ) {
 	baseTime := time.Now()
 	streamId := enum.
@@ -61,7 +63,7 @@ func records(
 	enum.
 		NewResultFromWithValue(
 			preload.NewDetectionProcessor,
-			filepath.Join("./video/detection_data.json"),
+			filepath.Join(dataPath),
 		).
 		OnOk(func(temp *preload.DetectionProcessor) {
 			functional.SetInterval(

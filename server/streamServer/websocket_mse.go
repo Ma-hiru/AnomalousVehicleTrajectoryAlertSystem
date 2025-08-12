@@ -3,6 +3,7 @@ package streamServer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -20,7 +21,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values, ctx context.Contex
 	defer utils.Logger("StreamServer").Println("视频帧处理结束")
 	streamName := query.Get("src")
 	// 模拟录像数据
-	go mock.RecordsMock(streamName, ctx)
+	go mock.RecordsMock(streamName, ctx, fmt.Sprintf("./video/detection_data_%v.json", streamName))
 	imgFrame, err := ExtractVideoFramesWithStream(
 		pr,
 		settings.ExtractOptions(streamName),
