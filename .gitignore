@@ -6,6 +6,7 @@
 /server/cert/
 /server/www/
 /server/video/
+/server/exe/
 /server/scripts/
 /server/frames/
 /client/src/__tests__

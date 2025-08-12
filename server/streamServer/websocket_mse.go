@@ -20,7 +20,7 @@ func HandleStreamWithMSE(pr *io.PipeReader, query url.Values, ctx context.Contex
 	defer utils.Logger("StreamServer").Println("视频帧处理结束")
 	streamName := query.Get("src")
 	// 模拟录像数据
-	go mock.Records(streamName, ctx, 0.5)
+	go mock.RecordsMock(streamName, ctx)
 	imgFrame, err := ExtractVideoFramesWithStream(
 		pr,
 		settings.ExtractOptions(streamName),

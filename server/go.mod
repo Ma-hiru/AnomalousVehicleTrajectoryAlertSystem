@@ -2,67 +2,72 @@ module server
 
 go 1.24.4
 
-require (
-	github.com/gin-contrib/cors v1.7.6 // indirect
-	github.com/gin-gonic/gin v1.10.1
-	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/gorilla/websocket v1.5.3
-	gorm.io/driver/mysql v1.6.0
-	gorm.io/gorm v1.30.0
+replace (
+	shiina-mahiru.cn/gin_server => ./core/gin_server
+	shiina-mahiru.cn/preload => ../temp
 )
 
 require (
 	github.com/expr-lang/expr v1.17.5
 	github.com/fatih/color v1.18.0
 	github.com/gin-contrib/pprof v1.5.3
+	github.com/gin-gonic/gin v1.10.1
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/mattn/go-isatty v0.0.20
-	github.com/miekg/dns v1.1.66
-	github.com/pion/ice/v2 v2.3.37
+	github.com/miekg/dns v1.1.68
+	github.com/pion/ice/v2 v2.3.38
 	github.com/pion/interceptor v0.1.40
 	github.com/pion/rtcp v1.2.15
-	github.com/pion/rtp v1.8.18
-	github.com/pion/sdp/v3 v3.0.13
+	github.com/pion/rtp v1.8.21
+	github.com/pion/sdp/v3 v3.0.15
 	github.com/pion/srtp/v2 v2.0.20
 	github.com/pion/stun v0.6.1
-	github.com/pion/webrtc/v3 v3.3.5
+	github.com/pion/webrtc/v3 v3.3.6
 	github.com/rs/zerolog v1.34.0
 	github.com/sigurn/crc16 v0.0.0-20240131213347-83fcde1e29d1
 	github.com/sigurn/crc8 v0.0.0-20220107193325-2243fe600f9f
 	github.com/stretchr/testify v1.10.0
 	github.com/tadglines/go-pkgs v0.0.0-20210623144937-b983b20f54f9
 	github.com/u2takey/ffmpeg-go v0.5.0
-	gocv.io/x/gocv v0.41.0
-	golang.org/x/crypto v0.40.0
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	gocv.io/x/gocv v0.42.0
+	golang.org/x/crypto v0.41.0
+	google.golang.org/grpc v1.74.2
+	google.golang.org/protobuf v1.36.7
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/gen v0.3.27
+	gorm.io/gorm v1.30.1
+	gorm.io/plugin/dbresolver v1.6.2
 	shiina-mahiru.cn/gin_server v0.0.0-00010101000000-000000000000
+	shiina-mahiru.cn/preload v0.0.0-00010101000000-000000000000
 )
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/aws/aws-sdk-go v1.55.7 // indirect
-	github.com/bytedance/sonic v1.13.3 // indirect
-	github.com/bytedance/sonic/loader v0.2.4 // indirect
+	github.com/aws/aws-sdk-go v1.55.8 // indirect
+	github.com/bytedance/sonic v1.14.0 // indirect
+	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/cloudwego/base64x v0.1.5 // indirect
+	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
+	github.com/gin-contrib/cors v1.7.6 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.26.0 // indirect
+	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
+	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -70,7 +75,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pion/datachannel v1.5.10 // indirect
 	github.com/pion/dtls/v2 v2.2.12 // indirect
-	github.com/pion/logging v0.2.3 // indirect
+	github.com/pion/logging v0.2.4 // indirect
 	github.com/pion/mdns v0.0.12 // indirect
 	github.com/pion/randutil v0.1.0 // indirect
 	github.com/pion/sctp v1.8.39 // indirect
@@ -82,21 +87,14 @@ require (
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
-	golang.org/x/arch v0.18.0 // indirect
-	golang.org/x/mod v0.26.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/arch v0.20.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
-	golang.org/x/tools v0.35.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250811230008-5f3141c8851a // indirect
 	gorm.io/datatypes v1.2.6 // indirect
-	gorm.io/gen v0.3.27 // indirect
 	gorm.io/hints v1.1.2 // indirect
-	gorm.io/plugin/dbresolver v1.6.1 // indirect
-)
-
-replace (
-	shiina-mahiru.cn/gin_server => ./core/gin_server
-	shiina-mahiru.cn/preload => ../temp
 )

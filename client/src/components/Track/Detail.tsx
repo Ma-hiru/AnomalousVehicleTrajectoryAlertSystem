@@ -97,7 +97,8 @@ const Detail: FC<props> = ({ track }) => {
                   <div>
                     <h4>{getStreamName(t.streamId)}</h4>
                     <p>
-                      出现时间: {new Date(t.timeRange[0]).toLocaleString()} -
+                      出现时间:
+                      {new Date(t.timeRange[0]).toLocaleString()} <br />
                       {new Date(t.timeRange[1]).toLocaleString()}
                     </p>
                     <p>记录数: {t.records.length}</p>

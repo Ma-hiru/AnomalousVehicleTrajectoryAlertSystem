@@ -15,12 +15,28 @@ import (
 	"shiina-mahiru.cn/preload"
 )
 
-func Records(streamName string, ctx context.Context, confidence float64) {
-	recordsWithLicensePlateType(streamName, ctx, confidence, true)
+func RecordsMock(streamName string, ctx context.Context) {
+	var provinces = []string{"浙"}
+	var regions = []string{"B", "U"}
+	var rate float32 = 0.6
+	records(
+		streamName,
+		ctx,
+		0.5,
+		provinces,
+		regions,
+		rate,
+	)
 }
 
-// recordsWithLicensePlateType 内部函数，支持选择车牌类型
-func recordsWithLicensePlateType(streamName string, ctx context.Context, confidence float64, useNingbo bool) {
+func records(
+	streamName string,
+	ctx context.Context,
+	confidence float64,
+	provinces []string,
+	letters []string,
+	rate float32,
+) {
 	baseTime := time.Now()
 	streamId := enum.
 		NewResultFrom(
@@ -61,7 +77,16 @@ func recordsWithLicensePlateType(streamName string, ctx context.Context, confide
 						cancel()
 						return
 					default:
-						insertRecordsWithLicensePlateType(temp, streamId, baseTime, cancel, confidence, useNingbo)
+						insertRecordsWithLicensePlateType(
+							temp,
+							streamId,
+							baseTime,
+							cancel,
+							confidence,
+							provinces,
+							letters,
+							rate,
+						)
 					}
 				},
 				time.Second,
@@ -75,7 +100,9 @@ func insertRecordsWithLicensePlateType(
 	baseTime time.Time,
 	cancel context.CancelFunc,
 	confidence float64,
-	useNingbo bool,
+	provinces []string,
+	letters []string,
+	rate float32,
 ) {
 	var records = enum.
 		NewResultFromWithValue(
@@ -87,33 +114,24 @@ func insertRecordsWithLicensePlateType(
 
 	var shouldInsertCars = make([]*model.Car, 0)
 	var shouldInsertRecords = make([]*model.Record, 0)
-
-	// 获取车牌管理器
-	plateManager := GetLicensePlateManager()
+	var licensePlate string
 
 	for _, Detection := range records.Detections {
 		if Detection.Confidence < confidence {
 			continue
 		}
-
-		// 根据选择生成车牌号
-		var licensePlate string
-		if useNingbo {
-			licensePlate = plateManager.GetOrCreateNingboLicensePlate(Detection.CarID)
-		} else {
-			licensePlate = plateManager.GetOrCreateLicensePlate(Detection.CarID)
-		}
-
+		licensePlate = plateManager.GetOrCreateLicensePlate(Detection.CarID, provinces, letters, rate)
 		shouldInsertCars = append(shouldInsertCars, &model.Car{
-			CarID: licensePlate, // 直接使用车牌号作为CarID
+			CarID: licensePlate,
 		})
 		shouldInsertRecords = append(shouldInsertRecords, &model.Record{
-			CarID:    licensePlate, // 使用车牌号作为CarID
+			CarID:    licensePlate,
 			StreamID: streamId,
 			ActionID: int64(Detection.Behavior.ActionID),
 			Time:     time.Now().UnixMilli(),
 		})
 	}
+
 	_ = service.Car.
 		WithContext(context.Background()).
 		Clauses(clause.OnConflict{DoNothing: true}).

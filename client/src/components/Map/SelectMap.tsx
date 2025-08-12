@@ -15,10 +15,10 @@ type props = {
   position: StreamPosition;
 };
 const SelectMap: FC<props> = ({ position }) => {
-  const map = useMyState<AMap.Map | null>(null);
-  const amap = useMyState<typeof window.AMap | null>(null);
+  const map = useMyState<Null<AMap.Map>>(null);
+  const amap = useMyState<Null<typeof window.AMap>>(null);
   const marker = useRef<InstanceType<typeof window.AMap.Marker>>();
-  const markers: InstanceType<typeof AMap.Marker>[] = useMemo(() => {
+  const markers = useMemo(() => {
     const currentAMap = amap.get();
     if (currentAMap) {
       marker.current = new currentAMap.Marker({
@@ -36,15 +36,13 @@ const SelectMap: FC<props> = ({ position }) => {
       if (position.longitude === 0 || position.latitude === 0) {
         getLocation()
           .then((pos) => {
-            if (pos) {
-              currentMap.setCenter(
-                new currentAMap.LngLat(pos.coords.longitude, pos.coords.latitude)
-              );
-            }
+            if (pos) return pos;
+            throw new Error("地点定位失败！");
           })
-          .catch(() => {
-            Logger.Message.Error("地点定位失败！");
-          });
+          .then((pos) =>
+            currentMap.setCenter(new currentAMap.LngLat(pos.coords.longitude, pos.coords.latitude))
+          )
+          .catch(Logger.Message.Error);
       } else {
         currentMap.setCenter(new currentAMap.LngLat(position.longitude, position.latitude));
       }
@@ -72,7 +70,6 @@ const SelectMap: FC<props> = ({ position }) => {
   );
   const UpdatePosition = useCallback(
     (e: AMap.MapsEvent) => {
-      console.log(e);
       addModifiedVideos(position.name, {
         longitude: e.lnglat.lng,
         latitude: e.lnglat.lat
@@ -96,6 +93,14 @@ const SelectMap: FC<props> = ({ position }) => {
   }, [UpdatePosition, amap, map]);
   //使用插件
   const [searchText, setSearchText] = useState("");
+  const PlaceSearch = useRef<InstanceType<typeof AMap.PlaceSearch>>();
+  const handlePOI = useCallback(
+    (e: Parameters<Parameters<InstanceType<typeof AMap.AutoComplete>["on"]>[1]>[number]) => {
+      PlaceSearch.current && PlaceSearch.current.search(e.poi.name);
+      setSearchText(e.poi.name);
+    },
+    []
+  );
   useEffect(() => {
     const currentAMap = amap.get();
     const currentMap = map.get();
@@ -117,17 +122,11 @@ const SelectMap: FC<props> = ({ position }) => {
         city: "010",
         input: "tipinput"
       });
-      const PlaceSearch = new currentAMap.PlaceSearch({
+      PlaceSearch.current = new currentAMap.PlaceSearch({
         //设置PlaceSearch属性
         city: "北京", //城市
         map: currentMap
       });
-      const handlePOI = (
-        e: Parameters<Parameters<InstanceType<typeof AMap.AutoComplete>["on"]>[1]>[number]
-      ) => {
-        PlaceSearch.search(e.poi.name);
-        setSearchText(e.poi.name);
-      };
       AutoComplete.on("select", handlePOI);
       return () => {
         if (currentMap) {
@@ -135,12 +134,12 @@ const SelectMap: FC<props> = ({ position }) => {
           currentMap.removeControl(Scale);
           currentMap.removeControl(Geolocation);
           currentMap.removeControl(AutoComplete);
-          currentMap.removeControl(PlaceSearch);
+          PlaceSearch.current = undefined;
           AutoComplete.off("select", handlePOI);
         }
       };
     }
-  }, [amap, map]);
+  }, [amap, handlePOI, map]);
   return (
     <>
       <div className="w-full h-full relative">

@@ -8,3 +8,4 @@ type RestParams<T> = T extends (firstArg: any, ...args: infer R) => any ? R : ne
 type FirstParams<T> = T extends (firstArg: infer F, ...args: any[]) => any ? F : never;
 type NormalFunc = () => void;
 type Nullable<T> = T | null | undefined;
+type Null<T> = T | null;

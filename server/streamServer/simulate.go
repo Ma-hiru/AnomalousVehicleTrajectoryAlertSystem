@@ -10,50 +10,97 @@ import (
 	"server/core/enum"
 	"server/core/ffmpeg"
 	"server/utils"
+	"sync"
 )
 
-var videoPath = "./video/processed_video.mp4"
-var config = ffmpeg.SimulateStreamsOptions{
-	FilePath:   filepath.Join(videoPath),
-	FileOutput: "rtsp://127.0.0.1:8554/live",
-	InputOpt: ffmpeg.SimulateInputOption{
-		StreamLoop:          "-1",
-		Re:                  "",
-		Threads:             "20",
-		Async:               "1",
-		Vsync:               "1",
-		Hwaccel:             "cuda", //"qsv" "cuda"
-		HwaccelOutputFormat: "cuda", //"qsv" "cuda"
-	},
-	OutputOpt: ffmpeg.SimulateOutputOption{
-		CV:            "h264_nvenc", //"h264_qsv" "h264_nvenc"
-		Preset:        "p6",         //"veryfast" "p6"
-		BV:            "1500k",
-		Maxrate:       "3000k",
-		Bufsize:       "4500k",
-		R:             "30",
-		G:             "60",
-		Bf:            "0",
-		ProfileV:      "high",
-		CA:            "aac",
-		BA:            "128k",
-		RtspTransport: "tcp",
-		TcpNodelay:    "1",
-		F:             "rtsp",
-	},
-	RtspServerConfig: ffmpeg.RtspServerConfig{
-		FilePath:   filepath.Join("./mediamtx/mediamtx.exe"),
-		ConfigPath: filepath.Join("./mediamtx/mediamtx.yml"),
-	},
+const defaultVideoPath = "./video/processed_video.mp4"
+const defaultOutput = "rtsp://127.0.0.1:8554/live"
+const defaultRtspPath = "./mediamtx/mediamtx.exe"
+const defaultRtspCfg = "./mediamtx/mediamtx.yml"
+
+func SimulateServer() {
+	wait := sync.WaitGroup{}
+	wait.Add(2)
+
+	go func() {
+		NewSimulate(defaultVideoPath, defaultOutput).
+			Expect("启动RTSP服务失败")
+		wait.Done()
+		fmt.Println("live close")
+	}()
+
+	go func() {
+		NewSimulate(
+			"./video/processed_video2.mp4", "rtsp://127.0.0.1:8554/live2",
+		).
+			Expect("启动RTSP服务失败")
+		wait.Done()
+		fmt.Println("live2 close")
+	}()
+
+	wait.Wait()
 }
 
-func SimulateStream() {
+func NewSimulate(path, out string) *enum.Result[enum.None] {
+	return NewSimulateConfig(path, out).
+		SetDevice().
+		RtspConfig(defaultRtspPath, defaultRtspCfg).
+		StartRTSP().
+		Expect("ffmpeg配置错误").
+		Simulate()
+}
+
+type SimulateConfig struct {
+	ffmpeg *ffmpeg.SimulateStreamsOptions
+}
+
+func NewSimulateConfig(path, out string) *SimulateConfig {
+	if path == "" {
+		path = defaultVideoPath
+	}
+	if out == "" {
+		out = defaultOutput
+	}
+	return &SimulateConfig{
+		ffmpeg: &ffmpeg.SimulateStreamsOptions{
+			FilePath:   filepath.Join(path),
+			FileOutput: out,
+			InputOpt: ffmpeg.SimulateInputOption{
+				StreamLoop:          "-1",
+				Re:                  "",
+				Threads:             "20",
+				Async:               "1",
+				Vsync:               "1",
+				Hwaccel:             "cuda", //"qsv" "cuda"
+				HwaccelOutputFormat: "cuda", //"qsv" "cuda"
+			},
+			OutputOpt: ffmpeg.SimulateOutputOption{
+				CV:            "h264_nvenc", //"h264_qsv" "h264_nvenc"
+				Preset:        "p6",         //"veryfast" "p6"
+				BV:            "1500k",
+				Maxrate:       "3000k",
+				Bufsize:       "4500k",
+				R:             "30",
+				G:             "60",
+				Bf:            "0",
+				ProfileV:      "high",
+				CA:            "aac",
+				BA:            "128k",
+				RtspTransport: "tcp",
+				TcpNodelay:    "1",
+				F:             "rtsp",
+			},
+		},
+	}
+}
+
+func (config *SimulateConfig) SetDevice() *SimulateConfig {
 	var isNvidia = utils.
 		IsDevice(utils.Nvidia).
-		Expect("Detect Nvidia Device Err")
+		Expect("Detect Device Err")
 	var isIntel = utils.
 		IsDevice(utils.Intel).
-		Expect("Detect Intel Device Err")
+		Expect("Detect Device Err")
 
 	if isNvidia {
 		utils.
@@ -61,36 +108,40 @@ func SimulateStream() {
 			Println(
 				"Detected Nvidia GPU, using NVENC for hardware acceleration.",
 			)
-		config.InputOpt.Hwaccel = "cuda"
-		config.InputOpt.HwaccelOutputFormat = "cuda"
-		config.OutputOpt.CV = "h264_nvenc"
-		config.OutputOpt.Preset = "p6"
+		config.ffmpeg.InputOpt.Hwaccel = "cuda"
+		config.ffmpeg.InputOpt.HwaccelOutputFormat = "cuda"
+		config.ffmpeg.OutputOpt.CV = "h264_nvenc"
+		config.ffmpeg.OutputOpt.Preset = "p6"
 	} else if isIntel {
 		utils.
 			Logger("streamServer").
 			Println(
 				"Detected Intel GPU, using QSV for hardware acceleration.",
 			)
-		config.InputOpt.Hwaccel = "qsv"
-		config.InputOpt.HwaccelOutputFormat = "qsv"
-		config.OutputOpt.CV = "h264_qsv"
-		config.OutputOpt.Preset = "veryfast"
+		config.ffmpeg.InputOpt.Hwaccel = "qsv"
+		config.ffmpeg.InputOpt.HwaccelOutputFormat = "qsv"
+		config.ffmpeg.OutputOpt.CV = "h264_qsv"
+		config.ffmpeg.OutputOpt.Preset = "veryfast"
 	}
-
-	res := simulate(config)
-	if res.IsErr() {
-		utils.
-			Logger("streamServer").
-			Println(
-				"SimulateStreamsErr:", res.UnwrapErr(),
-			)
-		return
-	}
+	return config
 }
 
-func simulate(options ffmpeg.SimulateStreamsOptions) *enum.Result[bool] {
-	startRTSP(options).Unwrap()
+func (config *SimulateConfig) RtspConfig(path, cfg string) *SimulateConfig {
+	if path == "" {
+		path = defaultRtspPath
+	}
+	if cfg == "" {
+		cfg = defaultRtspCfg
+	}
+	config.ffmpeg.RtspServerConfig = ffmpeg.RtspServerConfig{
+		FilePath:   filepath.Join(path),
+		ConfigPath: filepath.Join(cfg),
+	}
+	return config
+}
 
+func (config *SimulateConfig) Simulate() *enum.Result[enum.None] {
+	options := config.ffmpeg
 	errBuf := bytes.NewBuffer(nil)
 	err := ffmpeggo.
 		Input(options.FilePath,
@@ -123,7 +174,7 @@ func simulate(options ffmpeg.SimulateStreamsOptions) *enum.Result[bool] {
 		WithErrorOutput(errBuf).
 		Run()
 	if err != nil {
-		return enum.Err[bool](
+		return enum.Err[enum.None](
 			fmt.Errorf(
 				"run err: %v\n buf err: %v\n",
 				err.Error(), errBuf.String(),
@@ -131,29 +182,30 @@ func simulate(options ffmpeg.SimulateStreamsOptions) *enum.Result[bool] {
 		)
 	}
 
-	return enum.Ok(true)
+	return enum.Ok(enum.None{})
 }
 
-func startRTSP(options ffmpeg.SimulateStreamsOptions) *enum.Result[bool] {
+func (config *SimulateConfig) StartRTSP() *enum.Result[*SimulateConfig] {
 	var cmd *exec.Cmd
+	var options = config.ffmpeg
 	var file = options.RtspServerConfig.FilePath
-	var config = options.RtspServerConfig.ConfigPath
+	var cfg = options.RtspServerConfig.ConfigPath
 	switch runtime.GOOS {
 	case "windows":
 		shellCmd := "pwsh"
 		psCommand := fmt.Sprintf("& '%s' '%s'",
 			filepath.Join(file),
-			filepath.Join(config),
+			filepath.Join(cfg),
 		)
 		if _, err := exec.LookPath(shellCmd); err != nil {
 			shellCmd = "powershell"
 		}
 		cmd = exec.Command("cmd.exe", "/C", "start", "", shellCmd, "-Command", psCommand)
 	default:
-		cmd = exec.Command(filepath.Join(file), filepath.Join(config))
+		cmd = exec.Command(filepath.Join(file), filepath.Join(cfg))
 	}
 	if err := cmd.Start(); err != nil {
-		return enum.Err[bool](fmt.Errorf("启动RTSP服务失败: %w", err))
+		return enum.Err[*SimulateConfig](fmt.Errorf("启动RTSP服务失败: %w", err))
 	}
-	return enum.Ok(true)
+	return enum.Ok(config)
 }

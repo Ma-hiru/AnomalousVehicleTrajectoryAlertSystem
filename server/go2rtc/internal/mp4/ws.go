@@ -39,7 +39,7 @@ func handlerWSMSE(tr *ws.Transport, msg *ws.Message) error {
 	//复制MSE流以便处理
 	//pr, pw := io.Pipe()
 	ctx, cancel := context.WithCancel(context.Background())
-	go mock.Records(query.Get("src"), ctx, 0.5)
+	go mock.RecordsMock(query.Get("src"), ctx)
 	//go streamServer.HandleStreamWithMSE(pr, query, ctx)
 	go func() {
 		//_, _ = cons.WriteTo(tr.MultiWriter(pw))

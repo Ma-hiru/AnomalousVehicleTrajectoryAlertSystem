@@ -39,7 +39,7 @@ func SetInterval(callback func(cancel context.CancelFunc), delay time.Duration) 
 		for {
 			select {
 			case <-ticker.C:
-				callback(cancel)
+				go callback(cancel)
 			case <-ctx.Done():
 				return
 			}

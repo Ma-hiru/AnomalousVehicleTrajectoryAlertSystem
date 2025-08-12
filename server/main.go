@@ -16,10 +16,10 @@ func main() {
 	control.WrapWg(wg, map[string]func(){
 		//"pprof":          debug.PProf,
 		"listenSignExit": debug.ListenSignExit,
-		"simulateStream": streamServer.SimulateStream,
+		"simulateStream": streamServer.SimulateServer,
 		"go2rtc":         go2rtc.Init,
-		"yolo":           yolov8.Init,
-		"redis":          redis.Init,
+		"yolo_init":      yolov8.Init,
+		"redis_init":     redis.Init,
 		"apiServer":      apiServer.Init,
 		//"testYolo":  test.YoloSimulate,
 	})

@@ -35,26 +35,20 @@ const AddMenu: FC<props> = ({ open, change, update, config, setConfig }) => {
     }
     if (config && config.data) {
       if (typeof config.data[AppSettings.STREAMS_CONF_NAME] === "object") {
-        config.data[AppSettings.STREAMS_CONF_NAME][input.name] = [input.stream];
-        setConfig(config);
+        setConfig((draft) => {
+          draft!.data![AppSettings.STREAMS_CONF_NAME][input.name] = [input.stream];
+        });
         addModifiedVideos(input.name, {
           latitude: 0,
           longitude: 0
         });
         update();
+        input.name = "";
+        input.stream = "";
       }
     }
     change(false);
-  }, [
-    addModifiedVideos,
-    change,
-    config,
-    input.name,
-    input.stream,
-    modifiedVideos,
-    setConfig,
-    update
-  ]);
+  }, [addModifiedVideos, change, config, input, modifiedVideos, setConfig, update]);
   const onCancel = useCallback(() => {
     change(false);
   }, [change]);

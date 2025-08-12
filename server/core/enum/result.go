@@ -94,6 +94,13 @@ func (r *Result[T]) OnOkPure(f func()) *Result[T] {
 	return r
 }
 
+func (r *Result[T]) Any(f func()) *Result[T] {
+	if f != nil {
+		f()
+	}
+	return r
+}
+
 func (r *Result[T]) Then(f func(value T) *Result[any]) (res *Result[any]) {
 	defer func() {
 		if err := recover(); err != nil {
