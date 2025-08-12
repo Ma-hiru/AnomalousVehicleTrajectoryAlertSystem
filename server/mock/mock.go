@@ -22,7 +22,7 @@ func RecordsMock(streamName string, ctx context.Context, dataPath string) {
 	records(
 		streamName,
 		ctx,
-		0.5,
+		0.7,
 		provinces,
 		regions,
 		rate,

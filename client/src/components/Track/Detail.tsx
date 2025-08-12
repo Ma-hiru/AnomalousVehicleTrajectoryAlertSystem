@@ -88,7 +88,7 @@ const Detail: FC<props> = ({ track }) => {
     <ConfigProvider theme={AntdTheme}>
       <DetailContainer>
         <div className="track-summary">
-          <Card title="轨迹概览 (时间顺序)" bordered={false}>
+          <Card title="轨迹概览 (时间顺序)" variant={"borderless"}>
             <Timeline
               mode="left"
               items={sortedTrack.map((t, index) => ({
@@ -98,7 +98,9 @@ const Detail: FC<props> = ({ track }) => {
                     <h4>{getStreamName(t.streamId)}</h4>
                     <p>
                       出现时间:
-                      {new Date(t.timeRange[0]).toLocaleString()} <br />
+                      <br />
+                      {new Date(t.timeRange[0]).toLocaleString()}
+                      <br />
                       {new Date(t.timeRange[1]).toLocaleString()}
                     </p>
                     <p>记录数: {t.records.length}</p>
