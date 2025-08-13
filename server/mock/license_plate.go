@@ -29,7 +29,7 @@ func (lpm *LicensePlateManager) generateLicensePlate(provinces, letters []string
 			if rand.Float32() < rate {
 				number += fmt.Sprintf("%d", rand.Intn(10))
 			} else {
-				number += letters[randGen.Intn(len(letters))]
+				number += defaultLetters[randGen.Intn(len(defaultLetters))]
 			}
 		}
 		plate := province + region + number

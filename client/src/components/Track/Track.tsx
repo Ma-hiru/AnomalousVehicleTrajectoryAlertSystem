@@ -1,20 +1,41 @@
 import { FC, memo, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { Input, GetProps, ConfigProvider, Table, Button, theme, DatePicker, Tag } from "antd";
+import {
+  Input,
+  GetProps,
+  ConfigProvider,
+  Table,
+  Button,
+  theme,
+  DatePicker,
+  Tag,
+  Space,
+  Statistic,
+  Card,
+  Row,
+  Col,
+  Badge
+} from "antd";
 import MyModal from "@/components/MyModal";
 import Detail from "@/components/Track/Detail";
 import { useReactive } from "ahooks";
 import { useStreamStore } from "@/stores/pinia";
 import { pinia } from "@/stores/pinia";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/zh-cn";
 import { useImmer } from "use-immer";
 import { fetchDataAsync } from "@/utils/fetchData";
 import { useTrackZustandStore } from "@/stores/zustand/track";
 import { useShallow } from "zustand/react/shallow";
 import { useDebounceEffect } from "ahooks";
+import { AlertOutlined, EyeOutlined, CarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+
+// 配置dayjs
+dayjs.extend(relativeTime);
+dayjs.locale("zh-cn");
 
 const { Column } = Table;
-const { RangePicker } = DatePicker;
 type SearchProps = GetProps<typeof Input.Search>;
 
 const Track: FC<object> = () => {
@@ -82,16 +103,127 @@ const Track: FC<object> = () => {
     ShowModal.detail = false;
   }, [ShowModal]);
 
+  // 计算统计数据
+  const statistics = useMemo(() => {
+    const totalTracks = currentTrackList.length;
+    const totalAnomalies = currentTrackList.reduce((sum, track) => sum + track.actionIds.length, 0);
+    const uniqueActions = new Set(currentTrackList.flatMap((track) => track.actionIds)).size;
+
+    // 获取活跃的视频流数量
+    const activeStreams = new Set(
+      currentTrackList.flatMap((track) => track.track.map((t) => t.streamId))
+    ).size;
+
+    // 最近的异常时间
+    const latestTime =
+      currentTrackList.length > 0
+        ? Math.max(
+            ...currentTrackList.map((track) => {
+              if (typeof track.time === "object" && track.time !== null && "time" in track.time) {
+                return track.time.time;
+              } else if (typeof track.time === "number") {
+                return track.time;
+              }
+              return 0;
+            })
+          )
+        : Date.now();
+
+    return {
+      totalTracks,
+      totalAnomalies,
+      uniqueActions,
+      activeStreams,
+      latestTime
+    };
+  }, [currentTrackList]);
+
   return (
     <>
       <TrackContainer>
+        {/* 统计面板 */}
+        <div className="statistics">
+          <ConfigProvider theme={AntdCardTheme}>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={12} md={6}>
+                <Card variant={"borderless"} size="small">
+                  <Statistic
+                    title={
+                      <Space>
+                        <CarOutlined style={{ color: "var(--settings-loadingIcon-color)" }} />
+                        追踪车辆
+                      </Space>
+                    }
+                    value={statistics.totalTracks}
+                    suffix="辆"
+                    valueStyle={{
+                      color: "var(--settings-content-text-color)",
+                      fontSize: "20px"
+                    }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Card variant={"borderless"} size="small">
+                  <Statistic
+                    title={
+                      <Space>
+                        <AlertOutlined style={{ color: "#fa541c" }} />
+                        异常行为
+                      </Space>
+                    }
+                    value={statistics.totalAnomalies}
+                    suffix="次"
+                    valueStyle={{ color: "#fa541c", fontSize: "20px" }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Card variant={"borderless"} size="small">
+                  <Statistic
+                    title={
+                      <Space>
+                        <EyeOutlined style={{ color: "#52c41a" }} />
+                        监控流
+                      </Space>
+                    }
+                    value={statistics.activeStreams}
+                    suffix="路"
+                    valueStyle={{ color: "#52c41a", fontSize: "20px" }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Card variant={"borderless"} size="small">
+                  <Statistic
+                    title={
+                      <Space>
+                        <ClockCircleOutlined
+                          style={{ color: "var(--settings-loadingIcon-color)" }}
+                        />
+                        最新异常
+                      </Space>
+                    }
+                    value={dayjs(statistics.latestTime).fromNow()}
+                    valueStyle={{
+                      color: "var(--settings-content-text-color)",
+                      fontSize: "16px"
+                    }}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </ConfigProvider>
+        </div>
+
         <div className="search">
           <ConfigProvider theme={AntdDatePickerTheme}>
-            <RangePicker
+            <DatePicker.RangePicker
               defaultValue={defaultDate}
               onChange={selectTime as any}
               showTime
               format="YYYY-MM-DD HH:mm:ss"
+              placeholder={["开始时间", "结束时间"]}
             />
           </ConfigProvider>
           <ConfigProvider theme={AntdSearchTheme}>
@@ -126,8 +258,32 @@ const Track: FC<object> = () => {
                 render={(_, row: TrackList) => {
                   return row.actionIds.map((type) => {
                     const actionName = streamStore.ActionsEnum[type] || "未知行为";
+                    // 根据行为类型设置不同颜色，但异常行为统一使用红色图标
+                    let color = "error"; // 默认异常为红色
+                    if (
+                      actionName.includes("正常") ||
+                      actionName.toLowerCase().includes("normal")
+                    ) {
+                      color = "success";
+                    } else if (actionName.includes("危险") || actionName.includes("急")) {
+                      color = "error";
+                    } else if (actionName.includes("违规") || actionName.includes("禁")) {
+                      color = "warning";
+                    } else {
+                      color = "error"; // 所有异常统一为红色
+                    }
+
+                    const isNormal =
+                      actionName.includes("正常") || actionName.toLowerCase().includes("normal");
+
                     return (
-                      <Tag key={type} color={"red"}>
+                      <Tag
+                        key={type}
+                        color={color}
+                        style={{ marginBottom: "4px" }}
+                        icon={
+                          <AlertOutlined style={{ color: isNormal ? "#52c41a" : "#fa541c" }} />
+                        }>
                         {actionName}
                       </Tag>
                     );
@@ -139,10 +295,9 @@ const Track: FC<object> = () => {
                 dataIndex={"time"}
                 align="center"
                 render={(_, row: TrackList) => {
+                  console.log("time", row.time);
                   if (typeof row.time === "object" && row.time !== null && "time" in row.time) {
                     return new Date(row.time.time).toLocaleString();
-                  } else if (typeof row.time === "number") {
-                    return new Date(row.time).toLocaleString();
                   } else {
                     return "未知时间";
                   }
@@ -153,14 +308,26 @@ const Track: FC<object> = () => {
                 align="center"
                 dataIndex={"track"}
                 render={(_, row: TrackList) => {
+                  const trackCount = row.track.length;
                   return (
-                    <Button
-                      onClick={() => {
-                        setTrackDetail(row.track);
-                        ShowModal.detail = true;
-                      }}>
-                      查看详情
-                    </Button>
+                    <Space direction="vertical" size="small">
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => {
+                          setTrackDetail(row.track);
+                          ShowModal.detail = true;
+                        }}>
+                        查看详情
+                      </Button>
+                      <Badge
+                        count={trackCount}
+                        size="small"
+                        color="var(--settings-loadingIcon-color)"
+                        title={`共${trackCount}个轨迹段`}
+                      />
+                    </Space>
                   );
                 }}
               />
@@ -170,7 +337,7 @@ const Track: FC<object> = () => {
       </TrackContainer>
       <MyModal
         title={"轨迹详情"}
-        width={"60vw"}
+        width={"55vw"}
         open={ShowModal.detail}
         onCancel={closeDetailModal}>
         <Detail track={currentTrackDetail} />
@@ -181,82 +348,123 @@ const Track: FC<object> = () => {
 export default memo(Track);
 
 const TrackContainer = styled.div`
-  color: white;
+  color: var(--settings-content-text-color);
+
+  .statistics {
+    margin-bottom: 20px;
+  }
 
   .search {
     display: flex;
     gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
   }
 
   .form {
     margin-top: 20px;
   }
 `;
+
+const AntdCardTheme = {
+  algorithm: theme.darkAlgorithm,
+  token: {
+    colorPrimary: "var(--settings-loadingIcon-color)",
+    colorBgContainer: "var(--antd-modal-header-bg)",
+    colorText: "var(--settings-content-text-color)",
+    colorBorder: "var(--settings-content-content-divider)",
+    borderRadius: 6
+  },
+  components: {
+    Card: {
+      colorBorderSecondary: "var(--settings-content-content-divider)",
+      headerBg: "var(--antd-modal-header-bg)",
+      colorBgContainer: "var(--antd-modal-content-bg)",
+      paddingLG: 16
+    },
+    Statistic: {
+      titleFontSize: 14,
+      contentFontSize: 20
+    }
+  }
+};
+
 const AntdDatePickerTheme = {
   algorithm: theme.darkAlgorithm,
   token: {
-    colorPrimary: "#1890ff",
-    colorBgContainer: "#141414",
-    colorText: "rgba(255,255,255,0.85)",
-    colorTextDisabled: "rgba(255,255,255,0.3)",
-    colorBorder: "#303030",
-    colorIcon: "rgba(255,255,255,0.45)",
-    colorIconHover: "#1890ff"
+    colorPrimary: "var(--settings-loadingIcon-color)",
+    colorBgContainer: "var(--antd-modal-content-bg)",
+    colorText: "var(--settings-content-text-color)",
+    colorTextDisabled: "var(--settings-menu-default-color)",
+    colorBorder: "var(--settings-content-content-divider)",
+    colorIcon: "var(--settings-menu-default-color)",
+    colorIconHover: "var(--settings-loadingIcon-color)"
   },
   components: {
     DatePicker: {
-      cellHoverBg: "rgba(255,255,255,0.08)",
-      cellActiveBg: "rgba(24,144,255,0.2)",
-      rangeBorderColor: "#1890ff",
-      cellRangeBetweenBg: "rgba(24,144,255,0.1)",
-      timeColumnBg: "#1d1d1d",
-      timeCellActiveBg: "rgba(24,144,255,0.3)"
+      cellHoverBg: "var(--settings-menu-active-bg)",
+      cellActiveBg: "var(--settings-menu-actived-bg)",
+      rangeBorderColor: "var(--settings-loadingIcon-color)",
+      cellRangeBetweenBg: "var(--settings-menu-active-bg)",
+      timeColumnBg: "var(--antd-modal-header-bg)",
+      timeCellActiveBg: "var(--settings-menu-actived-bg)"
     }
   }
 };
+
 const AntdSearchTheme = {
   algorithm: theme.darkAlgorithm,
   token: {
-    colorPrimary: "#1890ff",
-    colorBgContainer: "#141414",
-    colorBorder: "#303030",
-    colorText: "rgba(255,255,255,0.85)",
-    colorTextPlaceholder: "rgba(255,255,255,0.4)"
+    colorPrimary: "var(--settings-loadingIcon-color)",
+    colorBgContainer: "var(--antd-modal-content-bg)",
+    colorBorder: "var(--settings-content-content-divider)",
+    colorText: "var(--settings-content-text-color)",
+    colorTextPlaceholder: "var(--settings-menu-default-color)"
   },
   components: {
     Input: {
-      colorPrimaryHover: "#40a9ff",
+      colorPrimaryHover: "var(--settings-loadingIcon-color)",
       activeShadow: "0 0 0 2px rgba(24, 144, 255, 0.2)",
       paddingBlock: 8,
       borderRadius: 4,
-      colorIcon: "rgba(255,255,255,0.45)",
-      colorIconHover: "#1890ff"
+      colorIcon: "var(--settings-menu-default-color)",
+      colorIconHover: "var(--settings-loadingIcon-color)"
+    },
+    Button: {
+      colorPrimary: "var(--settings-loadingIcon-color)",
+      algorithm: true
     }
   }
 };
+
 const AntdTableTheme = {
   algorithm: theme.darkAlgorithm,
   token: {
-    colorBgContainer: "#141414",
-    colorBorderSecondary: "#303030",
-    colorText: "rgba(255,255,255,0.85)",
-    colorTextHeading: "rgba(255,255,255,0.9)",
-    colorSplit: "#262626"
+    colorBgContainer: "var(--antd-modal-content-bg)",
+    colorBorderSecondary: "var(--settings-content-content-divider)",
+    colorText: "var(--settings-content-text-color)",
+    colorTextHeading: "var(--settings-content-text-color)",
+    colorSplit: "var(--settings-content-title-divider)"
   },
   components: {
     Table: {
-      headerBg: "#1d1d1d",
-      rowHoverBg: "rgba(255,255,255,0.08)",
-      headerSplitColor: "#303030",
-      headerColor: "#e6f4ff",
+      headerBg: "var(--antd-modal-header-bg)",
+      rowHoverBg: "var(--settings-menu-active-bg)",
+      headerSplitColor: "var(--settings-content-content-divider)",
+      headerColor: "var(--antd-modal-title-color)",
       cellPaddingBlock: 16,
-      rowSelectedBg: "rgba(24,144,255,0.2)",
+      rowSelectedBg: "var(--settings-menu-actived-bg)",
       stripe: true,
       colorFillAlter: "rgba(255,255,255,0.03)"
     },
     Pagination: {
-      colorPrimary: "#1890ff",
-      colorBgContainer: "#1d1d1d"
+      colorPrimary: "var(--settings-loadingIcon-color)",
+      colorBgContainer: "var(--antd-modal-header-bg)"
+    },
+    Button: {
+      colorPrimary: "var(--settings-loadingIcon-color)",
+      algorithm: true
     }
   }
 };

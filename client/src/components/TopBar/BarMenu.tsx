@@ -69,7 +69,7 @@ const BarMenu: FC<props> = ({ setActiveTitle }) => {
               type="text"
               shape="circle"
               size="large"
-              icon={<WarningOutlined style={styles.iconColor} size={ICON_SIZE} />}
+              icon={<WarningOutlined style={{ color: "#fa541c" }} size={ICON_SIZE} />}
               onClick={openModal("track")}
               onMouseOver={setTitle("异常追踪")}
             />
