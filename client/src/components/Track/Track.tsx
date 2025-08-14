@@ -299,7 +299,7 @@ const Track: FC<object> = () => {
                 align="center"
                 dataIndex={"track"}
                 render={(_, row: TrackList) => (
-                  <Space direction="vertical" size="small">
+                  <Space direction="horizontal" size="small">
                     <Button
                       type="primary"
                       size="small"
@@ -310,12 +310,6 @@ const Track: FC<object> = () => {
                       }}>
                       查看详情
                     </Button>
-                    <Badge
-                      count={row.track.length}
-                      size="small"
-                      color="var(--settings-loadingIcon-color)"
-                      title={`共${row.track.length}个轨迹段`}
-                    />
                   </Space>
                 )}
               />
@@ -343,10 +337,9 @@ const TrackContainer = styled.div`
   }
 
   .search {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    grid-gap: 16px;
     margin-bottom: 16px;
   }
 
