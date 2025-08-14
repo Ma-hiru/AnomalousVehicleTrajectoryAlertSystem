@@ -249,6 +249,27 @@ const Track: FC<object> = () => {
               bordered
               scroll={{
                 y: 55 * 6
+              }}
+              pagination={{
+                current: Math.floor(parseInt(query.offset) / parseInt(query.limit)) + 1,
+                pageSize: parseInt(query.limit),
+                total: totalTrack,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条记录`,
+                pageSizeOptions: ["10", "20", "50", "100"],
+                onChange: (page, pageSize) => {
+                  setQuery((draft) => {
+                    draft.offset = ((page - 1) * pageSize).toString();
+                    draft.limit = pageSize.toString();
+                  });
+                },
+                onShowSizeChange: (_, size) => {
+                  setQuery((draft) => {
+                    draft.offset = "0";
+                    draft.limit = size.toString();
+                  });
+                }
               }}>
               <Column align="center" title={"标识"} dataIndex={"carId"} />
               <Column
