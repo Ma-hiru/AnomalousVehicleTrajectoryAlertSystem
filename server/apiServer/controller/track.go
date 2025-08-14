@@ -51,10 +51,16 @@ func GetTrackList(ctx *gin.Context) {
 		utils.FailResponse(ctx, 201, "参数limit错误")
 		return
 	}
-	records, err := service.Record.WithContext(context.Background()).
+	query := service.Record.WithContext(context.Background()).
 		Where(service.Record.ActionID.Neq(normalId)).
 		Where(service.Record.Time.Between(from, to)).
-		Where(service.Record.CarID.Like("%" + keywords + "%")).
+		Where(service.Record.CarID.Like("%" + keywords + "%"))
+	total, err := query.Count()
+	if err != nil {
+		utils.FailResponse(ctx, 201, "获取异常轨迹列表失败")
+		return
+	}
+	records, err := query.
 		Offset(offset).
 		Limit(limit).
 		Find()
@@ -63,7 +69,10 @@ func GetTrackList(ctx *gin.Context) {
 		return
 	}
 	result := calculateTrackItem(records)
-	utils.SuccessResponse(ctx, "获取异常轨迹列表成功", result)
+	utils.SuccessResponse(ctx, "获取异常轨迹列表成功", gin.H{
+		"total": total,
+		"items": result,
+	})
 }
 
 func calculateTrackItem(records []*model.Record) []*TrackList {

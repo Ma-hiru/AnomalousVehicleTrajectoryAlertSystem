@@ -14,7 +14,12 @@ export const req_track_get = (query: {
   offset: string;
   limit: string;
   keywords?: string;
-}): Promise<ReqResponse<TrackList[]>> => {
+}): Promise<
+  ReqResponse<{
+    total: number;
+    items: TrackList[];
+  }>
+> => {
   return request.get(buildQuery(V1.tracks, query));
 };
 

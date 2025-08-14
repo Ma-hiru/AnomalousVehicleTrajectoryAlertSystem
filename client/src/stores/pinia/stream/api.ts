@@ -2,9 +2,11 @@ import { fetchDataAsync } from "@/utils/fetchData";
 import { StateType } from "./state";
 import { ActionType } from "./action";
 import { useMapZustandStore } from "@/stores/zustand/map";
+import { useTrackZustandStore } from "@/stores/zustand/track";
 
 //Link Zustand
 const { setVideoList, updateAnomalousCount } = useMapZustandStore.getState();
+const { setTotalExceptionsCount } = useTrackZustandStore.getState();
 
 export const api = (states: StateType, actions: ActionType) => {
   const { SingleCarRecordList, TotalCarRecordList } = states;
@@ -52,7 +54,10 @@ export const api = (states: StateType, actions: ActionType) => {
         to: new Date().getTime().toString()
       }
     ]);
-    ok && Number.isInteger(data) && (states.TotalCarExceptionsCount.value = data);
+    if (ok && Number.isInteger(data)) {
+      states.TotalCarExceptionsCount.value = data;
+      setTotalExceptionsCount(data);
+    }
     return ok;
   }
 

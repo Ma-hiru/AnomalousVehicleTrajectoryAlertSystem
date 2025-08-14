@@ -16,7 +16,7 @@ import AppVue from "./App.vue";
 
 // Memory monitoring
 import { memoryMonitor } from "./utils/memoryMonitor";
-import "./utils/memoryLeakDetector"; // 自动启动内存泄漏检测
+import "./utils/memoryLeakDetector";
 
 const app = createApp(AppVue);
 //element-plus
@@ -57,7 +57,6 @@ app.use(DataVVue3);
 
 app.mount("#app");
 
-// 开启内存监控（仅在开发环境）
 if (import.meta.env.DEV) {
   console.log("🔍 Starting memory monitor...");
   memoryMonitor.startMonitoring();

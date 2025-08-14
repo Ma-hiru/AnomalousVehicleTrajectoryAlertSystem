@@ -1,26 +1,25 @@
-import { FC, memo, useCallback, useMemo } from "react";
+import { FC, memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import {
-  Input,
-  GetProps,
-  ConfigProvider,
-  Table,
+  Badge,
   Button,
-  theme,
+  Card,
+  Col,
+  ConfigProvider,
   DatePicker,
-  Tag,
+  GetProps,
+  Input,
+  Row,
   Space,
   Statistic,
-  Card,
-  Row,
-  Col,
-  Badge
+  Table,
+  Tag,
+  theme
 } from "antd";
 import MyModal from "@/components/MyModal";
 import Detail from "@/components/Track/Detail";
 import { useReactive } from "ahooks";
-import { useStreamStore } from "@/stores/pinia";
-import { pinia } from "@/stores/pinia";
+import { pinia, useStreamStore } from "@/stores/pinia";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/zh-cn";
@@ -28,8 +27,8 @@ import { useImmer } from "use-immer";
 import { fetchDataAsync } from "@/utils/fetchData";
 import { useTrackZustandStore } from "@/stores/zustand/track";
 import { useShallow } from "zustand/react/shallow";
-import { useDebounceEffect } from "ahooks";
-import { AlertOutlined, EyeOutlined, CarOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { AlertOutlined, CarOutlined, ClockCircleOutlined, EyeOutlined } from "@ant-design/icons";
+import AppSettings from "@/settings";
 
 // 配置dayjs
 dayjs.extend(relativeTime);
@@ -41,50 +40,53 @@ type SearchProps = GetProps<typeof Input.Search>;
 const Track: FC<object> = () => {
   //Data
   const streamStore = useStreamStore(pinia);
-  const { currentTrackList, setTrackList, setTrackDetail, currentTrackDetail } =
-    useTrackZustandStore(
-      useShallow((state) => ({
-        currentTrackList: state.currentTrackList,
-        currentTrackDetail: state.currentTrackDetail,
-        setTrackList: state.setTrackList,
-        setTrackDetail: state.setTrackDetail
-      }))
-    );
+  const [totalTrack, setTotalTrack] = useState(0);
+  const [currentDetail, setCurrentDetail] = useImmer([] as Track[]);
+  const { currentTrackList, setTrackList, totalExceptionsCount } = useTrackZustandStore(
+    useShallow((state) => ({
+      currentTrackList: state.currentTrackList,
+      setTrackList: state.setTrackList,
+      totalExceptionsCount: state.totalExceptionsCount
+    }))
+  );
+
   //Search
   const defaultDate = useMemo<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
     const now = dayjs();
     const dayStart = now.startOf("day");
     return [dayStart, now];
   }, []);
-
   const [query, setQuery] = useImmer({
-    from: defaultDate[0].toDate().setHours(0, 0, 0, 0).toString(),
+    from: defaultDate[0].toDate().getTime().toString(),
     to: defaultDate[1].toDate().getTime().toString(),
     offset: "0",
     limit: "20",
     keywords: ""
   });
 
-  useDebounceEffect(() => {
-    fetchDataAsync("req_track_get", [query]).then((res) => {
-      setTrackList(res.data);
-    });
+  const updateTrack = useCallback(async () => {
+    const { ok, data } = await fetchDataAsync("req_track_get", [query]);
+    ok && setTrackList(data.items);
+    ok && setTotalTrack(data.total);
   }, [query, setTrackList]);
 
-  const selectTime = (values: dayjs.Dayjs[]) => {
-    if (values && values.length === 2) {
-      const [start, end] = values;
-      setQuery((draft) => {
-        draft.from = start.toDate().getTime().toString();
-        draft.to = end.toDate().getTime().toString();
-      });
-    } else {
-      setQuery((draft) => {
-        draft.from = new Date().setHours(0, 0, 0, 0).toString();
-        draft.to = new Date().getTime().toString();
-      });
-    }
-  };
+  const selectTime = useCallback(
+    (values: dayjs.Dayjs[]) => {
+      if (values && values.length === 2) {
+        const [start, end] = values;
+        setQuery((draft) => {
+          draft.from = start.toDate().getTime().toString();
+          draft.to = end.toDate().getTime().toString();
+        });
+      } else {
+        setQuery((draft) => {
+          draft.from = new Date().setHours(0, 0, 0, 0).toString();
+          draft.to = new Date().getTime().toString();
+        });
+      }
+    },
+    [setQuery]
+  );
 
   const onSearch = useCallback<NonNullable<SearchProps["onSearch"]>>(
     (keyword) => {
@@ -104,40 +106,39 @@ const Track: FC<object> = () => {
   }, [ShowModal]);
 
   // 计算统计数据
-  const statistics = useMemo(() => {
+  const [statistics, setStatistics] = useImmer({
+    totalTracks: 0,
+    totalAnomalies: 0,
+    uniqueActions: 0,
+    activeStreams: 0,
+    latestTime: 0
+  });
+  useLayoutEffect(() => {
     const totalTracks = currentTrackList.length;
-    const totalAnomalies = currentTrackList.reduce((sum, track) => sum + track.actionIds.length, 0);
     const uniqueActions = new Set(currentTrackList.flatMap((track) => track.actionIds)).size;
-
     // 获取活跃的视频流数量
     const activeStreams = new Set(
       currentTrackList.flatMap((track) => track.track.map((t) => t.streamId))
     ).size;
-
     // 最近的异常时间
     const latestTime =
       currentTrackList.length > 0
-        ? Math.max(
-            ...currentTrackList.map((track) => {
-              if (typeof track.time === "object" && track.time !== null && "time" in track.time) {
-                return track.time.time;
-              } else if (typeof track.time === "number") {
-                return track.time;
-              }
-              return 0;
-            })
-          )
+        ? Math.max(...currentTrackList.map((track) => track.time))
         : Date.now();
 
-    return {
+    setStatistics({
       totalTracks,
-      totalAnomalies,
+      totalAnomalies: totalExceptionsCount,
       uniqueActions,
       activeStreams,
       latestTime
-    };
-  }, [currentTrackList]);
-
+    });
+  }, [currentTrackList, setStatistics, totalExceptionsCount]);
+  useEffect(() => {
+    updateTrack().catch();
+    const timer = setInterval(updateTrack, AppSettings.UPDATE_RECORDS_INTERVAL);
+    return () => clearInterval(timer);
+  }, [updateTrack]);
   return (
     <>
       <TrackContainer>
@@ -215,7 +216,6 @@ const Track: FC<object> = () => {
             </Row>
           </ConfigProvider>
         </div>
-
         <div className="search">
           <ConfigProvider theme={AntdDatePickerTheme}>
             <DatePicker.RangePicker
@@ -255,81 +255,48 @@ const Track: FC<object> = () => {
                 title={"行为"}
                 dataIndex={"actionId"}
                 align="center"
-                render={(_, row: TrackList) => {
-                  return row.actionIds.map((type) => {
-                    const actionName = streamStore.ActionsEnum[type] || "未知行为";
-                    // 根据行为类型设置不同颜色，但异常行为统一使用红色图标
-                    let color = "error"; // 默认异常为红色
-                    if (
-                      actionName.includes("正常") ||
-                      actionName.toLowerCase().includes("normal")
-                    ) {
-                      color = "success";
-                    } else if (actionName.includes("危险") || actionName.includes("急")) {
-                      color = "error";
-                    } else if (actionName.includes("违规") || actionName.includes("禁")) {
-                      color = "warning";
-                    } else {
-                      color = "error"; // 所有异常统一为红色
-                    }
-
-                    const isNormal =
-                      actionName.includes("正常") || actionName.toLowerCase().includes("normal");
-
-                    return (
-                      <Tag
-                        key={type}
-                        color={color}
-                        style={{ marginBottom: "4px" }}
-                        icon={
-                          <AlertOutlined style={{ color: isNormal ? "#52c41a" : "#fa541c" }} />
-                        }>
-                        {actionName}
-                      </Tag>
-                    );
-                  });
-                }}
+                render={(_, row: TrackList) =>
+                  row.actionIds.map((type) => (
+                    <Tag
+                      key={type}
+                      color="error"
+                      style={{ marginBottom: "4px" }}
+                      icon={<AlertOutlined color="#fa541c" />}>
+                      {streamStore.ActionsEnum[type] || "未知行为"}
+                    </Tag>
+                  ))
+                }
               />
               <Column
                 title={"最近更新时间"}
                 dataIndex={"time"}
                 align="center"
-                render={(_, row: TrackList) => {
-                  console.log("time", row.time);
-                  if (typeof row.time === "object" && row.time !== null && "time" in row.time) {
-                    return new Date(row.time.time).toLocaleString();
-                  } else {
-                    return "未知时间";
-                  }
-                }}
+                render={(_, row: TrackList) => new Date(row.time).toLocaleString()}
               />
               <Column
                 title={"轨迹"}
                 align="center"
                 dataIndex={"track"}
-                render={(_, row: TrackList) => {
-                  const trackCount = row.track.length;
-                  return (
-                    <Space direction="vertical" size="small">
-                      <Button
-                        type="primary"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => {
-                          setTrackDetail(row.track);
-                          ShowModal.detail = true;
-                        }}>
-                        查看详情
-                      </Button>
-                      <Badge
-                        count={trackCount}
-                        size="small"
-                        color="var(--settings-loadingIcon-color)"
-                        title={`共${trackCount}个轨迹段`}
-                      />
-                    </Space>
-                  );
-                }}
+                render={(_, row: TrackList) => (
+                  <Space direction="vertical" size="small">
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        setCurrentDetail(row.track);
+                        ShowModal.detail = true;
+                      }}>
+                      查看详情
+                    </Button>
+                    <Badge
+                      count={row.track.length}
+                      size="small"
+                      color="var(--settings-loadingIcon-color)"
+                      title={`共${row.track.length}个轨迹段`}
+                    />
+                  </Space>
+                )}
               />
             </Table>
           </ConfigProvider>
@@ -340,7 +307,7 @@ const Track: FC<object> = () => {
         width={"55vw"}
         open={ShowModal.detail}
         onCancel={closeDetailModal}>
-        <Detail track={currentTrackDetail} />
+        <Detail track={currentDetail} />
       </MyModal>
     </>
   );

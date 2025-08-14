@@ -23,7 +23,7 @@ func SimulateServer() {
 	wait.Add(2)
 
 	go func() {
-		NewSimulate(defaultVideoPath, defaultOutput).
+		NewSimulate(defaultVideoPath, defaultOutput, true).
 			Expect("启动RTSP服务失败")
 		wait.Done()
 		fmt.Println("live close")
@@ -32,6 +32,7 @@ func SimulateServer() {
 	go func() {
 		NewSimulate(
 			"./video/路口.mp4", "rtsp://127.0.0.1:8554/live2",
+			false,
 		).
 			Expect("启动RTSP服务失败")
 		wait.Done()
@@ -41,12 +42,17 @@ func SimulateServer() {
 	wait.Wait()
 }
 
-func NewSimulate(path, out string) *enum.Result[enum.None] {
+func NewSimulate(path, out string, startRTSP bool) *enum.Result[enum.None] {
+	if startRTSP {
+		return NewSimulateConfig(path, out).
+			SetDevice().
+			RtspConfig(defaultRtspPath, defaultRtspCfg).
+			StartRTSP().
+			Expect("ffmpeg配置错误").
+			Simulate()
+	}
 	return NewSimulateConfig(path, out).
 		SetDevice().
-		RtspConfig(defaultRtspPath, defaultRtspCfg).
-		StartRTSP().
-		Expect("ffmpeg配置错误").
 		Simulate()
 }
 
