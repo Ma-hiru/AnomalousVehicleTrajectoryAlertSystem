@@ -1,4 +1,4 @@
-import { FC, memo, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Table,
   Timeline,

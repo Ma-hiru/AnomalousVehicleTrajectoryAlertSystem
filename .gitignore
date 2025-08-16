@@ -12,3 +12,4 @@
 /client/src/__tests__
 server/core/yolo_opencv/yolov8n.onnx
 /server/yolo/__pycache__
+/temp
